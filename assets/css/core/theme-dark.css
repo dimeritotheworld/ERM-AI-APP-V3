@@ -1,0 +1,391 @@
+/**
+ * Dark Theme for Dimeri ERM
+ * Applied when html.theme-dark class is active
+ */
+
+/* Dark Theme Variables */
+html.theme-dark {
+  /* Background colors */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-hover: #475569;
+
+  /* Text colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Border colors */
+  --border-color: #334155;
+  --border-light: #475569;
+
+  /* Card/Widget backgrounds */
+  --card-bg: #1e293b;
+  --card-border: #334155;
+
+  /* Input backgrounds */
+  --input-bg: #334155;
+  --input-border: #475569;
+  --input-focus-border: #3b82f6;
+
+  /* Sidebar */
+  --sidebar-bg: #1e293b;
+  --sidebar-border: #334155;
+
+  /* Header */
+  --header-bg: #1e293b;
+  --header-border: #334155;
+}
+
+/* ========================================
+   GLOBAL STYLES
+   ======================================== */
+
+html.theme-dark body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+html.theme-dark .app-header {
+  background: var(--header-bg);
+  border-bottom-color: var(--header-border);
+}
+
+html.theme-dark .header-logo-text {
+  color: var(--text-primary);
+}
+
+html.theme-dark .header-search input {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+html.theme-dark .header-search input::placeholder {
+  color: var(--text-muted);
+}
+
+html.theme-dark .user-menu-button {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .user-menu-button:hover {
+  background: var(--bg-hover);
+}
+
+/* ========================================
+   SIDEBAR
+   ======================================== */
+
+html.theme-dark .app-sidebar {
+  background: var(--sidebar-bg);
+  border-right-color: var(--sidebar-border);
+}
+
+html.theme-dark .sidebar-nav-link {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .sidebar-nav-link:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+html.theme-dark .sidebar-nav-link.active {
+  background: #1e40af;
+  color: white;
+}
+
+html.theme-dark .workspace-selector select {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+
+html.theme-dark .main-content {
+  background: var(--bg-primary);
+}
+
+html.theme-dark .page-title {
+  color: var(--text-primary);
+}
+
+html.theme-dark .page-subtitle {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   CARDS & WIDGETS
+   ======================================== */
+
+html.theme-dark .dashboard-widget,
+html.theme-dark .kpi-card,
+html.theme-dark .activity-widget,
+html.theme-dark .settings-section,
+html.theme-dark .heatmap-container {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+html.theme-dark .widget-title,
+html.theme-dark .kpi-label,
+html.theme-dark .activity-title {
+  color: var(--text-primary);
+}
+
+html.theme-dark .kpi-value {
+  color: var(--text-primary);
+}
+
+/* ========================================
+   FORMS & INPUTS
+   ======================================== */
+
+html.theme-dark .form-input,
+html.theme-dark .form-select,
+html.theme-dark .form-textarea,
+html.theme-dark .settings-input,
+html.theme-dark .settings-select {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+html.theme-dark .form-input::placeholder,
+html.theme-dark .form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+html.theme-dark .form-input:focus,
+html.theme-dark .form-select:focus,
+html.theme-dark .form-textarea:focus {
+  border-color: var(--input-focus-border);
+  background: var(--bg-tertiary);
+}
+
+html.theme-dark .form-label,
+html.theme-dark .settings-label {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+html.theme-dark .btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+html.theme-dark .btn-secondary:hover {
+  background: var(--bg-hover);
+}
+
+/* ========================================
+   TABLES
+   ======================================== */
+
+html.theme-dark .risk-table,
+html.theme-dark .control-table {
+  background: var(--card-bg);
+}
+
+html.theme-dark .risk-table thead th {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-bottom-color: var(--border-color);
+}
+
+html.theme-dark .risk-table tbody td {
+  border-bottom-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+html.theme-dark .risk-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+/* ========================================
+   MODALS
+   ======================================== */
+
+html.theme-dark .modal-content {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+html.theme-dark .modal-header {
+  border-bottom-color: var(--border-color);
+}
+
+html.theme-dark .modal-footer {
+  border-top-color: var(--border-color);
+}
+
+html.theme-dark .modal-title {
+  color: var(--text-primary);
+}
+
+/* ========================================
+   ACTIVITY LOG
+   ======================================== */
+
+html.theme-dark .activity-item {
+  background: var(--bg-tertiary);
+}
+
+html.theme-dark .activity-item:hover {
+  background: var(--bg-hover);
+}
+
+html.theme-dark .activity-message {
+  color: var(--text-primary);
+}
+
+html.theme-dark .activity-meta {
+  color: var(--text-muted);
+}
+
+/* ========================================
+   FAQ SECTION
+   ======================================== */
+
+html.theme-dark .faq-section {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+html.theme-dark .faq-question {
+  color: var(--text-primary);
+}
+
+html.theme-dark .faq-question:hover {
+  background: var(--bg-hover);
+}
+
+html.theme-dark .faq-answer {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .faq-item {
+  border-bottom-color: var(--border-color);
+}
+
+/* ========================================
+   HELP PAGE
+   ======================================== */
+
+html.theme-dark .quick-link {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+html.theme-dark .quick-link:hover {
+  border-color: #3b82f6;
+}
+
+html.theme-dark .quick-link-text {
+  color: var(--text-primary);
+}
+
+/* ========================================
+   SETTINGS PAGE
+   ======================================== */
+
+html.theme-dark .settings-header h2 {
+  color: var(--text-primary);
+}
+
+html.theme-dark .settings-header p {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .settings-section-title h3 {
+  color: var(--text-primary);
+}
+
+html.theme-dark .settings-section-title p {
+  color: var(--text-secondary);
+}
+
+html.theme-dark .preference-card {
+  background: var(--bg-tertiary);
+  border-color: var(--border-light);
+}
+
+html.theme-dark .preference-card:hover {
+  background: var(--bg-hover);
+}
+
+html.theme-dark .preference-card.active {
+  border-color: #3b82f6;
+  background: #1e3a8a;
+}
+
+html.theme-dark .preference-card-title {
+  color: var(--text-primary);
+}
+
+html.theme-dark .preference-card-desc {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   EMPTY STATES
+   ======================================== */
+
+html.theme-dark .empty-state-title {
+  color: var(--text-primary);
+}
+
+html.theme-dark .empty-state-desc {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   RISK HEATMAP (Dark mode friendly)
+   ======================================== */
+
+html.theme-dark .heatmap-y-label,
+html.theme-dark .heatmap-x-label,
+html.theme-dark .heatmap-row-label {
+  color: var(--text-secondary);
+}
+
+/* Keep heatmap colors visible in dark mode */
+html.theme-dark .heatmap-cell {
+  border-color: var(--border-color);
+}
+
+/* ========================================
+   SCROLLBARS (Dark theme)
+   ======================================== */
+
+html.theme-dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.theme-dark ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+html.theme-dark ::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+html.theme-dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
+}

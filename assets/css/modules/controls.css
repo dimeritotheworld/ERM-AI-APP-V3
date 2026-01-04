@@ -1,0 +1,1413 @@
+/**
+ * Dimeri ERM - Controls Module Styles
+ * @version 1.0.0
+ */
+
+/* ========================================
+   FILTER BAR
+   ======================================== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.filter-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 200px;
+  min-width: 140px;
+  flex-shrink: 1;
+}
+
+.search-input-wrapper svg {
+  position: absolute;
+  left: 12px;
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-input-wrapper .form-input,
+.search-input-wrapper input.filter-search,
+input.filter-search {
+  padding-left: 40px;
+  width: 100%;
+  height: 40px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper .form-input:focus,
+input.filter-search:focus {
+  outline: none;
+  border-color: #c41e3a;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+}
+
+/* Filter Select Dropdowns */
+.filter-select,
+select.filter-select {
+  width: 160px;
+  height: 40px;
+  padding: 8px 32px 8px 12px;
+  font-size: 14px;
+  color: #374151;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: #9ca3af;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #c41e3a;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+}
+
+.filter-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.result-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* View Toggle */
+.filter-bar .view-toggle {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.filter-bar .view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-bar .view-btn:hover {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.filter-bar .view-btn.active {
+  background: white;
+  color: #c41e3a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-bar .view-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Controls Content Wrapper */
+.controls-content-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* List View */
+.controls-list-view .controls-table-container {
+  display: block;
+}
+
+.controls-list-view .controls-grid-container {
+  display: none;
+}
+
+/* Grid View */
+.controls-grid-view .controls-table-container {
+  display: none;
+}
+
+.controls-grid-view .controls-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.controls-grid-view .bulk-actions-bar {
+  display: none;
+}
+
+/* Control Card Styles */
+.control-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.control-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.control-card.selected {
+  border-color: #c41e3a;
+  box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.1);
+}
+
+.control-card-checkbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.control-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-left: 28px;
+}
+
+.control-card-ref {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c41e3a;
+  font-family: monospace;
+}
+
+.control-card-type {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.control-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.control-card-owner {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+}
+
+.control-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.control-card .effectiveness-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.control-card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.control-card-actions .btn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.control-card-actions .btn-icon:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.control-card-actions .btn-delete-control:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* ========================================
+   CONTROLS TABLE
+   ======================================== */
+.controls-table-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.controls-table-container {
+  background: white;
+  overflow: hidden;
+}
+
+.control-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.control-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.control-table th {
+  padding: 12px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.control-table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #374151;
+  vertical-align: middle;
+}
+
+/* Column widths for controls table - 7 columns (checkbox + 5 data + actions) */
+.control-table th:nth-child(1),
+.control-table td:nth-child(1) {
+  width: 40px;
+  padding-left: 16px;
+  padding-right: 0;
+}
+
+.control-table th:nth-child(2),
+.control-table td:nth-child(2) {
+  width: 120px;
+  padding-left: 12px;
+}
+
+.control-table th:nth-child(3),
+.control-table td:nth-child(3) {
+  width: auto;
+  min-width: 200px;
+  padding-left: 16px;
+}
+
+.control-table th:nth-child(4),
+.control-table td:nth-child(4) {
+  width: 170px;
+  padding-left: 4px;
+}
+
+.control-table th:nth-child(5),
+.control-table td:nth-child(5) {
+  width: 140px;
+  padding-left: 4px;
+}
+
+.control-table th:nth-child(6),
+.control-table td:nth-child(6) {
+  width: 180px;
+  padding-left: 4px;
+}
+
+.control-table th:nth-child(7),
+.control-table td:nth-child(7) {
+  width: 80px;
+  padding-right: 20px;
+}
+
+.control-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+.control-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.control-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.control-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.control-row:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Checkbox cell */
+.checkbox-cell {
+  text-align: center;
+}
+
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+/* Row Actions */
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.control-row:hover .row-actions {
+  opacity: 1;
+}
+
+.row-actions button {
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.row-actions button:hover {
+  background: #f3f4f6;
+}
+
+.row-actions button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Floating Bulk Actions Bar */
+.bulk-actions-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 1px solid #fcd34d;
+}
+
+.bulk-selected-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.bulk-actions-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bulk-action-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.control-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.control-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Type badges */
+.badge-type-preventive {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.badge-type-detective {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-type-corrective {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.badge-type-directive {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.badge-type-default {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+/* Effectiveness badges */
+.badge-effective {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.badge-partiallyeffective {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.badge-ineffective {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.badge-nottested {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+/* Status badges */
+.badge-status-active {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+
+.badge-status-inactive {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.badge-status-underreview {
+  background: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+}
+
+.badge-status-planned {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.linked-count {
+  font-size: 0.8125rem;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Row actions */
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.control-row:hover .row-actions {
+  opacity: 1;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.btn-icon.btn-delete-control:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+/* ========================================
+   CONTROL FORM
+   ======================================== */
+.control-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.form-label-row .form-label {
+  margin-bottom: 0;
+}
+
+.form-label-row .form-section-title {
+  margin-bottom: 0;
+}
+
+/* Linked risks list - DEPRECATED: Container removed to match risk register pattern */
+/* Tooltips now work properly without the restricting overflow container */
+
+/* ========================================
+   AI FEATURES
+   ======================================== */
+
+/* AI field button */
+.ai-field-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8b5cf6;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1),
+    rgba(236, 72, 153, 0.1)
+  );
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-field-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2),
+    rgba(236, 72, 153, 0.2)
+  );
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.ai-field-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* AI Check Bar */
+.ai-check-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.08),
+    rgba(236, 72, 153, 0.08)
+  );
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.ai-check-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-check-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border-radius: 6px;
+  color: white;
+}
+
+.ai-check-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-check-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.ai-check-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-ai {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  border: none;
+}
+
+.btn-ai:hover {
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-ai-outline {
+  background: transparent;
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.btn-ai-outline:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+}
+
+/* AI Suggestions */
+.ai-suggestions-container {
+  padding: 8px 0;
+}
+
+.ai-suggestions-intro {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+.ai-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ai-suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.ai-suggestion-item:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.ai-suggestion-content {
+  flex: 1;
+}
+
+.ai-suggestion-text {
+  margin: 0 0 4px 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.ai-suggestion-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-ai-use {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  color: white;
+  border: none;
+  flex-shrink: 0;
+}
+
+.btn-ai-use:hover {
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+}
+
+/* AI Type Analysis */
+.ai-type-analysis {
+  padding: 16px 0;
+}
+
+.ai-analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.ai-analysis-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border-radius: 10px;
+  color: white;
+}
+
+.ai-analysis-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.ai-analysis-result h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-analysis-result .suggested-type {
+  font-weight: 600;
+}
+
+.ai-confidence {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.ai-analysis-reason,
+.ai-analysis-keywords {
+  margin-bottom: 16px;
+}
+
+.ai-analysis-reason h5,
+.ai-analysis-keywords h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.ai-analysis-reason p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 20px;
+}
+
+/* AI Risk Suggestions */
+.ai-risk-suggestions {
+  padding: 8px 0;
+}
+
+.ai-risk-suggestion {
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.ai-risk-suggestion:last-child {
+  margin-bottom: 0;
+}
+
+.risk-suggestion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.risk-suggestion-header .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.risk-suggestion-header .risk-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.match-score {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.risk-suggestion-reason {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding-left: 24px;
+}
+
+/* Strength Check Result */
+.strength-check-result {
+  padding: 16px 0;
+}
+
+.strength-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.score-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+}
+
+.score-label {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.strength-issues,
+.strength-recommendations {
+  margin-bottom: 16px;
+}
+
+.strength-issues h5,
+.strength-recommendations h5 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.strength-issues h5 {
+  color: #dc2626;
+}
+
+.strength-recommendations h5 {
+  color: #8b5cf6;
+}
+
+.strength-issues h5 svg,
+.strength-recommendations h5 svg {
+  width: 16px;
+  height: 16px;
+}
+
+.strength-issues ul,
+.strength-recommendations ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.strength-issues li {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+
+.strength-recommendations li {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+
+/* Improve Description Result */
+.improve-result {
+  padding: 8px 0;
+}
+
+.improve-section {
+  margin-bottom: 20px;
+}
+
+.improve-section:last-child {
+  margin-bottom: 0;
+}
+
+.improve-section h4 {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.original-text {
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.improved-text {
+  padding: 12px 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* AI Filled Animation */
+.ai-filled {
+  animation: aiFillPulse 0.5s ease;
+}
+
+@keyframes aiFillPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+/* ========================================
+   CONTROL SELECTOR (for Risk Form)
+   ======================================== */
+.control-selector {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.control-selector-search {
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.control-selector-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.control-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.control-selector-item:last-child {
+  border-bottom: none;
+}
+
+.control-selector-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.control-selector-item.selected {
+  background: rgba(196, 30, 58, 0.05);
+}
+
+.control-selector-item input[type="checkbox"] {
+  flex-shrink: 0;
+}
+
+.control-selector-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.control-selector-info .control-ref {
+  font-size: 0.7rem;
+}
+
+.control-selector-info .control-name {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.control-selector-footer {
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.no-controls-message {
+  padding: 24px;
+  text-align: center;
+}
+
+.no-controls-message p {
+  margin: 0 0 12px 0;
+}
+
+/* ========================================
+   DELETE CONFIRMATION
+   ======================================== */
+.confirm-delete {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.confirm-delete p {
+  margin: 0 0 8px 0;
+}
+
+.confirm-delete .text-muted {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.control-ref-preview {
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  margin: 12px 0;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+  .controls-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls-filter-bar .filter-bar-left {
+    flex-wrap: wrap;
+  }
+
+  .controls-filter-bar .filter-select {
+    width: 100%;
+  }
+
+  .ai-check-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .ai-check-actions {
+    justify-content: stretch;
+  }
+
+  .ai-check-actions .btn {
+    flex: 1;
+  }
+}
+
+/* AI Recommended Risks in Control Form */
+.checkbox-label.ai-recommended {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.checkbox-label.ai-recommended:hover {
+  border-color: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* AI Badge for risks */
+.checkbox-label .ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #92400e;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.checkbox-label .ai-badge svg {
+  width: 12px;
+  height: 12px;
+  fill: #f59e0b;
+}
+
+/* ========================================
+   EMPTY STATE (Windows Explorer Style)
+   ======================================== */
+
+.controls-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-height: 400px;
+}
+
+.controls-empty-state .empty-illustration {
+  margin-bottom: 24px;
+}
+
+.controls-empty-state .empty-illustration svg {
+  width: 120px;
+  height: 120px;
+}
+
+.controls-empty-state .empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.controls-empty-state .empty-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.controls-empty-state .btn {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Dark mode */
+html.theme-dark .controls-empty-state {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+html.theme-dark .controls-empty-state .empty-title {
+  color: var(--text-primary);
+}
+
+html.theme-dark .controls-empty-state .empty-description {
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   CONTROL FORM ALIGNMENT FIXES
+   ======================================== */
+
+/* Reference + Control Name row - Reference is narrow, Control Name fills remaining space */
+.control-form .form-row-ref-name {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+}
+
+/* All form rows in control form should use grid for consistent alignment */
+.control-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Ensure form groups fill their grid cell */
+.control-form .form-row .form-group {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Make labels consistent height regardless of content */
+.control-form .form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+  margin-bottom: 6px;
+}
+
+.control-form .form-label {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure inputs are full width */
+.control-form .form-input,
+.control-form .form-select {
+  width: 100%;
+}

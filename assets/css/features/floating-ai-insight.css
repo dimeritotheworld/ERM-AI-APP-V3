@@ -1,0 +1,624 @@
+/**
+ * Dimeri ERM - Floating AI Chat Styles
+ * Chat interface for context-aware AI assistant
+ *
+ * @version 2.0.0
+ */
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.floating-ai-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000001; /* Must be above editor (z-index: 9999) and modals */
+}
+
+/* ============================================
+   FLOATING BUTTON - Purple AI Style
+   ============================================ */
+.floating-ai-btn {
+  width: auto;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.floating-ai-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.5);
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+.floating-ai-btn:active {
+  transform: scale(0.98);
+}
+
+.floating-ai-btn .floating-ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-ai-btn .floating-ai-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.floating-ai-btn .floating-ai-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.floating-ai-btn .floating-ai-spinner {
+  display: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: floating-ai-spin 0.8s linear infinite;
+}
+
+.floating-ai-btn.loading .floating-ai-icon {
+  display: none;
+}
+
+.floating-ai-btn.loading .floating-ai-spinner {
+  display: block;
+}
+
+@keyframes floating-ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   PANEL
+   ============================================ */
+.floating-ai-panel {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  width: 340px;
+  max-height: 480px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  pointer-events: none;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-ai-panel.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ============================================
+   PANEL HEADER - Purple Style
+   ============================================ */
+.floating-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.floating-ai-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.floating-ai-title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.floating-ai-title-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* AI Counter Badges */
+.floating-ai-counter {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.floating-ai-counter.near-limit {
+  background: #fbbf24;
+  color: #78350f;
+}
+
+.floating-ai-counter.at-limit {
+  background: #ef4444;
+  color: #fff;
+}
+
+.floating-ai-header-counter {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  margin-left: 8px;
+}
+
+.floating-ai-header-counter.near-limit {
+  background: #fbbf24;
+  color: #78350f;
+}
+
+.floating-ai-header-counter.at-limit {
+  background: #ef4444;
+  color: #fff;
+}
+
+.floating-ai-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.floating-ai-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.floating-ai-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.floating-ai-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   CONTEXT BAR
+   ============================================ */
+.floating-ai-context {
+  padding: 6px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* Hide context bar when empty */
+.floating-ai-context:empty {
+  display: none;
+}
+
+/* ============================================
+   MESSAGES AREA
+   ============================================ */
+.floating-ai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  max-height: 240px;
+}
+
+/* Hide messages area when empty */
+.floating-ai-messages:empty,
+.floating-ai-messages.empty-state {
+  display: none;
+  padding: 0;
+  min-height: 0;
+}
+
+.floating-ai-welcome {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 16px;
+  line-height: 1.5;
+}
+
+/* Empty state - hide completely */
+.floating-ai-empty {
+  display: none;
+}
+
+/* ============================================
+   MESSAGE BUBBLES
+   ============================================ */
+.floating-ai-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.floating-ai-message-user {
+  align-self: flex-end;
+}
+
+.floating-ai-message-ai {
+  align-self: flex-start;
+}
+
+.floating-ai-message-content {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.floating-ai-message-user .floating-ai-message-content {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.floating-ai-message-ai .floating-ai-message-content {
+  background: #f3f4f6;
+  color: #374151;
+  border-bottom-left-radius: 4px;
+}
+
+/* Keyword highlighting in AI messages */
+.floating-ai-message-ai .floating-ai-message-content .ai-keyword {
+  color: #7c3aed;
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.floating-ai-message-ai .floating-ai-message-content .ai-number {
+  color: #8b5cf6;
+  font-weight: 700;
+}
+
+/* ============================================
+   TYPING INDICATOR
+   ============================================ */
+.floating-ai-typing .floating-ai-typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+}
+
+.floating-ai-typing-dots span {
+  width: 8px;
+  height: 8px;
+  background: #9ca3af;
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.floating-ai-typing-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.floating-ai-typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.floating-ai-typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   SUGGESTED PROMPTS
+   ============================================ */
+.floating-ai-suggestions {
+  padding: 10px 14px;
+  background: #fafafa;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.floating-ai-suggestions-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.floating-ai-suggestion-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  margin-bottom: 5px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floating-ai-suggestion-btn:last-child {
+  margin-bottom: 0;
+}
+
+.floating-ai-suggestion-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+/* ============================================
+   INPUT AREA
+   ============================================ */
+.floating-ai-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.floating-ai-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #1f2937;
+  background: #f9fafb;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.floating-ai-input:focus {
+  border-color: #8b5cf6;
+  background: #fff;
+}
+
+.floating-ai-input::placeholder {
+  color: #9ca3af;
+}
+
+.floating-ai-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.floating-ai-send-btn:hover {
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+.floating-ai-send-btn:active {
+  transform: scale(0.95);
+}
+
+.floating-ai-send-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+[data-theme="dark"] .floating-ai-panel {
+  background: #1f2937;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .floating-ai-header {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+[data-theme="dark"] .floating-ai-context {
+  background: #111827;
+  border-color: #374151;
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .floating-ai-messages {
+  background: #1f2937;
+}
+
+[data-theme="dark"] .floating-ai-welcome {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .floating-ai-message-ai .floating-ai-message-content {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .floating-ai-message-ai .floating-ai-message-content .ai-keyword {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.15);
+}
+
+[data-theme="dark"] .floating-ai-message-ai .floating-ai-message-content .ai-number {
+  color: #c4b5fd;
+}
+
+[data-theme="dark"] .floating-ai-typing .floating-ai-typing-dots {
+  background: #374151;
+}
+
+[data-theme="dark"] .floating-ai-typing-dots span {
+  background: #6b7280;
+}
+
+[data-theme="dark"] .floating-ai-suggestions {
+  background: #111827;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .floating-ai-suggestion-btn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .floating-ai-suggestion-btn:hover {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .floating-ai-input-container {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .floating-ai-input {
+  background: #111827;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .floating-ai-input:focus {
+  border-color: #6b7280;
+  background: #1f2937;
+}
+
+[data-theme="dark"] .floating-ai-input::placeholder {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .floating-ai-send-btn {
+  background: #4b5563;
+}
+
+[data-theme="dark"] .floating-ai-send-btn:hover {
+  background: #6b7280;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  .floating-ai-container {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .floating-ai-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .floating-ai-btn .floating-ai-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .floating-ai-panel {
+    width: calc(100vw - 32px);
+    max-width: 380px;
+    bottom: 58px;
+    max-height: 70vh;
+  }
+
+  .floating-ai-messages {
+    max-height: 200px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+.floating-ai-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.floating-ai-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.floating-ai-messages::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.floating-ai-messages::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+[data-theme="dark"] .floating-ai-messages::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+[data-theme="dark"] .floating-ai-messages::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

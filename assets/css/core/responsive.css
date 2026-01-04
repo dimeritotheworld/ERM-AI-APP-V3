@@ -1,0 +1,588 @@
+/**
+ * Dimeri ERM - Responsive Design
+ * Mobile, Tablet, and Desktop optimizations
+ */
+
+/* ========================================
+   DESKTOP FIRST APPROACH
+   ======================================== */
+
+/* Large Desktops (1440px and above) - Default styles */
+/* All default styles in other CSS files */
+
+/* ========================================
+   LAPTOP / SMALL DESKTOP (1024px - 1439px)
+   ======================================== */
+@media (max-width: 1439px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .container {
+    max-width: 1200px;
+    padding: 0 24px;
+  }
+}
+
+/* ========================================
+   TABLET (768px - 1023px)
+   ======================================== */
+@media (max-width: 1023px) {
+  /* Layout */
+  .main-container {
+    padding: 16px;
+  }
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    margin-left: 200px;
+  }
+
+  /* Grids */
+  .dashboard-grid,
+  .stats-grid,
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Tables */
+  .risk-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .risk-table {
+    min-width: 768px;
+  }
+
+  /* Modals */
+  .modal {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  /* Header */
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Cards */
+  .settings-card {
+    padding: 20px;
+  }
+
+  /* Forms */
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-row .form-group {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   MOBILE LANDSCAPE / SMALL TABLET (640px - 767px)
+   ======================================== */
+@media (max-width: 767px) {
+  /* Hide sidebar by default on mobile */
+  .sidebar {
+    position: fixed;
+    left: -250px;
+    top: 0;
+    bottom: 0;
+    width: 250px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    background: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  /* Add sidebar overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  /* Main content takes full width */
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* Mobile header */
+  .header {
+    padding: 12px 16px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+  }
+
+  /* Add hamburger menu button */
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+  }
+
+  /* Navigation */
+  .nav-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tab {
+    white-space: nowrap;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Cards */
+  .settings-card {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  /* Buttons */
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Risk Register */
+  .risk-header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .risk-header-actions .btn {
+    width: 100%;
+  }
+
+  .risk-card {
+    padding: 16px;
+  }
+
+  .risk-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Modals */
+  .modal {
+    width: 95%;
+    margin: 10px auto;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+  /* Profile Page */
+  .profile-sidebar {
+    position: static;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+  }
+
+  .profile-nav {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profile-nav .nav-item {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .profile-content {
+    margin-left: 0;
+  }
+
+  /* Billing */
+  .billing-team-member {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .billing-member-info {
+    width: 100%;
+  }
+
+  .billing-member-role {
+    margin: 0;
+  }
+
+  .payment-method {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .invoice-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .invoice-status {
+    margin: 0;
+  }
+
+  .seat-usage-actions {
+    flex-direction: column;
+  }
+
+  .seat-usage-actions .btn {
+    width: 100%;
+  }
+
+  /* Reports */
+  .report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-card {
+    padding: 16px;
+  }
+
+  /* Controls */
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-card {
+    padding: 16px;
+  }
+
+  /* Dashboard */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+}
+
+/* ========================================
+   MOBILE PORTRAIT (480px - 639px)
+   ======================================== */
+@media (max-width: 639px) {
+  /* Typography */
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+
+  /* Spacing */
+  .main-container {
+    padding: 12px;
+  }
+
+  .settings-card {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  /* Forms */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Tables - Force horizontal scroll */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* Risk Cards */
+  .risk-score {
+    font-size: 28px;
+  }
+
+  .risk-score-label {
+    font-size: 11px;
+  }
+
+  /* Stat Cards */
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+}
+
+/* ========================================
+   SMALL MOBILE (320px - 479px)
+   ======================================== */
+@media (max-width: 479px) {
+  /* Extra compact spacing */
+  .main-container {
+    padding: 8px;
+  }
+
+  .settings-card,
+  .card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  /* Modal */
+  .modal {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  /* Risk/Control Cards */
+  .risk-card,
+  .control-card {
+    padding: 12px;
+  }
+
+  /* Avatar */
+  .avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  /* Tags */
+  .tag {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+  .sidebar,
+  .header,
+  .mobile-menu-btn,
+  .btn,
+  .modal-overlay,
+  .toast-container {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  .card,
+  .settings-card {
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  .risk-table,
+  .control-table {
+    page-break-inside: auto;
+  }
+
+  .risk-table tr,
+  .control-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+
+/* ========================================
+   LANDSCAPE ORIENTATION
+   ======================================== */
+@media (orientation: landscape) and (max-height: 600px) {
+  .modal {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .sidebar {
+    overflow-y: auto;
+  }
+}
+
+/* ========================================
+   HIGH DPI SCREENS (Retina)
+   ======================================== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Use higher quality images if needed */
+  .logo {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* ========================================
+   DARK MODE (System Preference)
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles would go here if implementing */
+  /* For now, Dimeri uses light mode only */
+}
+
+/* ========================================
+   REDUCED MOTION (Accessibility)
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch target sizes */
+  .btn,
+  .nav-tab,
+  .nav-item,
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover states on touch devices */
+  .btn:hover,
+  .card:hover,
+  .nav-tab:hover {
+    transform: none;
+  }
+
+  /* Improve scrolling */
+  .modal-body,
+  .sidebar,
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}

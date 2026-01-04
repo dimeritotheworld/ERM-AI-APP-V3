@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Editor V2 Test - Dimeri ERM</title>
+
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="assets/css/core/global.css" />
+  <!-- Load reports.css first so V2 can override -->
+  <link rel="stylesheet" href="assets/css/modules/reports.css" />
+  <!-- Toolbar styles -->
+  <link rel="stylesheet" href="assets/css/modules/report-editor.css?v=1.0.0" />
+  <!-- Shared AI styles -->
+  <link rel="stylesheet" href="assets/css/modules/report-editor-ai.css?v=1.0.0" />
+  <!-- V2 Editor styles -->
+  <link rel="stylesheet" href="assets/css/modules/report-editor-v2.css?v=6.0.0" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #editor-container {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor-container"></div>
+
+  <!-- Core Scripts -->
+  <script src="assets/js/core/global.js"></script>
+
+  <!-- Mock ERM functions for testing -->
+  <script>
+    // Mock storage
+    if (!ERM.storage) {
+      ERM.storage = {
+        get: function(key) {
+          try {
+            var item = localStorage.getItem('erm_' + key);
+            return item ? JSON.parse(item) : null;
+          } catch(e) { return null; }
+        },
+        set: function(key, value) {
+          try {
+            localStorage.setItem('erm_' + key, JSON.stringify(value));
+          } catch(e) {}
+        }
+      };
+    }
+
+    // Mock state
+    if (!ERM.state) {
+      ERM.state = {
+        user: {
+          id: 'user_1',
+          name: 'John Doe',
+          email: 'john@example.com'
+        }
+      };
+    }
+
+    // Mock toast
+    if (!ERM.toast) {
+      ERM.toast = {
+        success: function(msg) { console.log('✓ ' + msg); },
+        error: function(msg) { console.log('✗ ' + msg); alert(msg); },
+        show: function(options) {
+          var msg = options.message || options.msg || '';
+          if (options.type === 'success') {
+            console.log('✓ ' + msg);
+          } else if (options.type === 'error') {
+            console.log('✗ ' + msg);
+            alert(msg);
+          } else {
+            console.log(msg);
+          }
+        }
+      };
+    }
+
+    // Mock components for modals
+    if (!ERM.components) {
+      ERM.components = {
+        showModal: function(options) {
+          console.log('[Mock] showModal called:', options.title);
+          // Create a simple modal div
+          var modal = document.createElement('div');
+          modal.id = 'mock-modal';
+          modal.innerHTML = options.content || '';
+          modal.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:10000;';
+          document.body.appendChild(modal);
+        },
+        closeModal: function() {
+          console.log('[Mock] closeModal called');
+          var modal = document.getElementById('mock-modal');
+          if (modal) modal.remove();
+        }
+      };
+    }
+
+    // Mock reports namespace
+    if (!ERM.reports) {
+      ERM.reports = {
+        showList: function() {
+          alert('Back to reports list');
+        }
+      };
+    }
+
+    // Mock AI
+    if (!ERM.ai) {
+      ERM.ai = {
+        query: function(prompt, callback) {
+          // Simulate AI response
+          setTimeout(function() {
+            var responses = {
+              simplify: 'Here is a simplified version of the text that is easier to understand.',
+              expand: 'Here is an expanded version with more details and context. This includes additional information that provides a deeper understanding of the topic.',
+              rewrite: 'Here is the text rewritten in a different way while maintaining the same meaning.',
+              formal: 'Please find herewith a formal rendition of the aforementioned content.',
+              summarize: 'Key points: 1) Main idea 2) Supporting detail 3) Conclusion',
+              bullets: '• First key point\n• Second key point\n• Third key point'
+            };
+
+            // Check which type of request
+            var response = 'This is an AI-generated response based on your request. In a production environment, this would connect to Claude or another AI service to provide intelligent suggestions for your risk management report.';
+
+            callback(null, response);
+          }, 1500);
+        }
+      };
+    }
+
+    // Mock risk registers for embed picker
+    ERM.storage.set('riskRegisters', [
+      { id: 'reg_1', name: 'Corporate Risk Register' },
+      { id: 'reg_2', name: 'IT Risk Register' },
+      { id: 'reg_3', name: 'Compliance Register' },
+      { id: 'reg_4', name: 'Operational Risk Register' }
+    ]);
+
+    // Mock risks for embed content
+    ERM.storage.set('risks', [
+      { id: 'risk_1', title: 'Data Breach Risk', category: 'Cybersecurity', inherentLikelihood: 4, inherentImpact: 5, residualLikelihood: 2, residualImpact: 4, owner: 'IT Director', status: 'mitigating', registerId: 'reg_2' },
+      { id: 'risk_2', title: 'Regulatory Non-Compliance', category: 'Compliance', inherentLikelihood: 3, inherentImpact: 4, residualLikelihood: 2, residualImpact: 3, owner: 'Legal Counsel', status: 'open', registerId: 'reg_3' },
+      { id: 'risk_3', title: 'Supply Chain Disruption', category: 'Operational', inherentLikelihood: 3, inherentImpact: 4, residualLikelihood: 2, residualImpact: 3, owner: 'Operations Manager', status: 'open', registerId: 'reg_4' },
+      { id: 'risk_4', title: 'Market Volatility', category: 'Financial', inherentLikelihood: 4, inherentImpact: 3, residualLikelihood: 3, residualImpact: 3, owner: 'CFO', status: 'mitigating', registerId: 'reg_1' },
+      { id: 'risk_5', title: 'Key Personnel Loss', category: 'Human Resources', inherentLikelihood: 2, inherentImpact: 4, residualLikelihood: 2, residualImpact: 3, owner: 'HR Director', status: 'open', registerId: 'reg_1' },
+      { id: 'risk_6', title: 'System Outage', category: 'Cybersecurity', inherentLikelihood: 3, inherentImpact: 5, residualLikelihood: 2, residualImpact: 4, owner: 'IT Director', status: 'mitigating', registerId: 'reg_2' },
+      { id: 'risk_7', title: 'Fraud Risk', category: 'Financial', inherentLikelihood: 2, inherentImpact: 5, residualLikelihood: 1, residualImpact: 4, owner: 'CFO', status: 'closed', registerId: 'reg_1' },
+      { id: 'risk_8', title: 'Third Party Vendor Risk', category: 'Operational', inherentLikelihood: 3, inherentImpact: 3, residualLikelihood: 2, residualImpact: 2, owner: 'Procurement Manager', status: 'open', registerId: 'reg_4' }
+    ]);
+
+    // Mock controls for embed content
+    ERM.storage.set('controls', [
+      { id: 'ctrl_1', name: 'Firewall Protection', type: 'Preventive', effectiveness: 'effective', owner: 'IT Security', registerId: 'reg_2' },
+      { id: 'ctrl_2', name: 'Access Control Policy', type: 'Preventive', effectiveness: 'effective', owner: 'IT Director', registerId: 'reg_2' },
+      { id: 'ctrl_3', name: 'Compliance Training', type: 'Detective', effectiveness: 'partially-effective', owner: 'HR Director', registerId: 'reg_3' },
+      { id: 'ctrl_4', name: 'Incident Response Plan', type: 'Corrective', effectiveness: 'effective', owner: 'IT Security', registerId: 'reg_2' },
+      { id: 'ctrl_5', name: 'Vendor Assessment', type: 'Preventive', effectiveness: 'partially-effective', owner: 'Procurement', registerId: 'reg_4' }
+    ]);
+
+    // Mock workspace members for @mention
+    ERM.storage.set('workspaceMembers', [
+      { id: 'user_2', name: 'Sarah Johnson', email: 'sarah@company.com', color: '#10b981' },
+      { id: 'user_3', name: 'Mike Chen', email: 'mike@company.com', color: '#f59e0b' },
+      { id: 'user_4', name: 'Emily Davis', email: 'emily@company.com', color: '#8b5cf6' }
+    ]);
+  </script>
+
+  <!-- Utilities needed for reports -->
+  <script>
+    // Mock ERM.utils if not defined
+    if (!ERM.utils) {
+      ERM.utils = {
+        escapeHtml: function(text) {
+          if (!text) return '';
+          var div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+      };
+    }
+  </script>
+
+  <!-- Reports Module (for embed rendering) -->
+  <script src="assets/js/modules/reports/reports.js?v=1.0.0"></script>
+
+  <!-- Shared AI Module (Ask AI panel) -->
+  <script src="assets/js/modules/reports/report-editor-ai.js?v=1.0.0"></script>
+
+  <!-- Report Editor V2 -->
+  <script src="assets/js/modules/reports/report-editor-v2.js?v=6.0.0"></script>
+
+  <!-- Initialize -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize with a sample report
+      var sampleReport = {
+        id: 'report_test',
+        title: 'Q4 2024 Risk Assessment Report',
+        content: [
+          { id: 'block_1', type: 'heading1', content: 'Executive Summary' },
+          { id: 'block_2', type: 'paragraph', content: 'This report provides a comprehensive overview of the organization\'s risk landscape for Q4 2024. Key findings indicate several areas requiring immediate attention.' },
+          { id: 'block_3', type: 'heading2', content: 'Risk Overview' },
+          { id: 'block_4', type: 'paragraph', content: 'The risk assessment identified 24 risks across 5 categories. Select text in this paragraph and try the AI features!' },
+          { id: 'block_5', type: 'bullet', content: 'Cybersecurity risks remain elevated' },
+          { id: 'block_6', type: 'bullet', content: 'Compliance requirements have increased' },
+          { id: 'block_7', type: 'bullet', content: 'Operational resilience needs improvement' },
+          { id: 'block_8', type: 'paragraph', content: '' }
+        ],
+        createdAt: '2024-12-01T10:00:00Z',
+        updatedAt: new Date().toISOString(),
+        author: 'John Doe'
+      };
+
+      // Initialize editor
+      ERM.reportEditorV2.init('editor-container', sampleReport);
+
+      console.log('Editor V2 Test Page Ready');
+      console.log('Editor V2 Test Page Features:');
+      console.log('1. Type / anywhere to see slash commands');
+      console.log('2. Select text to see AI and Comment pills');
+      console.log('3. Click AI pill for AI actions');
+      console.log('4. Use # ## ### for headings');
+      console.log('5. Use - or * for bullets');
+      console.log('6. Press Ctrl+S to save');
+      console.log('7. Press Ctrl+Z to undo, Ctrl+Y to redo');
+      console.log('8. Click "More options" (⋮) > Export PDF to test PDF export');
+      console.log('\nTest AI features by selecting text and using AI actions!');
+
+      // Add global error handler to catch any issues
+      window.addEventListener('error', function(e) {
+        console.error('[Global Error]', e.message, e.filename, e.lineno);
+      });
+    });
+  </script>
+</body>
+</html>

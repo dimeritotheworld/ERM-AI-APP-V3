@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports Guide - Dimeri ERM Help</title>
+  <link rel="stylesheet" href="../assets/css/core/variables.css">
+  <link rel="stylesheet" href="../assets/css/core/base.css">
+  <link rel="stylesheet" href="../assets/css/core/layout.css">
+  <link rel="stylesheet" href="../assets/css/core/components.css">
+  <link rel="stylesheet" href="../assets/css/pages/help-article.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="help-article-page">
+    <header class="help-article-header">
+      <div class="header-left">
+        <a href="../index.html" class="back-to-app"><span class="back-icon">←</span><span>Back to App</span></a>
+      </div>
+      <div class="header-center">
+        <a href="index.html" class="help-logo"><span class="logo-icon">📚</span><span class="logo-text">Help Center</span></a>
+      </div>
+      <div class="header-right">
+        <div class="help-search-mini"><input type="text" placeholder="Search help..." id="mini-search"></div>
+      </div>
+    </header>
+
+    <nav class="breadcrumb">
+      <a href="index.html">Help Center</a>
+      <span class="separator">›</span>
+      <span class="current">Reports & Analytics</span>
+    </nav>
+
+    <main class="help-article-main">
+      <div class="article-container">
+        <aside class="article-sidebar">
+          <nav class="sidebar-nav">
+            <h4>On This Page</h4>
+            <ul>
+              <li><a href="#overview" class="active">Overview</a></li>
+              <li><a href="#report-types">Report Types</a></li>
+              <li><a href="#creating-reports">Creating Reports</a></li>
+              <li><a href="#ai-features">AI Features</a></li>
+              <li><a href="#customization">Customization</a></li>
+              <li><a href="#dashboard">Dashboard Analytics</a></li>
+              <li><a href="#exporting">Exporting Data</a></li>
+            </ul>
+          </nav>
+        </aside>
+
+        <article class="article-content">
+          <div class="article-header">
+            <span class="article-badge">Intermediate</span>
+            <span class="article-time">10 min read</span>
+          </div>
+
+          <h1>Reports & Analytics Guide</h1>
+
+          <p class="article-intro">
+            Generate professional reports for stakeholders and leverage analytics
+            to gain insights into your organization's risk profile.
+          </p>
+
+          <section id="overview" class="article-section">
+            <h2>Understanding Reports</h2>
+
+            <div class="info-box info-box-blue">
+              <div class="info-icon">📄</div>
+              <div class="info-content">
+                <strong>Why Reports Matter</strong>
+                <p>Reports transform raw risk data into actionable insights. They help communicate
+                risk status to leadership, demonstrate compliance, and track progress over time.</p>
+              </div>
+            </div>
+
+            <h3>What You Can Report On</h3>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Risk Summary</h4>
+                <p>Overview of all risks by category, severity, and status.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h4>Control Status</h4>
+                <p>Control effectiveness and coverage across risks.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h4>Trend Analysis</h4>
+                <p>How risk levels have changed over time.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h4>Action Items</h4>
+                <p>Outstanding actions and upcoming review dates.</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="report-types" class="article-section">
+            <h2>Report Types</h2>
+
+            <div class="report-types-grid">
+              <div class="report-type-card">
+                <div class="report-icon">📋</div>
+                <h4>Executive Summary</h4>
+                <p>High-level overview for leadership. Includes key metrics, top risks, and recommendations.</p>
+                <div class="report-audience"><strong>Audience:</strong> Board, C-suite</div>
+                <div class="report-frequency"><strong>Frequency:</strong> Monthly/Quarterly</div>
+              </div>
+              <div class="report-type-card">
+                <div class="report-icon">📊</div>
+                <h4>Risk Assessment Report</h4>
+                <p>Detailed analysis of all risks including scoring, controls, and mitigation status.</p>
+                <div class="report-audience"><strong>Audience:</strong> Risk managers, auditors</div>
+                <div class="report-frequency"><strong>Frequency:</strong> Quarterly</div>
+              </div>
+              <div class="report-type-card">
+                <div class="report-icon">🛡️</div>
+                <h4>Control Effectiveness Report</h4>
+                <p>Analysis of control performance, testing results, and gaps.</p>
+                <div class="report-audience"><strong>Audience:</strong> Internal audit, compliance</div>
+                <div class="report-frequency"><strong>Frequency:</strong> Semi-annually</div>
+              </div>
+              <div class="report-type-card">
+                <div class="report-icon">🔥</div>
+                <h4>Heat Map Report</h4>
+                <p>Visual representation of risk distribution by likelihood and impact.</p>
+                <div class="report-audience"><strong>Audience:</strong> All stakeholders</div>
+                <div class="report-frequency"><strong>Frequency:</strong> As needed</div>
+              </div>
+            </div>
+          </section>
+
+          <section id="creating-reports" class="article-section">
+            <h2>Creating Reports</h2>
+
+            <div class="step-list">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <h4>Go to Reports</h4>
+                  <p>Click <strong>Reports</strong> in the sidebar navigation.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <h4>Create New Report</h4>
+                  <p>Click <strong>Create Report</strong> and select a template or start from scratch.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <h4>Configure Sections</h4>
+                  <p>Choose which sections to include: summary, risk register, controls, charts, etc.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <h4>Edit Content</h4>
+                  <p>Use the side-by-side editor to customize content with live preview.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <h4>Generate & Export</h4>
+                  <p>Preview your report and download as PDF for distribution.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- AI Features Section -->
+          <section id="ai-features" class="article-section">
+            <h2>AI Features for Reports</h2>
+
+            <p>The Reports module includes a powerful AI toolbar that helps you write, edit, and enhance your reports with just a few clicks.</p>
+
+            <div class="info-box info-box-purple">
+              <div class="info-icon">✨</div>
+              <div class="info-content">
+                <strong>AI-Powered Report Writing</strong>
+                <p>The purple AI toolbar at the top of the report editor gives you instant access to AI writing assistance. It uses your actual risk and control data to generate relevant content.</p>
+              </div>
+            </div>
+
+            <h3>The AI Toolbar</h3>
+            <p>When you open a report in the editor, you'll see the purple <strong>✨ AI toolbar</strong> at the top. Here's what each button does:</p>
+
+            <div class="ai-toolbar-grid">
+              <div class="ai-tool-card">
+                <div class="tool-header">
+                  <span class="tool-badge">✨ Improve</span>
+                </div>
+                <h4>Enhance Your Text</h4>
+                <p>Select text and click to rewrite with better clarity, grammar, and flow.</p>
+                <div class="tool-usage">
+                  <strong>How to use:</strong>
+                  <ol>
+                    <li>Select the text you want to improve</li>
+                    <li>Click ✨ Improve</li>
+                    <li>AI rewrites with professional language</li>
+                  </ol>
+                </div>
+                <div class="tool-best"><strong>Best for:</strong> Polishing rough drafts, fixing grammar</div>
+              </div>
+
+              <div class="ai-tool-card">
+                <div class="tool-header">
+                  <span class="tool-badge">✨ Expand</span>
+                </div>
+                <h4>Add More Detail</h4>
+                <p>Select brief content and AI adds more depth, examples, and explanation.</p>
+                <div class="tool-usage">
+                  <strong>How to use:</strong>
+                  <ol>
+                    <li>Select a short sentence or paragraph</li>
+                    <li>Click ✨ Expand</li>
+                    <li>AI adds detail and depth</li>
+                  </ol>
+                </div>
+                <div class="tool-best"><strong>Best for:</strong> Fleshing out thin sections</div>
+              </div>
+
+              <div class="ai-tool-card">
+                <div class="tool-header">
+                  <span class="tool-badge">✨ Summarize</span>
+                </div>
+                <h4>Condense Content</h4>
+                <p>Select long text and AI condenses it into key points.</p>
+                <div class="tool-usage">
+                  <strong>How to use:</strong>
+                  <ol>
+                    <li>Select a long section of text</li>
+                    <li>Click ✨ Summarize</li>
+                    <li>AI creates concise summary</li>
+                  </ol>
+                </div>
+                <div class="tool-best"><strong>Best for:</strong> Executive summaries, key takeaways</div>
+              </div>
+
+              <div class="ai-tool-card">
+                <div class="tool-header">
+                  <span class="tool-badge">✨ Generate Section</span>
+                </div>
+                <h4>Create New Content</h4>
+                <p>Generate entire sections using your risk and control data.</p>
+                <div class="tool-usage">
+                  <strong>How to use:</strong>
+                  <ol>
+                    <li>Place cursor where you want content</li>
+                    <li>Click ✨ Generate Section</li>
+                    <li>Choose section type</li>
+                    <li>AI creates content from your data</li>
+                  </ol>
+                </div>
+                <div class="tool-best"><strong>Best for:</strong> Starting from scratch, auto-generating reports</div>
+              </div>
+
+              <div class="ai-tool-card">
+                <div class="tool-header">
+                  <span class="tool-badge">✨ Professional Tone</span>
+                </div>
+                <h4>Formal Business Language</h4>
+                <p>Convert casual text into formal, board-ready language.</p>
+                <div class="tool-usage">
+                  <strong>How to use:</strong>
+                  <ol>
+                    <li>Select informal or casual text</li>
+                    <li>Click ✨ Professional Tone</li>
+                    <li>AI rewrites formally</li>
+                  </ol>
+                </div>
+                <div class="tool-best"><strong>Best for:</strong> Board presentations, executive reports</div>
+              </div>
+            </div>
+
+            <h3>Generate Section Types</h3>
+            <p>When you click <strong>✨ Generate Section</strong>, you can choose from these pre-built section types:</p>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Section Type</th>
+                  <th>What AI Generates</th>
+                  <th>Uses Data From</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Executive Summary</strong></td>
+                  <td>High-level overview with key metrics and findings</td>
+                  <td>All risks, controls, dashboard stats</td>
+                </tr>
+                <tr>
+                  <td><strong>Risk Analysis</strong></td>
+                  <td>Detailed breakdown of top risks and their status</td>
+                  <td>Risk register, scores, categories</td>
+                </tr>
+                <tr>
+                  <td><strong>Control Assessment</strong></td>
+                  <td>Summary of control effectiveness and coverage</td>
+                  <td>Controls, effectiveness ratings, gaps</td>
+                </tr>
+                <tr>
+                  <td><strong>Recommendations</strong></td>
+                  <td>Suggested next steps based on current risk profile</td>
+                  <td>Uncontrolled risks, gaps, trends</td>
+                </tr>
+                <tr>
+                  <td><strong>Methodology</strong></td>
+                  <td>Explanation of risk assessment approach</td>
+                  <td>Scoring criteria, categories, framework</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>📊 Insert Chart</h3>
+            <p>Add visual charts from your dashboard directly into reports:</p>
+
+            <div class="chart-types-grid">
+              <div class="chart-type">
+                <span class="chart-icon">🔥</span>
+                <h4>Risk Heatmap</h4>
+                <p>5x5 matrix showing risk distribution</p>
+              </div>
+              <div class="chart-type">
+                <span class="chart-icon">📊</span>
+                <h4>Risk by Category</h4>
+                <p>Bar chart of risks per category</p>
+              </div>
+              <div class="chart-type">
+                <span class="chart-icon">📈</span>
+                <h4>Inherent vs Residual</h4>
+                <p>Shows risk reduction from controls</p>
+              </div>
+              <div class="chart-type">
+                <span class="chart-icon">🛡️</span>
+                <h4>Control Effectiveness</h4>
+                <p>Pie chart of control statuses</p>
+              </div>
+              <div class="chart-type">
+                <span class="chart-icon">📉</span>
+                <h4>Risk Trend</h4>
+                <p>Line chart over time</p>
+              </div>
+              <div class="chart-type">
+                <span class="chart-icon">📋</span>
+                <h4>Insert Table</h4>
+                <p>Summary table of your risks</p>
+              </div>
+            </div>
+
+            <div class="tip-box">
+              <div class="tip-icon">💡</div>
+              <div class="tip-content">
+                <strong>Pro Workflow:</strong> Use ✨ Generate Section to create your initial content, then ✨ Improve to polish it, and finally ✨ Professional Tone for board-ready language.
+              </div>
+            </div>
+          </section>
+
+          <section id="customization" class="article-section">
+            <h2>Report Customization</h2>
+
+            <h3>Available Sections</h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Section</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Executive Summary</strong></td>
+                  <td>Key metrics and high-level findings</td>
+                </tr>
+                <tr>
+                  <td><strong>Risk Overview</strong></td>
+                  <td>Summary of risk distribution and trends</td>
+                </tr>
+                <tr>
+                  <td><strong>Top Risks</strong></td>
+                  <td>Detailed view of highest-priority risks</td>
+                </tr>
+                <tr>
+                  <td><strong>Risk Register</strong></td>
+                  <td>Complete list of all risks</td>
+                </tr>
+                <tr>
+                  <td><strong>Control Summary</strong></td>
+                  <td>Overview of control status and effectiveness</td>
+                </tr>
+                <tr>
+                  <td><strong>Heat Map</strong></td>
+                  <td>Visual risk matrix</td>
+                </tr>
+                <tr>
+                  <td><strong>Recommendations</strong></td>
+                  <td>Suggested actions and next steps</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="tip-box">
+              <div class="tip-icon">💡</div>
+              <div class="tip-content">
+                <strong>Pro Tip:</strong> Use the AI Assistant in the report editor to help
+                write executive summaries and recommendations based on your risk data.
+              </div>
+            </div>
+          </section>
+
+          <section id="dashboard" class="article-section">
+            <h2>Dashboard Analytics</h2>
+
+            <p>The dashboard provides real-time analytics on your risk portfolio:</p>
+
+            <div class="analytics-grid">
+              <div class="analytics-card">
+                <h4>Risk Heatmap</h4>
+                <p>5x5 matrix showing risk distribution. Click any cell to filter risks by that score.</p>
+              </div>
+              <div class="analytics-card">
+                <h4>Inherent vs Residual</h4>
+                <p>Bar chart comparing risk before and after controls. Shows your risk reduction effectiveness.</p>
+              </div>
+              <div class="analytics-card">
+                <h4>Category Distribution</h4>
+                <p>Pie chart showing risk concentration by category (Operational, Financial, etc.).</p>
+              </div>
+              <div class="analytics-card">
+                <h4>Control Effectiveness</h4>
+                <p>Breakdown of controls by effectiveness rating (Effective, Partial, Ineffective).</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="exporting" class="article-section">
+            <h2>Exporting Data</h2>
+
+            <h3>Export Formats</h3>
+            <div class="export-options">
+              <div class="export-card">
+                <div class="export-icon">📄</div>
+                <h4>PDF</h4>
+                <p>Professional formatted reports for presentations and stakeholders.</p>
+              </div>
+              <div class="export-card">
+                <div class="export-icon">📊</div>
+                <h4>CSV</h4>
+                <p>Raw data export for Excel analysis and manipulation.</p>
+              </div>
+              <div class="export-card">
+                <div class="export-icon">💾</div>
+                <h4>JSON</h4>
+                <p>Technical format for data backup or system integration.</p>
+              </div>
+            </div>
+
+            <h3>What Can Be Exported</h3>
+            <ul>
+              <li><strong>Risk Register:</strong> All risks with full details</li>
+              <li><strong>Controls:</strong> All controls with linked risks</li>
+              <li><strong>Activity Log:</strong> Audit trail for compliance</li>
+              <li><strong>Reports:</strong> Generated reports as PDF</li>
+            </ul>
+          </section>
+
+          <footer class="article-footer">
+            <div class="article-feedback">
+              <p>Was this article helpful?</p>
+              <div class="feedback-buttons">
+                <button class="feedback-btn" data-value="yes">👍 Yes</button>
+                <button class="feedback-btn" data-value="no">👎 No</button>
+              </div>
+            </div>
+            <div class="article-nav">
+              <div class="nav-prev">
+                <a href="controls.html"><span class="nav-label">Previous</span><span class="nav-title">← Controls Guide</span></a>
+              </div>
+              <div class="nav-next">
+                <a href="settings.html"><span class="nav-label">Next</span><span class="nav-title">Settings Guide →</span></a>
+              </div>
+            </div>
+          </footer>
+        </article>
+      </div>
+    </main>
+
+    <footer class="help-footer">
+      <div class="footer-content">
+        <p>&copy; 2024 Dimeri Technologies. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});});
+    var sections=document.querySelectorAll('.article-section'),navLinks=document.querySelectorAll('.sidebar-nav a');
+    window.addEventListener('scroll',function(){var c='';sections.forEach(function(s){if(window.pageYOffset>=s.offsetTop-100)c=s.getAttribute('id');});navLinks.forEach(function(l){l.classList.remove('active');if(l.getAttribute('href')==='#'+c)l.classList.add('active');});});
+    document.querySelectorAll('.feedback-btn').forEach(function(b){b.addEventListener('click',function(){this.parentElement.innerHTML='<span style="color:#16a34a;">Thanks!</span>';});});
+    document.getElementById('mini-search').addEventListener('keypress',function(e){if(e.key==='Enter')window.location.href='index.html?search='+encodeURIComponent(this.value);});
+  </script>
+
+  <style>
+    .report-types-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin:24px 0}
+    .report-type-card{padding:24px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0}
+    .report-icon{font-size:32px;margin-bottom:12px}
+    .report-type-card h4{font-size:16px;margin:0 0 8px;color:#0f172a}
+    .report-type-card>p{font-size:14px;color:#64748b;margin-bottom:12px}
+    .report-audience,.report-frequency{font-size:13px;color:#475569;margin-top:8px}
+    .analytics-grid,.export-options{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:24px 0}
+    .analytics-card,.export-card{padding:20px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
+    .analytics-card h4,.export-card h4{font-size:15px;color:#0f172a;margin:0 0 8px}
+    .analytics-card p,.export-card p{font-size:13px;color:#64748b;margin:0}
+    .export-icon{font-size:28px;margin-bottom:12px}
+    .data-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+    .data-table th,.data-table td{padding:12px 16px;text-align:left;border-bottom:1px solid #e2e8f0}
+    .data-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    @media(max-width:768px){.report-types-grid,.analytics-grid,.export-options{grid-template-columns:1fr}}
+
+    /* AI Features Styles */
+    .info-box-purple{background:linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%);border-left:4px solid #a855f7;padding:20px;border-radius:8px;display:flex;gap:16px;margin:20px 0}
+    .info-box-purple .info-icon{font-size:28px;flex-shrink:0}
+    .info-box-purple .info-content strong{color:#6b21a8;display:block;margin-bottom:4px}
+    .info-box-purple .info-content p{margin:0;color:#581c87;font-size:14px}
+
+    .ai-toolbar-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin:24px 0}
+    .ai-tool-card{padding:24px;background:#faf5ff;border:2px solid #e9d5ff;border-radius:12px}
+    .tool-header{margin-bottom:12px}
+    .tool-badge{background:linear-gradient(135deg,#a855f7 0%,#7c3aed 100%);color:white;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600}
+    .ai-tool-card h4{font-size:16px;color:#0f172a;margin:12px 0 8px}
+    .ai-tool-card>p{font-size:14px;color:#64748b;margin-bottom:16px}
+    .tool-usage{background:white;padding:12px;border-radius:8px;margin-bottom:12px}
+    .tool-usage strong{font-size:12px;color:#6b21a8;text-transform:uppercase}
+    .tool-usage ol{margin:8px 0 0 16px;padding:0;font-size:13px;color:#475569}
+    .tool-usage li{margin-bottom:4px}
+    .tool-best{font-size:13px;color:#7c3aed;font-style:italic}
+
+    .chart-types-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+    .chart-type{padding:16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;text-align:center}
+    .chart-icon{font-size:28px;display:block;margin-bottom:8px}
+    .chart-type h4{font-size:14px;color:#0f172a;margin:0 0 4px}
+    .chart-type p{font-size:12px;color:#64748b;margin:0}
+
+    .tip-box{display:flex;gap:16px;padding:20px;background:#fffbeb;border-left:4px solid #f59e0b;border-radius:8px;margin:24px 0}
+    .tip-icon{font-size:24px;flex-shrink:0}
+    .tip-content{font-size:14px;color:#78350f}
+    .tip-content strong{color:#92400e}
+
+    @media(max-width:1024px){.ai-toolbar-grid{grid-template-columns:1fr}.chart-types-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.chart-types-grid{grid-template-columns:1fr}}
+  </style>
+</body>
+</html>

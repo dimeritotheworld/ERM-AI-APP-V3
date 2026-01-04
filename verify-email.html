@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email | Dimeri ERM</title>
+    <meta
+      name="description"
+      content="Verify your email address to continue with Dimeri ERM"
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/verify-email.css" />
+  </head>
+  <body class="verify-page">
+    <div class="verify-container">
+      <!-- Verification Card -->
+      <div class="verify-card">
+        <!-- Email Icon -->
+        <div class="verify-icon">
+          <img
+            src="assets/images/email-icon.png"
+            alt="Email"
+            class="email-icon-img"
+            onerror="this.style.display='none'; document.getElementById('email-icon-fallback').style.display='flex';"
+          />
+          <div class="email-icon-fallback" id="email-icon-fallback">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <h1 class="verify-title">Please check your email!</h1>
+        <p class="verify-subtitle">
+          We've emailed a 6-digit confirmation code.<br />Please enter the code
+          in the box below to verify your email.
+        </p>
+
+        <!-- Email Display -->
+        <div class="email-display">
+          <label class="email-label">Email address</label>
+          <div class="email-value" id="user-email">user@example.com</div>
+        </div>
+
+        <!-- OTP Input -->
+        <div class="otp-container">
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-1"
+            maxlength="1"
+            data-index="1"
+            autofocus
+          />
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-2"
+            maxlength="1"
+            data-index="2"
+          />
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-3"
+            maxlength="1"
+            data-index="3"
+          />
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-4"
+            maxlength="1"
+            data-index="4"
+          />
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-5"
+            maxlength="1"
+            data-index="5"
+          />
+          <input
+            type="text"
+            class="otp-input"
+            id="otp-6"
+            maxlength="1"
+            data-index="6"
+          />
+        </div>
+
+        <!-- Error Message -->
+        <p class="otp-error" id="otp-error"></p>
+
+        <!-- Verify Button -->
+        <button class="verify-btn" id="verify-btn" onclick="verifyOTP()">
+          Verify
+        </button>
+
+        <!-- Resend OTP -->
+        <div class="resend-container">
+          <button
+            class="resend-btn"
+            id="resend-btn"
+            onclick="resendOTP()"
+            disabled
+          >
+            Resend OTP in <span id="resend-timer">60</span>s
+          </button>
+        </div>
+
+        <!-- Change Email -->
+        <div class="change-email">
+          <a href="login.html" class="change-email-link"
+            >← Use a different email</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/verify-email.js"></script>
+  </body>
+</html>

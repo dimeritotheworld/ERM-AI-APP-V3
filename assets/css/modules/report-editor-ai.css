@@ -1,0 +1,714 @@
+/**
+ * Report Editor AI Styles (Shared)
+ * Ask AI panel styling shared by old and V2 editors
+ */
+
+/* ========================================
+   SELECTION HIGHLIGHT
+   ======================================== */
+
+/* Visual highlight for selected text when using Ask AI or AI Actions.
+   Subtle, non-distracting - like native browser selection but persistent.
+   Uses a soft neutral/blue tint that doesn't compete with content.
+
+   The highlight persists even when:
+   - Clicking inside the AI panel to type
+   - Selecting an AI action from the dropdown
+   - Focus moves away from the editor */
+.ai-selection-highlight {
+  background-color: rgba(59, 130, 246, 0.4);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+  /* Ensure inline display for proper wrapping */
+  display: inline;
+  /* Smooth appearance */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Multiple highlight spans in a row should flow naturally */
+.ai-selection-highlight + .ai-selection-highlight {
+  margin-left: 0;
+}
+
+/* Ensure highlight works in lists */
+li .ai-selection-highlight,
+ul .ai-selection-highlight,
+ol .ai-selection-highlight {
+  display: inline;
+}
+
+/* Dark mode support */
+.dark-mode .ai-selection-highlight,
+[data-theme="dark"] .ai-selection-highlight {
+  background-color: rgba(147, 197, 253, 0.25);
+}
+
+/* ========================================
+   AI LOADING & ERROR STATES
+   ======================================== */
+
+.ai-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #c41e3a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-error-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.ai-error-message {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #dc2626;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.ai-error-hint {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.ai-error-hint code {
+  background: #1e293b;
+  color: #22c55e;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 11px;
+}
+
+/* Ask AI Error Panel */
+.ask-ai-error-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.ask-ai-error-panel .ai-error-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ask-ai-error-panel .ai-error-message {
+  font-size: 12px;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.ask-ai-error-panel .ai-error-hint {
+  font-size: 10px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.ask-ai-error-panel .ai-error-hint code {
+  background: #1e293b;
+  color: #22c55e;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 10px;
+}
+
+.ask-ai-error-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ========================================
+   FORMATTED AI RESPONSE
+   Professional ERM typography (Inter font):
+   - Body: 11pt (15px) - matches editor
+   - H1: 16pt (21px), H2: 14pt (19px), H3: 12pt (16px)
+   - Tables: 10-10.5pt (13-14px)
+   - Color: #1e293b (neutral dark slate)
+   - Weights: 400 body, 500 emphasis, 600 headings
+   ======================================== */
+
+.result-text,
+.ai-content {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 15px; /* 11pt - standard body text */
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1e293b;
+}
+
+/* Headings - professional hierarchy (Inter Semibold 600) */
+.result-text h1,
+.ai-content h1 {
+  font-size: 21px; /* 16pt */
+  font-weight: 600;
+  color: #1e293b;
+  margin: 16px 0 8px 0;
+  line-height: 1.3;
+}
+
+.result-text h2,
+.ai-content h2 {
+  font-size: 19px; /* 14pt */
+  font-weight: 600;
+  color: #1e293b;
+  margin: 14px 0 6px 0;
+  line-height: 1.35;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.result-text h3,
+.ai-content h3 {
+  font-size: 16px; /* 12pt */
+  font-weight: 600;
+  color: #1e293b;
+  margin: 12px 0 4px 0;
+  line-height: 1.4;
+}
+
+.result-text h4,
+.ai-content h4 {
+  font-size: 15px; /* 11pt - same as body but bold */
+  font-weight: 600;
+  color: #1e293b;
+  margin: 10px 0 4px 0;
+  line-height: 1.4;
+}
+
+.result-text h1:first-child,
+.result-text h2:first-child,
+.result-text h3:first-child,
+.result-text h4:first-child,
+.ai-content h1:first-child,
+.ai-content h2:first-child,
+.ai-content h3:first-child,
+.ai-content h4:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs - 11pt body text */
+.result-text p,
+.ai-content p {
+  font-size: 15px; /* 11pt */
+  font-weight: 400;
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+  color: #1e293b;
+}
+
+.result-text p:last-child,
+.ai-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists - 11pt body text */
+.result-text ul,
+.result-text ol,
+.ai-content ul,
+.ai-content ol {
+  font-size: 15px; /* 11pt */
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1e293b;
+  margin: 6px 0 10px 0;
+  padding-left: 20px;
+}
+
+.result-text ul,
+.ai-content ul {
+  list-style-type: disc !important;
+}
+
+.result-text ol,
+.ai-content ol {
+  list-style-type: decimal !important;
+}
+
+.result-text li,
+.ai-content li {
+  font-size: 15px; /* 11pt */
+  font-weight: 400;
+  margin: 3px 0;
+  padding: 2px 0;
+  line-height: 1.6;
+  color: #1e293b;
+  display: list-item !important;
+}
+
+/* Nested lists */
+.result-text ul ul,
+.result-text ol ol,
+.result-text ul ol,
+.result-text ol ul,
+.ai-content ul ul,
+.ai-content ol ol,
+.ai-content ul ol,
+.ai-content ol ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+/* Emphasis - Medium (500) for emphasis, Semibold (600) for strong */
+.result-text strong,
+.ai-content strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.result-text em,
+.ai-content em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Tables - 10-10.5pt for professional reports */
+.result-text table,
+.ai-content table,
+.result-text table.ai-table,
+.ai-content table.ai-table {
+  display: table !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  margin: 10px 0 !important;
+  font-size: 14px !important; /* 10.5pt - table body */
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #1e293b !important;
+  table-layout: fixed !important;
+  word-wrap: break-word !important;
+}
+
+.result-text thead,
+.ai-content thead {
+  display: table-header-group !important;
+}
+
+.result-text tbody,
+.ai-content tbody {
+  display: table-row-group !important;
+}
+
+.result-text tr,
+.ai-content tr,
+.result-text table.ai-table tr,
+.ai-content table.ai-table tr {
+  display: table-row !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.result-text th,
+.result-text td,
+.ai-content th,
+.ai-content td,
+.result-text table.ai-table th,
+.result-text table.ai-table td,
+.ai-content table.ai-table th,
+.ai-content table.ai-table td {
+  display: table-cell !important;
+  padding: 6px 8px !important;
+  border: 1px solid #d1d5db !important;
+  text-align: left !important;
+  vertical-align: top !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.result-text th,
+.ai-content th,
+.result-text table.ai-table th,
+.ai-content table.ai-table th {
+  background: #f8fafc !important;
+  font-size: 13px !important; /* 10pt - table header */
+  font-weight: 600 !important;
+  color: #1e293b !important;
+}
+
+.result-text td,
+.ai-content td,
+.result-text table.ai-table td,
+.ai-content table.ai-table td {
+  color: #1e293b !important;
+  background: white !important;
+  font-size: 14px !important; /* 10.5pt - table body */
+  font-weight: 400 !important;
+}
+
+.result-text tr:nth-child(even) td,
+.ai-content tr:nth-child(even) td,
+.result-text table.ai-table tr:nth-child(even) td,
+.ai-content table.ai-table tr:nth-child(even) td {
+  background: #f9fafb;
+}
+
+/* Blockquotes */
+.result-text blockquote,
+.ai-content blockquote {
+  margin: 12px 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-left: 3px solid #8b5cf6;
+  color: #1e293b;
+  font-size: 15px; /* 11pt */
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* Horizontal rule */
+.result-text hr,
+.ai-content hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 16px 0;
+}
+
+/* ========================================
+   ASK AI PANEL - Notion-like minimal design
+   ======================================== */
+
+.ask-ai-panel {
+  position: fixed;
+  width: 380px;
+  min-width: 300px;
+  max-width: calc(100vw - 32px);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  z-index: 9999999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: all 0.12s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: auto;
+  max-height: calc(100vh - 64px);
+}
+
+.ask-ai-panel.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* When panel opens upward */
+.ask-ai-panel.dropdown-above {
+  transform: translateY(-4px);
+}
+
+.ask-ai-panel.dropdown-above.visible {
+  transform: translateY(0);
+}
+
+.ask-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.ask-ai-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #37352f;
+}
+
+.ask-ai-title svg {
+  color: #37352f;
+  opacity: 0.6;
+}
+
+.ask-ai-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #9b9a97;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.ask-ai-close:hover {
+  background: rgba(55, 53, 47, 0.08);
+  color: #37352f;
+}
+
+.ask-ai-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.context-label {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9b9a97;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ask-ai-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(55, 53, 47, 0.06);
+  border: none;
+  border-radius: 3px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #37352f;
+}
+
+.context-chip-empty {
+  background: transparent;
+  color: #9b9a97;
+  font-style: italic;
+}
+
+.ask-ai-suggestions {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.suggestion-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  margin-bottom: 1px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #37352f;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.suggestion-item:last-child {
+  margin-bottom: 0;
+}
+
+.suggestion-item:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.ask-ai-input-area {
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+
+.ask-ai-input-area textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #37352f;
+  resize: none;
+  transition: border-color 0.1s ease;
+}
+
+.ask-ai-input-area textarea:focus {
+  outline: none;
+  border-color: rgba(55, 53, 47, 0.3);
+  box-shadow: none;
+}
+
+.ask-ai-input-area textarea::placeholder {
+  color: #9b9a97;
+}
+
+.ask-ai-input-area .btn {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.ask-ai-response {
+  display: none;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  flex: 1 1 auto;
+  min-height: 80px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Hide suggestions when response is visible */
+.ask-ai-response:not(:empty) + .ask-ai-suggestions {
+  display: none;
+}
+
+.ask-ai-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  color: #9b9a97;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ask-ai-result {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ask-ai-result .result-text {
+  /* Inherit from .result-text base styles */
+  margin-bottom: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure tables inside result-text don't break */
+.ask-ai-result .result-text table {
+  min-width: 100%;
+}
+
+/* Notion-like action buttons - simple row layout */
+.result-actions {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.result-actions .btn {
+  flex: 1;
+  white-space: nowrap;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  height: auto;
+  text-align: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  color: #37352f;
+  transition: background 0.1s ease;
+}
+
+.result-actions .btn:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.result-actions .btn.btn-primary {
+  background: #37352f;
+  color: white;
+  border-color: #37352f;
+}
+
+.result-actions .btn.btn-primary:hover {
+  background: #2f2d28;
+}
+
+.result-actions .btn.btn-danger {
+  background: #eb5757;
+  color: white;
+  border-color: #eb5757;
+}
+
+.result-actions .btn.btn-danger:hover {
+  background: #d94c4c;
+}
+
+.result-actions .ask-ai-clear-result {
+  background: transparent;
+  border: none;
+  color: #9b9a97;
+}
+
+.result-actions .ask-ai-clear-result:hover {
+  color: #37352f;
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.ask-ai-disclaimer {
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 0 0 6px 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #9b9a97;
+  text-align: center;
+  flex-shrink: 0;
+}

@@ -1,0 +1,1250 @@
+/**
+ * Dimeri ERM - AI Assistant Styles
+ * Styles for floating AI button, panel, and modal content
+ * 
+ * @version 2.1.0
+ */
+
+/* ============================================
+   FLOATING AI BUTTON
+   ============================================ */
+#ai-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+#ai-float-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+#ai-float-btn.processing {
+  pointer-events: none;
+  animation: ai-pulse 1.5s ease-in-out infinite;
+}
+
+#ai-float-btn .ai-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* AI Spinner */
+.ai-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+}
+
+@keyframes ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ai-pulse {
+  0%,
+  100% {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(139, 92, 246, 0.6);
+  }
+}
+
+/* ============================================
+   AI PANEL (Slide-out)
+   ============================================ */
+#ai-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  width: 320px;
+  max-height: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+#ai-panel.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+
+.ai-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.ai-panel-title .ai-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.ai-panel-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.ai-panel-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#ai-panel-context {
+  padding: 8px 20px;
+  font-size: 0.75rem;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#ai-panel-context.ai-form-context {
+  background: rgba(139, 92, 246, 0.08);
+  color: #7c3aed;
+  font-weight: 500;
+}
+
+#ai-panel-body {
+  padding: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================
+   AI ACTION BUTTONS (In Panel)
+   ============================================ */
+.ai-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.ai-action-btn:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.ai-action-btn .ai-icon {
+  width: 18px;
+  height: 18px;
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+.ai-action-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* ============================================
+   AI ICON (SVG)
+   ============================================ */
+.ai-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   AI REVIEW RESULTS
+   ============================================ */
+.ai-review-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-review-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.ai-review-score.good {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.ai-review-score.fair {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.1),
+    rgba(217, 119, 6, 0.1)
+  );
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.ai-review-score.poor {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1),
+    rgba(220, 38, 38, 0.1)
+  );
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.ai-review-score-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ai-review-score.good .ai-review-score-value {
+  color: #16a34a;
+}
+.ai-review-score.fair .ai-review-score-value {
+  color: #d97706;
+}
+.ai-review-score.poor .ai-review-score-value {
+  color: #dc2626;
+}
+
+.ai-review-score-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Review Sections */
+.ai-review-section {
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.ai-review-section h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.ai-review-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ai-review-section li {
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.ai-review-section li:last-child {
+  margin-bottom: 0;
+}
+
+.ai-review-section.error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.ai-review-section.error h5 {
+  color: #dc2626;
+}
+.ai-review-section.error li {
+  color: #b91c1c;
+}
+
+.ai-review-section.warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.ai-review-section.warning h5 {
+  color: #d97706;
+}
+.ai-review-section.warning li {
+  color: #b45309;
+}
+
+.ai-review-section.success {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.ai-review-section.success h5 {
+  color: #16a34a;
+}
+.ai-review-section.success li {
+  color: #15803d;
+}
+
+/* AI Insight section (DeepSeek analysis) */
+.ai-review-section.ai-insight {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  margin-top: 16px;
+}
+
+.ai-review-section.ai-insight .ai-insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-review-section.ai-insight .ai-insight-header svg {
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+.ai-review-section.ai-insight .ai-insight-header h5 {
+  margin: 0;
+  color: #7c3aed;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ai-review-section.ai-insight .ai-insight-content {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #4c1d95;
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   SCORING SUMMARY (Validate Scoring)
+   ============================================ */
+.scoring-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.score-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.score-arrow {
+  font-size: 1.5rem;
+  color: #94a3b8;
+}
+
+/* ============================================
+   AI IMPROVEMENTS (Improve Wording)
+   ============================================ */
+.ai-improvements {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ai-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-original,
+.ai-improved {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.ai-original {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.ai-original small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.ai-improved {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.ai-improved small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #16a34a;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   AI CONTROL SUGGESTIONS
+   ============================================ */
+.ai-control-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ai-control-suggestions h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.ai-control-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ai-control-list li {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* ============================================
+   AI SUGGESTIONS LIST (For View Actions)
+   ============================================ */
+.ai-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.ai-suggestion-item:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.ai-suggestion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-suggestion-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.ai-suggestion-desc {
+  font-size: 0.8125rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================
+   AI GAP ANALYSIS
+   ============================================ */
+.ai-gap-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================
+   EFFECTIVENESS REVIEW
+   ============================================ */
+.effectiveness-review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.effectiveness-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.effectiveness-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ============================================
+   CONTROL-RISK MAP TABLE
+   ============================================ */
+.control-risk-map {
+  overflow-x: auto;
+}
+
+.control-risk-map .data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.control-risk-map .data-table th,
+.control-risk-map .data-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+
+.control-risk-map .data-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #374151;
+}
+
+.control-risk-map .data-table td {
+  color: #4b5563;
+}
+
+/* ============================================
+   AI INSIGHT CONTENT
+   ============================================ */
+.ai-insight-content {
+  padding: 8px 0;
+}
+
+.ai-insight-content p {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+/* ============================================
+   AI FILL ANIMATION
+   ============================================ */
+.ai-filled {
+  animation: ai-fill-pulse 0.6s ease-out;
+}
+
+@keyframes ai-fill-pulse {
+  0% {
+    background-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* ============================================
+   BADGE TYPE VARIANTS (Control Types)
+   ============================================ */
+.badge-type-preventive {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-type-detective {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-type-corrective {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ============================================
+   AI BUTTON VARIANTS (For Forms)
+   ============================================ */
+.btn-ai-suggest {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  color: #8b5cf6;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ai-suggest:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-ai-suggest .ai-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  color: #8b5cf6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ai-icon:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: scale(1.05);
+}
+
+.btn-ai-icon .ai-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   AI CHECK BAR (Bottom of Forms)
+   ============================================ */
+.ai-check-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.08),
+    rgba(99, 102, 241, 0.08)
+  );
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.ai-check-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-check-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border-radius: 8px;
+  color: white;
+}
+
+.ai-check-icon .ai-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.ai-check-text {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.ai-check-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ============================================
+   FORM LABEL ROW (With AI Button)
+   ============================================ */
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.form-label-row .form-label {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   AI LOADING STATE
+   ============================================ */
+.ai-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.ai-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(139, 92, 246, 0.2);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+}
+
+.ai-loading-text {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+.text-muted {
+  color: #94a3b8;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  #ai-float-btn {
+    width: 48px;
+    height: 48px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  #ai-panel {
+    right: 16px;
+    bottom: 74px;
+    width: calc(100vw - 32px);
+    max-width: 320px;
+  }
+
+  .scoring-summary {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .score-arrow {
+    transform: rotate(90deg);
+  }
+
+  .effectiveness-breakdown {
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   AI RISK REVIEW RESULTS
+   ======================================== */
+.ai-risk-review-results {
+  padding: 0 0 16px 0;
+}
+
+.ai-risk-review-results .ai-review-header {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ai-risk-review-results .ai-review-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.ai-risk-review-results .ai-review-score.good {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.ai-risk-review-results .ai-review-score.fair {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.ai-risk-review-results .ai-review-score.poor {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+}
+
+.ai-risk-review-results .ai-review-score-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ai-risk-review-results .ai-review-score.good .ai-review-score-value {
+  color: #16a34a;
+}
+
+.ai-risk-review-results .ai-review-score.fair .ai-review-score-value {
+  color: #ca8a04;
+}
+
+.ai-risk-review-results .ai-review-score.poor .ai-review-score-value {
+  color: #dc2626;
+}
+
+.ai-risk-review-results .ai-review-score-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.ai-risk-review-results .ai-review-score.good .ai-review-score-label {
+  color: #16a34a;
+}
+
+.ai-risk-review-results .ai-review-score.fair .ai-review-score-label {
+  color: #ca8a04;
+}
+
+.ai-risk-review-results .ai-review-score.poor .ai-review-score-label {
+  color: #dc2626;
+}
+
+/* Checklist */
+.ai-review-checklist {
+  display: flex;
+  flex: 1;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+}
+
+.ai-checklist-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+  min-width: 70px;
+  flex: 1;
+  max-width: 90px;
+  gap: 6px;
+}
+
+.ai-checklist-item.complete {
+  background: #f0fdf4;
+}
+
+.ai-checklist-item.incomplete {
+  background: #fef2f2;
+}
+
+.ai-checklist-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-checklist-item.complete .ai-checklist-icon {
+  color: #16a34a;
+}
+
+.ai-checklist-item.incomplete .ai-checklist-icon {
+  color: #dc2626;
+}
+
+.ai-checklist-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.ai-checklist-item.complete .ai-checklist-label {
+  color: #166534;
+}
+
+.ai-checklist-item.incomplete .ai-checklist-label {
+  color: #991b1b;
+}
+
+/* Summary items (Fields, Issues, Warnings, Strengths) */
+.ai-review-summary {
+  display: flex;
+  flex: 1;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+}
+
+.ai-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+  min-width: 65px;
+  flex: 1;
+  max-width: 85px;
+  gap: 4px;
+}
+
+.ai-summary-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #374151;
+  line-height: 1;
+}
+
+.ai-summary-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.ai-summary-item.has-issues {
+  background: #fef2f2;
+}
+
+.ai-summary-item.has-issues .ai-summary-value {
+  color: #dc2626;
+}
+
+.ai-summary-item.has-issues .ai-summary-label {
+  color: #991b1b;
+}
+
+.ai-summary-item.has-warnings {
+  background: #fffbeb;
+}
+
+.ai-summary-item.has-warnings .ai-summary-value {
+  color: #ca8a04;
+}
+
+.ai-summary-item.has-warnings .ai-summary-label {
+  color: #92400e;
+}
+
+.ai-summary-item.has-strengths {
+  background: #f0fdf4;
+}
+
+.ai-summary-item.has-strengths .ai-summary-value {
+  color: #16a34a;
+}
+
+.ai-summary-item.has-strengths .ai-summary-label {
+  color: #166534;
+}
+
+/* Review note at bottom */
+.ai-review-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+}
+
+.ai-note-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #0284c7;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  margin-top: 1px;
+}
+
+.ai-review-note p {
+  margin: 0;
+  font-size: 13px;
+  color: #0369a1;
+  line-height: 1.5;
+}
+
+/* Fix modal footer for AI review results */
+.ai-risk-review-results + .modal-footer,
+.ai-risk-review-results ~ .modal-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Success header */
+.ai-success-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ai-success-header svg {
+  color: #16a34a;
+}
+
+.ai-success-header h5 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #166534;
+}
+
+.ai-review-section.success p {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+}
+
+/* Section headers with icons */
+.ai-risk-review-results .ai-review-section h5 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-risk-review-results .ai-review-section h5 svg {
+  flex-shrink: 0;
+}
+
+.ai-risk-review-results .ai-review-section.error h5 svg {
+  color: #dc2626;
+}
+
+.ai-risk-review-results .ai-review-section.warning h5 svg {
+  color: #ca8a04;
+}
+
+.ai-risk-review-results .ai-review-section.success h5 svg {
+  color: #16a34a;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ai-risk-review-results .ai-review-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ai-review-checklist {
+    padding-left: 0;
+    justify-content: center;
+  }
+}
+
+/* ========================================
+   GLOBAL: ALL MODAL FOOTER FIX
+   Ensures buttons don't fall off the bottom
+   ======================================== */
+#modal-container .modal-footer,
+.modal .modal-footer,
+.modal-dialog .modal-footer {
+  margin-top: 16px !important;
+  padding: 16px 20px !important;
+  border-top: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+  border-radius: 0 0 12px 12px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+/* Ensure modal body scrolls, not the whole modal */
+#modal-container .modal-body,
+.modal .modal-body,
+.modal-dialog .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 12px !important;
+  max-height: 55vh;
+}
+
+/* Secondary modal specific - more compact */
+.modal-overlay.secondary .modal-body {
+  max-height: 50vh;
+}
+
+/* Override for AI thinking animation - needs full height to show all steps */
+.modal-overlay.secondary .modal-body:has(.ai-thinking-container) {
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+.modal-overlay.secondary .modal-footer {
+  margin-top: 20px !important;
+  padding: 14px 18px !important;
+}
+
+/* Prevent modal content from pushing footer off screen */
+#modal-container .modal-content,
+.modal .modal-content,
+.modal-dialog .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 85vh !important;
+}
+
+/* Compact suggestions list */
+.ai-suggestions-list {
+  max-height: 280px !important;
+  overflow-y: auto !important;
+}
+
+/* ============================================
+   AI SUGGESTIONS LOADING STATE
+   ============================================ */
+.ai-suggestions-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.ai-suggestions-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.ai-suggestions-loading p {
+  font-size: 0.9375rem;
+  color: #64748b;
+  margin: 0;
+}

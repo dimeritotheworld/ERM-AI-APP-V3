@@ -1,0 +1,18 @@
+{
+  "name": "mvp-erm",
+  "version": "1.0.0",
+  "description": "Enterprise Risk Management Application",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "puppeteer": "^24.34.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

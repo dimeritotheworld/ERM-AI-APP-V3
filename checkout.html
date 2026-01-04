@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Dimeri ERM</title>
+  <link rel="stylesheet" href="assets/css/core/variables.css">
+  <link rel="stylesheet" href="assets/css/core/base.css">
+  <link rel="stylesheet" href="assets/css/core/layout.css">
+  <link rel="stylesheet" href="assets/css/core/components.css">
+  <link rel="stylesheet" href="assets/css/pages/checkout.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="checkout-page">
+    <!-- Minimal Header -->
+    <header class="checkout-header">
+      <a href="upgrade.html" class="checkout-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c41e3a" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Dimeri<span class="logo-accent">.ai</span></span>
+      </a>
+      <div class="secure-indicator">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Secure checkout</span>
+      </div>
+    </header>
+
+    <main class="checkout-main">
+      <div class="checkout-container">
+        <!-- Left: Payment Form -->
+        <div class="checkout-form-column">
+          <div class="checkout-card">
+            <!-- Payment Method Selection -->
+            <section class="payment-methods">
+              <h2 class="section-title">Payment method</h2>
+              <div class="method-tabs">
+                <button class="method-tab active" data-method="card">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                  Card
+                </button>
+                <button class="method-tab" data-method="paypal">
+                  <span class="paypal-text">Pay<strong>Pal</strong></span>
+                </button>
+              </div>
+            </section>
+
+            <!-- Card Form -->
+            <form id="card-form" class="payment-form">
+              <div class="form-group">
+                <label class="form-label" for="card-name">Name on card</label>
+                <input type="text" class="form-input" id="card-name" placeholder="Full name" autocomplete="cc-name" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="card-number">Card number</label>
+                <div class="input-with-icon">
+                  <input type="text" class="form-input" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" required>
+                  <div class="card-brands">
+                    <svg class="brand-icon" viewBox="0 0 38 24" width="28" height="18"><rect fill="#1A1F71" width="38" height="24" rx="3"/><text x="19" y="15" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">VISA</text></svg>
+                    <svg class="brand-icon" viewBox="0 0 38 24" width="28" height="18"><rect fill="#EB001B" width="38" height="24" rx="3"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path fill="#FF5F00" d="M15 12c0-2.5 1.3-4.7 3.2-6a7.1 7.1 0 0 0 0 12 7.1 7.1 0 0 1-3.2-6z"/></svg>
+                    <svg class="brand-icon" viewBox="0 0 38 24" width="28" height="18"><rect fill="#006FCF" width="38" height="24" rx="3"/><text x="19" y="15" fill="#fff" font-size="6" font-weight="bold" text-anchor="middle">AMEX</text></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="card-expiry">Expiry</label>
+                  <input type="text" class="form-input" id="card-expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="card-cvc">CVC</label>
+                  <div class="input-with-help">
+                    <input type="text" class="form-input" id="card-cvc" placeholder="123" maxlength="4" autocomplete="cc-csc" required>
+                    <button type="button" class="help-btn" title="3 or 4 digit code on your card">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <div class="form-group">
+                <label class="form-label" for="billing-country">Country</label>
+                <select class="form-select" id="billing-country" required>
+                  <option value="">Select country</option>
+                  <option value="US">United States</option>
+                  <option value="UK">United Kingdom</option>
+                  <option value="CA">Canada</option>
+                  <option value="AU">Australia</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                  <option value="NL">Netherlands</option>
+                  <option value="SG">Singapore</option>
+                  <option value="AE">United Arab Emirates</option>
+                  <option value="ZA">South Africa</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="billing-zip">Postal code</label>
+                <input type="text" class="form-input" id="billing-zip" placeholder="12345" autocomplete="postal-code" required>
+              </div>
+
+              <div class="form-divider"></div>
+
+              <!-- Team Size Selector -->
+              <div class="form-group">
+                <label class="form-label" for="team-size">Number of seats</label>
+                <select class="form-select" id="team-size" required onchange="updatePricingForSeats()">
+                  <option value="3">3 seats (Free tier)</option>
+                  <option value="4">4 seats (+$10/month)</option>
+                  <option value="5">5 seats (+$20/month)</option>
+                  <option value="6">6 seats (+$30/month)</option>
+                  <option value="7">7 seats (+$40/month)</option>
+                </select>
+                <p class="form-help">Admin will be billed for all seats. Pro plan allows 3-7 users.</p>
+              </div>
+
+              <button type="submit" class="btn-pay" id="pay-btn">
+                <span class="btn-content">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  Pay <span id="pay-amount">$29.00</span>
+                </span>
+                <span class="btn-loading">
+                  <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                    <path d="M12 2a10 10 0 0 1 10 10"/>
+                  </svg>
+                  Processing...
+                </span>
+              </button>
+            </form>
+
+            <!-- PayPal Form (hidden by default) -->
+            <div id="paypal-form" class="payment-form" style="display: none;">
+              <div class="paypal-prompt">
+                <div class="paypal-logo">
+                  <span>Pay</span><strong>Pal</strong>
+                </div>
+                <p>You'll be redirected to PayPal to complete your payment securely.</p>
+                <button type="button" class="btn-paypal" onclick="processPayPal()">
+                  Continue with PayPal
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Security badges -->
+            <div class="security-badges">
+              <div class="badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                256-bit SSL
+              </div>
+              <div class="badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                PCI compliant
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="checkout-summary-column">
+          <div class="summary-card">
+            <div class="summary-header">
+              <span class="summary-label">Order summary</span>
+              <a href="upgrade.html" class="change-link">Change plan</a>
+            </div>
+
+            <div class="plan-summary">
+              <div class="plan-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div class="plan-details">
+                <span class="plan-name" id="plan-name">Pro Plan</span>
+                <span class="plan-billing" id="plan-billing">Billed monthly</span>
+              </div>
+            </div>
+
+            <ul class="plan-includes">
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Unlimited Risk Registers
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                AI Portfolio & Control Review
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Team collaboration (10 members)
+              </li>
+              <li>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                CSV & Excel import/export
+              </li>
+            </ul>
+
+            <!-- Promo Code -->
+            <div class="promo-section">
+              <div class="promo-input-row" id="promo-input-row">
+                <input type="text" class="promo-input" id="promo-code" placeholder="Promo code">
+                <button type="button" class="promo-apply" onclick="applyPromo()">Apply</button>
+              </div>
+              <div class="promo-success" id="promo-success" style="display: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="promo-label">LAUNCH20</span>
+                <button type="button" class="promo-remove" onclick="removePromo()">Remove</button>
+              </div>
+            </div>
+
+            <div class="price-breakdown">
+              <div class="price-line">
+                <span>Subtotal</span>
+                <span id="subtotal">$29.00</span>
+              </div>
+              <div class="price-line discount" id="discount-line" style="display: none;">
+                <span>Annual discount (20%)</span>
+                <span id="discount-amount">-$69.60</span>
+              </div>
+              <div class="price-line promo" id="promo-line" style="display: none;">
+                <span>Promo discount</span>
+                <span id="promo-amount">-$5.80</span>
+              </div>
+              <div class="price-line total">
+                <span>Total</span>
+                <span id="total-amount">$29.00</span>
+              </div>
+            </div>
+
+            <p class="billing-cycle" id="billing-cycle">Then $29/month. Cancel anytime.</p>
+
+            <!-- Guarantee -->
+            <div class="guarantee">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+              <div class="guarantee-text">
+                <strong>14-day money-back guarantee</strong>
+                <span>Not satisfied? Full refund, no questions.</span>
+              </div>
+            </div>
+          </div>
+
+          <p class="help-link">Questions? <a href="mailto:support@dimeri.ai">Contact support</a></p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal-backdrop" id="success-modal" style="display: none;">
+      <div class="success-modal">
+        <div class="success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2>Welcome to Pro</h2>
+        <p>Your account has been upgraded. You now have access to all Pro features.</p>
+        <ul class="unlocked-features">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+            AI Portfolio & Control Review
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Team collaboration
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            CSV & Excel import/export
+          </li>
+        </ul>
+        <button class="btn-dashboard" onclick="window.location.href='index.html'">
+          Go to Dashboard
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/plan-limits/upgrade-analytics.js?v=1.0.0"></script>
+  <script>
+    // Parse URL params
+    var urlParams = new URLSearchParams(window.location.search);
+    var plan = urlParams.get('plan') || 'pro';
+    var billing = urlParams.get('billing') || 'monthly';
+    var promoCode = null;
+    var promoPercent = 0;
+    var teamSize = 3; // Default seat count
+
+    // Get upgrade source from session storage
+    var upgradeSource = sessionStorage.getItem('erm_upgradeSource') || 'direct';
+    var upgradeFeature = sessionStorage.getItem('erm_upgradeFeature') || '';
+
+    // Pricing
+    var prices = {
+      pro: { monthly: 29, annual: 23, perSeat: 10 },
+      enterprise: { monthly: 99, annual: 79, perSeat: 25 }
+    };
+
+    // Initialize
+    function init() {
+      var planPrice = prices[plan] ? prices[plan][billing] : 29;
+      var planName = plan.charAt(0).toUpperCase() + plan.slice(1) + ' Plan';
+      var isAnnual = billing === 'annual';
+
+      document.getElementById('plan-name').textContent = planName;
+      document.getElementById('plan-billing').textContent = isAnnual ? 'Billed annually' : 'Billed monthly';
+
+      // Update features for Enterprise
+      if (plan === 'enterprise') {
+        var includes = document.querySelector('.plan-includes');
+        includes.innerHTML =
+          '<li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Everything in Pro</li>' +
+          '<li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited team members</li>' +
+          '<li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SSO / SAML integration</li>' +
+          '<li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dedicated account manager</li>';
+      }
+
+      updatePricing();
+    }
+
+    function updatePricingForSeats() {
+      var select = document.getElementById('team-size');
+      teamSize = parseInt(select.value) || 3;
+      updatePricing();
+    }
+
+    function updatePricing() {
+      var basePrice = prices[plan] ? prices[plan][billing] : 29;
+      var perSeatPrice = prices[plan] ? prices[plan].perSeat : 10;
+      var isAnnual = billing === 'annual';
+      var subtotal, discount = 0, total;
+
+      // Calculate price with additional seats (first 3 seats included)
+      var additionalSeats = Math.max(0, teamSize - 3);
+      var seatCharge = additionalSeats * perSeatPrice;
+
+      if (isAnnual) {
+        var monthlyPrice = prices[plan].monthly;
+        subtotal = (monthlyPrice + seatCharge) * 12;
+        var baseAnnual = basePrice * 12;
+        discount = (monthlyPrice * 12) - baseAnnual;
+        total = baseAnnual + (seatCharge * 12);
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('discount-line').style.display = 'flex';
+        document.getElementById('discount-amount').textContent = '-$' + discount.toFixed(2);
+      } else {
+        subtotal = basePrice + seatCharge;
+        total = basePrice + seatCharge;
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('discount-line').style.display = 'none';
+      }
+
+      // Apply promo
+      var promoDiscount = 0;
+      if (promoCode && promoPercent > 0) {
+        promoDiscount = total * (promoPercent / 100);
+        total = total - promoDiscount;
+        document.getElementById('promo-line').style.display = 'flex';
+        document.getElementById('promo-amount').textContent = '-$' + promoDiscount.toFixed(2);
+      } else {
+        document.getElementById('promo-line').style.display = 'none';
+      }
+
+      document.getElementById('total-amount').textContent = '$' + total.toFixed(2);
+      document.getElementById('pay-amount').textContent = '$' + total.toFixed(2);
+
+      if (isAnnual) {
+        var annualTotal = (basePrice + seatCharge) * 12;
+        document.getElementById('billing-cycle').textContent = 'Then $' + annualTotal.toFixed(2) + '/year. Cancel anytime.';
+      } else {
+        var monthlyTotal = basePrice + seatCharge;
+        document.getElementById('billing-cycle').textContent = 'Then $' + monthlyTotal.toFixed(2) + '/month. Cancel anytime.';
+      }
+    }
+
+    // Payment method toggle
+    document.querySelectorAll('.method-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.method-tab').forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        var method = this.getAttribute('data-method');
+        document.getElementById('card-form').style.display = method === 'card' ? 'block' : 'none';
+        document.getElementById('paypal-form').style.display = method === 'paypal' ? 'block' : 'none';
+      });
+    });
+
+    // Card number formatting
+    document.getElementById('card-number').addEventListener('input', function(e) {
+      var value = e.target.value.replace(/\D/g, '');
+      e.target.value = value.replace(/(\d{4})(?=\d)/g, '$1 ').substring(0, 19);
+    });
+
+    // Expiry formatting
+    document.getElementById('card-expiry').addEventListener('input', function(e) {
+      var value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.substring(0, 2) + ' / ' + value.substring(2, 4);
+      }
+      e.target.value = value;
+    });
+
+    // CVC formatting
+    document.getElementById('card-cvc').addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    });
+
+    // Form submission
+    document.getElementById('card-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('pay-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      setTimeout(function() {
+        completeUpgrade();
+      }, 2000);
+    });
+
+    // PayPal processing
+    function processPayPal() {
+      completeUpgrade();
+    }
+
+    // Complete upgrade and track analytics
+    function completeUpgrade() {
+      // Store upgrade details
+      localStorage.setItem('ERM_plan', plan.toUpperCase());
+      localStorage.setItem('ERM_billing', billing);
+      localStorage.setItem('ERM_teamSize', teamSize.toString());
+      localStorage.setItem('ERM_upgraded', 'true');
+      localStorage.setItem('ERM_upgradeDate', new Date().toISOString());
+      localStorage.setItem('ERM_upgradeSource', upgradeSource);
+      localStorage.setItem('ERM_upgradeFeature', upgradeFeature);
+
+      // Track successful upgrade in analytics
+      if (typeof ERM !== 'undefined' && ERM.upgradeAnalytics) {
+        ERM.upgradeAnalytics.trackUpgradeSuccess(plan.toUpperCase(), upgradeSource, upgradeFeature);
+      }
+
+      // Clear session storage
+      sessionStorage.removeItem('erm_upgradeSource');
+      sessionStorage.removeItem('erm_upgradeFeature');
+
+      // Redirect to dashboard with success parameter
+      window.location.href = 'index.html?upgrade=success';
+    }
+
+    // Promo code
+    function applyPromo() {
+      var code = document.getElementById('promo-code').value.trim().toUpperCase();
+      if (code === 'LAUNCH20') {
+        promoCode = code;
+        promoPercent = 20;
+        document.getElementById('promo-label').textContent = 'LAUNCH20 - 20% off';
+      } else if (code === 'WELCOME10') {
+        promoCode = code;
+        promoPercent = 10;
+        document.getElementById('promo-label').textContent = 'WELCOME10 - 10% off';
+      } else {
+        var input = document.getElementById('promo-code');
+        input.classList.add('error');
+        setTimeout(function() { input.classList.remove('error'); }, 2000);
+        return;
+      }
+      document.getElementById('promo-input-row').style.display = 'none';
+      document.getElementById('promo-success').style.display = 'flex';
+      updatePricing();
+    }
+
+    function removePromo() {
+      promoCode = null;
+      promoPercent = 0;
+      document.getElementById('promo-code').value = '';
+      document.getElementById('promo-input-row').style.display = 'flex';
+      document.getElementById('promo-success').style.display = 'none';
+      updatePricing();
+    }
+
+    init();
+  </script>
+</body>
+</html>

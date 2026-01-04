@@ -1,0 +1,39 @@
+========================================
+  URGENT: RESTART THE SERVER
+========================================
+
+The PDF export endpoint exists in the code but the running
+server is an OLD VERSION without it.
+
+SOLUTION:
+---------
+1. Close the current Node.js server (Ctrl+C in the terminal)
+2. Double-click START_SERVER.bat OR run from project root:
+   node server/server.js
+
+   (DO NOT cd into server folder - run from root so node_modules is accessible!)
+
+ERROR YOU SAW:
+--------------
+POST http://localhost:3000/api/reports/export-pdf 404 (Not Found)
+
+WHY IT HAPPENED:
+----------------
+- The server was started BEFORE we added the PDF export endpoint
+- Node.js doesn't reload code automatically
+- You need to restart the server to load the new code
+
+WHAT TO EXPECT AFTER RESTART:
+-----------------------------
+✅ Server will show: "ERM Server running on port 3000"
+✅ PDF exports will work from all three locations:
+   1. Reports list hamburger → "Export as PDF"
+   2. Editor preview → "Export PDF"
+   3. Editor toolbar hamburger → "Export PDF"
+
+VERIFICATION:
+-------------
+After restart, you should see in server logs:
+- [PDF Export] Generating PDF for: Report_Title
+- [PDF Service] Launching browser...
+- [PDF Service] PDF generated successfully

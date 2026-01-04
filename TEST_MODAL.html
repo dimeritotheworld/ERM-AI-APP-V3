@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Modal</title>
+  <link rel="stylesheet" href="assets/css/core/global.css" />
+  <link rel="stylesheet" href="assets/css/core/components.css" />
+</head>
+<body>
+  <h1>Modal Test</h1>
+  <button id="testBtn">Click to Test Modal</button>
+
+  <script src="assets/js/core/global.js"></script>
+  <script src="assets/js/core/components.js"></script>
+
+  <script>
+    document.getElementById('testBtn').addEventListener('click', function() {
+      console.log('Button clicked');
+      console.log('ERM.components available?', typeof ERM.components);
+      console.log('ERM.components.showModal available?', typeof ERM.components.showModal);
+
+      if (ERM.components && ERM.components.showModal) {
+        ERM.components.showModal({
+          title: 'Test Modal',
+          content: '<p>If you can see this, the modal system works!</p>',
+          size: 'small',
+          buttons: [{
+            label: 'Close',
+            type: 'primary',
+            action: function() {
+              ERM.components.closeModal();
+            }
+          }]
+        });
+      } else {
+        alert('ERM.components.showModal NOT available!');
+      }
+    });
+  </script>
+</body>
+</html>

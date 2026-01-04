@@ -1,0 +1,363 @@
+/**
+ * Billing & Seat Management Styles
+ */
+
+/* Billing Plan Card */
+.billing-plan-card {
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.billing-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.billing-plan-info h4.billing-plan-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.billing-plan-billing {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.billing-plan-price {
+  text-align: right;
+}
+
+.billing-price-amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.billing-price-period {
+  font-size: 14px;
+  color: #64748b;
+  margin-left: 4px;
+}
+
+/* Seat Usage */
+.billing-seat-usage {
+  margin-top: 20px;
+}
+
+.seat-usage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.seat-usage-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.seat-usage-count {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.seat-usage-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.seat-usage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.seat-usage-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-seat-action {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-seat-action:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.btn-seat-remove {
+  color: #dc2626;
+}
+
+.btn-seat-remove:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Team Section */
+.billing-team-section {
+  margin-top: 32px;
+}
+
+.billing-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.billing-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.billing-team-member {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.billing-team-member:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.billing-member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.billing-member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.billing-member-details {
+  flex: 1;
+}
+
+.billing-member-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.billing-member-email {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.billing-member-role {
+  margin-right: 16px;
+}
+
+.billing-member-seat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #166534;
+}
+
+.billing-member-seat svg {
+  flex-shrink: 0;
+  color: #16a34a;
+}
+
+/* Billing Actions */
+.billing-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.billing-owner-only {
+  color: #64748b;
+  font-size: 14px;
+  padding: 24px;
+  background: #f8fafc;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Seat Options Modal */
+.modal-description {
+  color: #64748b;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.seat-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.seat-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seat-option:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.seat-option.selected {
+  background: #eff6ff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.seat-option-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seat-option-info strong {
+  font-size: 15px;
+  color: #1e293b;
+}
+
+.seat-option-change {
+  font-size: 13px;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.seat-option-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Analytics */
+.analytics-stats {
+  margin-bottom: 24px;
+}
+
+.analytics-stats h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.analytics-card {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.analytics-card h5 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analytics-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.analytics-metrics div {
+  font-size: 14px;
+  color: #475569;
+}
+
+.analytics-metrics span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.analytics-events {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.analytics-event {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.analytics-event-time {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+}

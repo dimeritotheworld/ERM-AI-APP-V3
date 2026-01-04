@@ -1,0 +1,357 @@
+/**
+ * First Time User Experience Styles
+ * Calm, enterprise-grade orientation pop-ups
+ */
+
+/* ========================================
+   OVERLAY
+   ======================================== */
+
+.ftux-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.ftux-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   POPUP
+   ======================================== */
+
+.ftux-popup {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 480px;
+  width: 90%;
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.ftux-overlay.active .ftux-popup {
+  transform: translateY(0) scale(1);
+}
+
+.ftux-popup-content {
+  padding: 40px 36px 32px;
+  text-align: center;
+  position: relative;
+}
+
+/* ========================================
+   CLOSE BUTTON
+   ======================================== */
+
+.ftux-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: #f8fafc;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.ftux-close-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+  transform: scale(1.05);
+}
+
+.ftux-close-btn:active {
+  transform: scale(0.95);
+}
+
+.ftux-close-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2);
+}
+
+.ftux-close-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========================================
+   HEADER & ICON
+   ======================================== */
+
+.ftux-popup-header {
+  margin-bottom: 24px;
+}
+
+.ftux-popup-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fef2f2 0%, #fce7f3 100%);
+  border-radius: 20px;
+  color: #c41e3a;
+}
+
+.ftux-popup-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+/* ========================================
+   TITLE & BODY
+   ======================================== */
+
+.ftux-popup-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.ftux-popup-body {
+  font-size: 15px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0 0 28px 0;
+}
+
+/* ========================================
+   AI BADGE
+   ======================================== */
+
+.ftux-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #fef7f8 0%, #fdf2f4 100%);
+  border: 1px solid rgba(196, 30, 58, 0.15);
+  border-radius: 24px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #c41e3a;
+}
+
+.ftux-ai-sparkle {
+  width: 16px;
+  height: 16px;
+  color: #c41e3a;
+  animation: ftux-sparkle 3s ease-in-out infinite;
+}
+
+@keyframes ftux-sparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   ACTIONS
+   ======================================== */
+
+.ftux-popup-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.ftux-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  pointer-events: auto;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.ftux-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2);
+}
+
+.ftux-btn-primary {
+  background: #c41e3a;
+  color: white;
+}
+
+.ftux-btn-primary:hover {
+  background: #a91830;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+}
+
+.ftux-btn-primary:active {
+  transform: translateY(0);
+}
+
+.ftux-btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.ftux-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.ftux-popup-footer {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 520px) {
+  .ftux-popup {
+    max-width: 95%;
+    margin: 16px;
+  }
+
+  .ftux-popup-content {
+    padding: 32px 24px 24px;
+  }
+
+  .ftux-popup-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+
+  .ftux-popup-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ftux-popup-title {
+    font-size: 20px;
+  }
+
+  .ftux-popup-body {
+    font-size: 14px;
+  }
+
+  .ftux-popup-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .ftux-btn {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes ftux-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered fade-in for non-interactive elements only */
+.ftux-popup-content > .ftux-popup-header,
+.ftux-popup-content > .ftux-popup-title,
+.ftux-popup-content > .ftux-popup-body,
+.ftux-popup-content > .ftux-ai-badge,
+.ftux-popup-content > .ftux-popup-footer {
+  animation: ftux-fade-in 0.4s ease forwards;
+  opacity: 0;
+}
+
+.ftux-popup-content > .ftux-popup-header { animation-delay: 0.1s; }
+.ftux-popup-content > .ftux-popup-title { animation-delay: 0.15s; }
+.ftux-popup-content > .ftux-popup-body { animation-delay: 0.2s; }
+.ftux-popup-content > .ftux-ai-badge { animation-delay: 0.25s; }
+.ftux-popup-content > .ftux-popup-footer { animation-delay: 0.35s; }
+
+/* Popup content - ensure clickable */
+.ftux-popup-content {
+  pointer-events: auto !important;
+}
+
+/* Close button - always interactive */
+.ftux-close-btn {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 102;
+}
+
+/* Button container - NO animation, always visible and interactive */
+.ftux-popup-actions {
+  opacity: 1 !important;
+  animation: none !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 100;
+}
+
+.ftux-btn {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 101;
+  cursor: pointer !important;
+}
+
+/* Prevent any animation on buttons */
+.ftux-btn,
+.ftux-close-btn {
+  animation: none !important;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+}

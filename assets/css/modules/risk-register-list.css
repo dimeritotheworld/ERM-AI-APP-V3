@@ -1,0 +1,654 @@
+/**
+ * Dimeri ERM - Risk Register List Styles
+ * Styles for: info banner, bulk header, register cards
+ *
+ * @version 3.0.0
+ */
+
+/* ========================================
+   INFO BANNER
+   ======================================== */
+.info-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.info-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-banner-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 14px;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.info-banner-icon-circle svg {
+  stroke: white;
+  width: 14px;
+  height: 14px;
+}
+
+.info-banner-text {
+  font-size: 14px;
+  color: #1e40af;
+}
+
+.info-banner-text a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.info-banner-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.info-banner-close:hover {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* ========================================
+   REGISTERS TOOLBAR
+   ======================================== */
+.registers-toolbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.registers-toolbar-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.registers-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Search box */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box .search-icon {
+  position: absolute;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-box .search-input {
+  padding: 8px 12px 8px 36px;
+  font-size: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  width: 240px;
+  transition: all 0.15s ease;
+}
+
+.search-box .search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(161, 46, 46, 0.1);
+}
+
+.search-box .search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Ghost button for sort/filter */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ghost:hover {
+  background: #e5e7eb;
+}
+
+.btn-ghost svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================
+   REGISTERS BULK BAR
+   ======================================== */
+.registers-bulk-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.registers-bulk-bar.visible {
+  display: flex;
+}
+
+.registers-bulk-bar .bulk-selected-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.bulk-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Filter empty state */
+.filter-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #6b7280;
+}
+
+.filter-empty-state p {
+  margin-bottom: 12px;
+}
+
+/* ========================================
+   RISK REGISTER EMPTY STATE
+   ======================================== */
+.risk-register-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-height: 400px;
+  margin-top: 16px;
+}
+
+.risk-register-empty-state .empty-illustration {
+  margin-bottom: 24px;
+}
+
+.risk-register-empty-state .empty-illustration svg {
+  width: 120px;
+  height: 120px;
+}
+
+.risk-register-empty-state .empty-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.risk-register-empty-state .empty-description {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 28px 0;
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+.risk-register-empty-state .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #c41e3a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.risk-register-empty-state .btn-primary:hover {
+  background: #a91830;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+}
+
+.risk-register-empty-state .btn-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark mode support */
+html.theme-dark .risk-register-empty-state {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.theme-dark .risk-register-empty-state .empty-title {
+  color: #f1f5f9;
+}
+
+html.theme-dark .risk-register-empty-state .empty-description {
+  color: #94a3b8;
+}
+
+/* ========================================
+   VIEW TOGGLE
+   ======================================== */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-btn:hover {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.view-btn.active {
+  background: white;
+  color: #c41e3a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.view-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================
+   REGISTER CARDS
+   ======================================== */
+
+/* List view layout (default) */
+.registers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Grid view layout */
+.registers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Base card styles (grid view default) */
+.register-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.register-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.register-card.selected {
+  border-color: #c41e3a;
+  box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.1);
+}
+
+.register-card.dropdown-active {
+  border-color: #c41e3a;
+  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+}
+
+/* Checkbox positioning - absolute for grid */
+.register-card-checkbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+}
+
+/* Header with icon and type badge */
+.register-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-left: 28px;
+}
+
+.register-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.register-card-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+/* Title */
+.register-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Owner */
+.register-card-owner {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+}
+
+/* Footer with actions */
+.register-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.register-card-footer .open-register-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* ========================================
+   LIST VIEW - Horizontal compact layout
+   ======================================== */
+.registers-list .register-card {
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 16px;
+  border-radius: 8px;
+}
+
+.registers-list .register-card-checkbox {
+  position: static;
+  flex-shrink: 0;
+}
+
+.registers-list .register-card-header {
+  display: contents;
+}
+
+.registers-list .register-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.registers-list .register-card-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  -webkit-line-clamp: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.registers-list .register-card-owner {
+  flex-shrink: 0;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.registers-list .register-card-type {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.registers-list .register-card-footer {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  flex-shrink: 0;
+}
+
+.registers-list .register-card-footer .open-register-btn {
+  display: none;
+}
+
+.register-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Open button in card (grid view) */
+.register-card .open-register-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* Dark mode */
+html.theme-dark .register-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.theme-dark .register-card:hover {
+  border-color: #475569;
+}
+
+html.theme-dark .register-card-title {
+  color: #f1f5f9;
+}
+
+html.theme-dark .register-card-owner {
+  color: #94a3b8;
+}
+
+html.theme-dark .register-card-type {
+  background: #334155;
+  color: #94a3b8;
+}
+
+html.theme-dark .register-card-owner {
+  color: #64748b;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Mobile: hide type badge and owner on small screens */
+@media (max-width: 480px) {
+  .register-card-type,
+  .register-card-owner {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+  .registers-toolbar-top {
+    justify-content: stretch;
+  }
+
+  .registers-toolbar-top .btn {
+    width: 100%;
+  }
+
+  .registers-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-left .checkbox-wrapper {
+    display: none;
+  }
+
+  .search-box .search-input {
+    width: 100%;
+  }
+
+  .toolbar-right {
+    justify-content: flex-end;
+  }
+
+  .registers-bulk-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .bulk-bar-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* ========================================
+   INVITED BADGE
+   ======================================== */
+.invited-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: 1px solid #93c5fd;
+  margin-left: auto;
+}
+
+.invited-badge svg {
+  stroke: #1d4ed8;
+}
+
+html.theme-dark .invited-badge {
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.2), rgba(30, 64, 175, 0.1));
+  color: #93c5fd;
+  border-color: #1e40af;
+}
+
+html.theme-dark .invited-badge svg {
+  stroke: #93c5fd;
+}

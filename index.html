@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Dimeri ERM - Enterprise Risk Management Platform"
+    />
+    <title>Dimeri ERM - Dashboard</title>
+
+    <!-- Google Fonts - DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="assets/css/core/global.css" />
+    <link rel="stylesheet" href="assets/css/core/components.css?v=2.5.0" />
+    <link rel="stylesheet" href="assets/css/core/layout.css?v=2.3.0" />
+    <link rel="stylesheet" href="assets/css/core/theme-dark.css" />
+    <link rel="stylesheet" href="assets/css/core/responsive.css" />
+    <link rel="stylesheet" href="assets/css/utils/pixelated-avatar.css" />
+    <!-- Module Styles -->
+    <link rel="stylesheet" href="assets/css/modules/dashboard.css?v=2.5.4" />
+    <link rel="stylesheet" href="assets/css/modules/risk-register-core.css?v=2.1.9" />
+    <link rel="stylesheet" href="assets/css/modules/risk-register-list.css" />
+    <link rel="stylesheet" href="assets/css/modules/risk-register-detail.css?v=2.1.0" />
+    <link rel="stylesheet" href="assets/css/modules/risk-register-ai.css?v=2.2.0" />
+    <link rel="stylesheet" href="assets/css/modules/controls.css?v=2.2.1" />
+    <link rel="stylesheet" href="assets/css/modules/controls-ai.css?v=2.1.3" />
+    <link rel="stylesheet" href="assets/css/modules/reports.css?v=7.3.0" />
+    <link rel="stylesheet" href="assets/css/modules/report-editor.css?v=1.0.0" />
+    <link rel="stylesheet" href="assets/css/modules/report-editor-ai.css?v=1.0.0" />
+    <link rel="stylesheet" href="assets/css/modules/report-editor-v2.css?v=1.0.0" />
+    <link rel="stylesheet" href="assets/css/modules/help.css?v=2.4.0" />
+    <link rel="stylesheet" href="assets/css/modules/settings.css?v=2.4.0" />
+    <link rel="stylesheet" href="assets/css/modules/activity.css" />
+    <link rel="stylesheet" href="assets/css/modules/first-time-ux.css" />
+    <link rel="stylesheet" href="assets/css/modules/preview-dashboard.css" />
+    <!-- Plan Limits & Billing Styles -->
+    <link rel="stylesheet" href="assets/css/plan-limits.css" />
+    <!-- Feature Styles -->
+    <link rel="stylesheet" href="assets/css/features/ai-assistant.css?v=2.1.1" />
+    <link rel="stylesheet" href="assets/css/features/floating-ai-insight.css?v=1.0.0" />
+    <!-- Template UI Styles -->
+    <link rel="stylesheet" href="assets/templates/shared/template-ui.css" />
+    <!-- Quill WYSIWYG Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+  </head>
+  <body>
+    <!-- App Wrapper -->
+    <div class="app-wrapper">
+      <!-- Header Container (rendered by JS) -->
+      <div id="header-container"></div>
+
+      <!-- App Container -->
+      <div class="app-container">
+        <!-- Sidebar Container (rendered by JS) -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+          <!-- Dashboard View -->
+          <section class="view active" id="view-dashboard">
+            <div class="page-header">
+              <div class="page-header-content">
+                <h1 class="page-title" id="dashboard-greeting">
+                  Good morning!
+                </h1>
+                <p class="page-subtitle" id="dashboard-date"></p>
+              </div>
+            </div>
+
+            <!-- Dashboard content will be populated by JS -->
+            <div id="dashboard-content">
+              <div class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <h3 class="empty-state-title">Dashboard Coming Soon</h3>
+                <p class="empty-state-desc">
+                  Your risk dashboard with heatmaps, charts, and insights will
+                  appear here
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Risk Register View -->
+          <section class="view" id="view-risk-register">
+            <!-- Content rendered by risk-register.js -->
+          </section>
+
+          <!-- Controls View -->
+          <section class="view" id="view-controls">
+            <div class="page-header">
+              <div class="page-header-content">
+                <h1 class="page-title">Controls</h1>
+                <p class="page-subtitle">
+                  Manage and track your risk controls and mitigations
+                </p>
+              </div>
+              <div class="page-header-actions">
+                <button class="btn btn-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  Add Control
+                </button>
+              </div>
+            </div>
+
+            <div class="empty-state">
+              <div class="empty-state-icon">🛡️</div>
+              <h3 class="empty-state-title">Controls Module Coming Soon</h3>
+              <p class="empty-state-desc">
+                Track and manage your risk controls here
+              </p>
+            </div>
+          </section>
+
+          <!-- Reports View -->
+          <section class="view" id="view-reports">
+            <div class="page-header">
+              <div class="page-header-content">
+                <h1 class="page-title">Reports</h1>
+                <p class="page-subtitle">
+                  Generate professional risk reports for your stakeholders
+                </p>
+              </div>
+              <div class="page-header-actions">
+                <button class="btn btn-secondary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Export
+                </button>
+                <button class="btn btn-primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+                    ></path>
+                  </svg>
+                  Generate Report
+                </button>
+              </div>
+            </div>
+
+            <div class="empty-state">
+              <div class="empty-state-icon">📄</div>
+              <h3 class="empty-state-title">Reports Module Coming Soon</h3>
+              <p class="empty-state-desc">
+                Create board-ready risk reports with AI assistance
+              </p>
+            </div>
+          </section>
+
+          <!-- Help View -->
+          <section class="view" id="view-help">
+            <!-- Help content will be populated by JS -->
+            <div id="help-content"></div>
+          </section>
+
+          <!-- Settings View -->
+          <section class="view" id="view-settings">
+            <!-- Settings content will be populated by JS -->
+            <div id="settings-content"></div>
+          </section>
+
+          <!-- Activity Log View -->
+          <section class="view" id="view-activity-log">
+            <!-- Activity log content will be populated by JS -->
+            <div id="activity-log-content"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- AI Button Container (rendered by JS) -->
+    <div id="ai-button-container"></div>
+
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Scripts -->
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="assets/js/core/global.js"></script>
+    <script src="assets/js/utils/avatar-generator.js"></script>
+    <script src="assets/js/core/permissions.js"></script>
+    <script src="assets/js/core/components.js?v=2.3.2"></script>
+    <script src="assets/js/core/layout.js"></script>
+    <script src="assets/js/core/team-sync-manager.js"></script>
+    <script src="assets/js/team.js"></script>
+    <script src="assets/js/core/billing-api.js"></script>
+    <script src="assets/js/core/invoice-generator.js"></script>
+
+    <!-- Plan Limits & Enforcement -->
+    <script src="assets/js/plan-limits/upgrade-analytics.js"></script>
+    <script src="assets/js/plan-limits/upgrade-modal.js"></script>
+    <script src="assets/js/plan-limits/upgrade-success-modal.js"></script>
+    <script src="assets/js/plan-limits/upgrade-flow.js"></script>
+    <script src="assets/js/plan-limits/plan-config.js"></script>
+    <script src="assets/js/plan-limits/usage-tracker.js"></script>
+    <script src="assets/js/plan-limits/ai-counter.js?v=2.0.0"></script>
+    <script src="assets/js/plan-limits/ai-session-manager.js"></script>
+    <script src="assets/js/plan-limits/enforcement.js"></script>
+    <script src="assets/js/plan-limits/export-enforcement.js"></script>
+    <script src="assets/js/plan-limits/export-wrapper.js"></script>
+    <script src="assets/js/plan-limits/plan-limits-integration.js"></script>
+    <script src="assets/js/plan-limits/billing-management.js"></script>
+
+    <!-- Feature Scripts -->
+    <script src="assets/js/features/ai-assistant.js?v=2.2.0"></script>
+    <script src="assets/js/features/floating-ai-insight.js?v=1.0.0"></script>
+    <script src="assets/js/features/risk-control-matcher.js"></script>
+
+    <!-- Module Scripts -->
+    <script src="assets/js/modules/dashboard.js?v=2.5.1"></script>
+    <script src="assets/js/modules/help.js?v=3.0.0"></script>
+    <script src="assets/js/modules/settings.js?v=2.4.0"></script>
+    <script src="assets/js/modules/reports/report-styles.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-components.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/pdf-engine.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-data-service.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-sections.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-builder.js?v=3.4.1"></script>
+    <script src="assets/js/modules/reports/reports.js?v=3.6.0"></script>
+    <script src="assets/js/modules/reports/ai-service.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-editor-ai.js?v=1.0.0"></script>
+    <script src="assets/js/modules/reports/report-editor-v2.js?v=1.0.0"></script>
+    <script src="assets/js/modules/activity/activity-logger.js"></script>
+    <script src="assets/js/modules/activity/activity-log.js"></script>
+    <script src="assets/js/modules/first-time-ux.js"></script>
+    <script src="assets/js/modules/preview-dashboard.js"></script>
+
+    <!-- Risk Register Module -->
+    <script src="assets/js/modules/risk-register/risk-register-core.js"></script>
+    <script src="assets/js/modules/risk-register/risk-register-list.js"></script>
+    <script src="assets/js/modules/risk-register/risk-register-detail.js?v=2.1.8"></script>
+    <script src="assets/js/modules/risk-register/risk-register-modals.js?v=2.1.0"></script>
+    <!-- Removed: risk-scoring-keywords.js and risk-ai-scoring.js (obsolete, replaced by DeepSeek) -->
+    <script src="assets/js/modules/risk-register/risk-register-ai-templates.js"></script>
+    <script src="assets/js/modules/risk-register/risk-register-ai-parser.js"></script>
+    <script src="assets/js/modules/risk-register/risk-ai-deepseek-suggestions.js"></script>
+    <script src="assets/js/modules/risk-register/risk-ai-starter-deepseek.js"></script>
+    <script src="assets/js/modules/risk-register/risk-register-ai-ui.js?v=9.9.9"></script>
+    <script src="assets/js/modules/risk-register/risk-register-ai.js"></script>
+
+    <!-- Controls Module -->
+    <script src="assets/js/modules/controls/controls.js?v=2.3.0"></script>
+    <script src="assets/js/modules/controls/controls-ai-deepseek-suggestions.js"></script>
+    <script src="assets/js/modules/controls/controls-ai-ui.js?v=2.3.0"></script>
+
+    <!-- Template System -->
+    <script src="assets/templates/shared/template-loader.js"></script>
+    <script src="assets/templates/shared/sentence-builder.js"></script>
+    <script src="assets/templates/shared/control-loader.js"></script>
+    <script src="assets/templates/shared/generic-templates.js"></script>
+
+    <!-- Mining Risk Templates -->
+    <script src="assets/templates/mining/risks/mining-config.js"></script>
+    <script src="assets/templates/mining/risks/mining-departments.js"></script>
+    <script src="assets/templates/mining/risks/mining-categories.js"></script>
+    <script src="assets/templates/mining/risks/mining-risks.js"></script>
+    <script src="assets/templates/mining/risks/mining-keywords.js"></script>
+    <script src="assets/templates/mining/risks/mining-sentences.js"></script>
+
+    <!-- Mining Control Templates -->
+    <script src="assets/templates/mining/controls/mining-control-config.js"></script>
+    <script src="assets/templates/mining/controls/mining-control-departments.js"></script>
+    <script src="assets/templates/mining/controls/mining-control-categories.js"></script>
+    <script src="assets/templates/mining/controls/mining-controls.js"></script>
+    <script src="assets/templates/mining/controls/mining-control-keywords.js"></script>
+
+    <!-- Healthcare Templates -->
+    <script src="assets/templates/healthcare/risks/healthcare-config.js"></script>
+    <script src="assets/templates/healthcare/risks/healthcare-departments.js"></script>
+    <script src="assets/templates/healthcare/risks/healthcare-categories.js"></script>
+    <script src="assets/templates/healthcare/risks/healthcare-risks.js"></script>
+    <script src="assets/templates/healthcare/risks/healthcare-keywords.js"></script>
+    <script src="assets/templates/healthcare/risks/healthcare-sentences.js"></script>
+    <script src="assets/templates/healthcare/controls/healthcare-controls.js"></script>
+
+    <!-- Oil & Gas Templates -->
+    <script src="assets/templates/oil-gas/risks/oil-gas-config.js"></script>
+    <script src="assets/templates/oil-gas/risks/oil-gas-departments.js"></script>
+    <script src="assets/templates/oil-gas/risks/oil-gas-categories.js"></script>
+    <script src="assets/templates/oil-gas/risks/oil-gas-risks.js"></script>
+    <script src="assets/templates/oil-gas/risks/oil-gas-keywords.js"></script>
+    <script src="assets/templates/oil-gas/risks/oil-gas-sentences.js"></script>
+    <script src="assets/templates/oil-gas/controls/oil-gas-controls.js"></script>
+
+    <!-- Energy & Utilities Templates -->
+    <script src="assets/templates/energy/risks/energy-config.js"></script>
+    <script src="assets/templates/energy/risks/energy-departments.js"></script>
+    <script src="assets/templates/energy/risks/energy-categories.js"></script>
+    <script src="assets/templates/energy/risks/energy-risks.js"></script>
+    <script src="assets/templates/energy/risks/energy-keywords.js"></script>
+    <script src="assets/templates/energy/risks/energy-sentences.js"></script>
+    <script src="assets/templates/energy/controls/energy-controls.js"></script>
+
+    <!-- Public Sector Templates -->
+    <script src="assets/templates/public-sector/risks/public-sector-config.js"></script>
+    <script src="assets/templates/public-sector/risks/public-sector-departments.js"></script>
+    <script src="assets/templates/public-sector/risks/public-sector-categories.js"></script>
+    <script src="assets/templates/public-sector/risks/public-sector-risks.js"></script>
+    <script src="assets/templates/public-sector/risks/public-sector-keywords.js"></script>
+    <script src="assets/templates/public-sector/risks/public-sector-sentences.js"></script>
+    <script src="assets/templates/public-sector/controls/public-sector-controls.js"></script>
+
+    <!-- Manufacturing Templates -->
+    <script src="assets/templates/manufacturing/risks/manufacturing-config.js"></script>
+    <script src="assets/templates/manufacturing/risks/manufacturing-departments.js"></script>
+    <script src="assets/templates/manufacturing/risks/manufacturing-categories.js"></script>
+    <script src="assets/templates/manufacturing/risks/manufacturing-risks.js"></script>
+    <script src="assets/templates/manufacturing/risks/manufacturing-keywords.js"></script>
+    <script src="assets/templates/manufacturing/risks/manufacturing-sentences.js"></script>
+    <script src="assets/templates/manufacturing/controls/manufacturing-controls.js"></script>
+
+    <!-- Page-specific initialization -->
+    <script>
+      (function () {
+        // Update dashboard greeting
+        var greetingEl = document.getElementById("dashboard-greeting");
+        var dateEl = document.getElementById("dashboard-date");
+
+        if (greetingEl && ERM.state.user) {
+          var greeting = ERM.utils.getGreeting();
+          var name = ERM.state.user.name
+            ? ERM.state.user.name.split(" ")[0]
+            : "";
+          greetingEl.textContent =
+            greeting + (name ? ", " + name : "") + "! 👋";
+        }
+
+        if (dateEl) {
+          var today = new Date();
+          var options = {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          };
+          dateEl.textContent = today.toLocaleDateString("en-GB", options);
+        }
+      })();
+    </script>
+
+    <!-- Stripe.js for Payment Processing -->
+    <script src="https://js.stripe.com/v3/"></script>
+  </body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In | Dimeri ERM</title>
+    <meta
+      name="description"
+      content="Sign in to access your Enterprise Risk Management dashboard and tools."
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/login.css" />
+  </head>
+  <body class="login-page">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-tabs">
+          <button
+            class="login-tab active"
+            data-tab="signin"
+            onclick="switchTab('signin')"
+          >
+            Sign In
+          </button>
+          <button
+            class="login-tab"
+            data-tab="signup"
+            onclick="switchTab('signup')"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <div class="login-content">
+          <!-- Sign In Panel -->
+          <div class="login-panel active" id="signin">
+            <button class="social-btn google" onclick="demoLogin()">
+              <svg viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              Continue with Google
+            </button>
+
+            <button class="social-btn microsoft" onclick="demoLogin()">
+              <svg viewBox="0 0 24 24">
+                <path fill="#F25022" d="M1 1h10v10H1z" />
+                <path fill="#00A4EF" d="M1 13h10v10H1z" />
+                <path fill="#7FBA00" d="M13 1h10v10H13z" />
+                <path fill="#FFB900" d="M13 13h10v10H13z" />
+              </svg>
+              Continue with Microsoft
+            </button>
+
+            <div class="divider">
+              <span>or sign in with email</span>
+            </div>
+
+            <form onsubmit="demoLogin(); return false;">
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input
+                  type="email"
+                  class="form-input"
+                  placeholder="you@example.com"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    class="form-input"
+                    id="signin-password"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    onclick="togglePasswordVisibility('signin-password', this)"
+                  >
+                    <svg
+                      class="eye-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-off-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <label class="remember-me">
+                  <input type="checkbox" />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-link">Forgot password?</a>
+              </div>
+
+              <button type="submit" class="submit-btn">Sign In</button>
+            </form>
+
+            <p class="terms-text">
+              By signing in, you agree to our
+              <a href="https://www.dimeri.ai/terms" target="_blank">Terms of Service</a> and
+              <a href="https://www.dimeri.ai/privacy" target="_blank">Privacy Policy</a>.
+            </p>
+          </div>
+
+          <!-- Sign Up Panel -->
+          <div class="login-panel" id="signup">
+            <button class="social-btn google" onclick="demoLogin()">
+              <svg viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              Sign up with Google
+            </button>
+
+            <button class="social-btn microsoft" onclick="demoLogin()">
+              <svg viewBox="0 0 24 24">
+                <path fill="#F25022" d="M1 1h10v10H1z" />
+                <path fill="#00A4EF" d="M1 13h10v10H1z" />
+                <path fill="#7FBA00" d="M13 1h10v10H13z" />
+                <path fill="#FFB900" d="M13 13h10v10H13z" />
+              </svg>
+              Sign up with Microsoft
+            </button>
+
+            <div class="divider">
+              <span>or create account with email</span>
+            </div>
+
+            <form id="signup-form" onsubmit="handleSignup(event)">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="signup-name"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input
+                  type="email"
+                  class="form-input"
+                  id="signup-email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    class="form-input"
+                    id="signup-password"
+                    placeholder="Create a strong password"
+                    required
+                    oninput="checkPasswordStrength(this.value)"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    onclick="togglePasswordVisibility('signup-password', this)"
+                  >
+                    <svg
+                      class="eye-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-off-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="password-requirements">
+                  <p class="requirements-title">Password must contain:</p>
+                  <ul class="requirements-list">
+                    <li id="req-length" class="requirement">
+                      <span class="req-icon">○</span>
+                      At least 8 characters
+                    </li>
+                    <li id="req-uppercase" class="requirement">
+                      <span class="req-icon">○</span>
+                      One uppercase letter (A-Z)
+                    </li>
+                    <li id="req-lowercase" class="requirement">
+                      <span class="req-icon">○</span>
+                      One lowercase letter (a-z)
+                    </li>
+                    <li id="req-symbol" class="requirement">
+                      <span class="req-icon">○</span>
+                      One symbol (!@#$%^&* etc.)
+                    </li>
+                  </ul>
+                </div>
+                <div class="password-strength-bar">
+                  <div class="strength-fill" id="strength-fill"></div>
+                </div>
+                <p class="strength-text" id="strength-text"></p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    class="form-input"
+                    id="signup-confirm"
+                    placeholder="Confirm your password"
+                    required
+                    oninput="checkPasswordMatch()"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    onclick="togglePasswordVisibility('signup-confirm', this)"
+                  >
+                    <svg
+                      class="eye-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    <svg
+                      class="eye-off-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                      />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  </button>
+                </div>
+                <p class="password-match-text" id="password-match-text"></p>
+              </div>
+
+              <button type="submit" class="submit-btn" id="signup-btn" disabled>
+                Create Account
+              </button>
+            </form>
+
+            <p class="terms-text">
+              By creating an account, you agree to our
+              <a href="https://www.dimeri.ai/terms" target="_blank">Terms of Service</a> and
+              <a href="https://www.dimeri.ai/privacy" target="_blank">Privacy Policy</a>.
+            </p>
+          </div>
+        </div>
+
+        <div class="login-footer" id="signin-footer">
+          <p>
+            Don't have an account?
+            <a href="#" onclick="switchTab('signup'); return false;"
+              >Create one</a
+            >
+          </p>
+        </div>
+
+        <div class="login-footer" id="signup-footer" style="display: none">
+          <p>
+            Already have an account?
+            <a href="#" onclick="switchTab('signin'); return false;">Sign in</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="back-link">
+        <a href="https://www.dimeri.ai/">← Back to Dimeri.ai</a>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/auth.js"></script>
+  </body>
+</html>

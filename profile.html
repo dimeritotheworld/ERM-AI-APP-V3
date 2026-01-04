@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile & Settings - Dimeri ERM</title>
+  <link rel="stylesheet" href="assets/css/core/global.css">
+  <link rel="stylesheet" href="assets/css/core/components.css">
+  <link rel="stylesheet" href="assets/css/core/layout.css">
+  <link rel="stylesheet" href="assets/css/core/responsive.css">
+  <link rel="stylesheet" href="assets/css/plan-limits.css">
+  <link rel="stylesheet" href="assets/css/pages/profile.css">
+  <link rel="stylesheet" href="assets/css/utils/pixelated-avatar.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="profile-page">
+    <!-- Header -->
+    <header class="profile-header">
+      <a href="index.html" class="profile-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c41e3a" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Dimeri<span class="logo-accent">.ai</span></span>
+      </a>
+      <a href="index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Dashboard
+      </a>
+    </header>
+
+    <main class="profile-main">
+      <div class="profile-container">
+        <!-- Sidebar Navigation -->
+        <aside class="profile-sidebar">
+          <nav class="profile-nav">
+            <button class="nav-item active" data-tab="profile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Profile
+            </button>
+            <button class="nav-item" data-tab="notifications">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              Notifications
+            </button>
+            <button class="nav-item" data-tab="preferences">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              Preferences
+            </button>
+            <button class="nav-item" data-tab="security">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Security
+            </button>
+            <button class="nav-item" data-tab="billing" id="billing-nav">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+              Billing
+            </button>
+            <button class="nav-item" data-tab="activity">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              Activity
+            </button>
+            <button class="nav-item" data-tab="support">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              Support
+            </button>
+          </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="profile-content">
+          <!-- Profile Tab -->
+          <section class="tab-content active" id="tab-profile">
+            <div class="tab-header">
+              <h1>Profile</h1>
+              <p>Manage your personal information and account details.</p>
+            </div>
+
+            <div class="settings-card">
+              <div class="avatar-section">
+                <div class="avatar-wrapper">
+                  <div class="avatar" id="user-avatar">
+                    <span id="avatar-initials">--</span>
+                  </div>
+                  <button class="avatar-edit" title="Change photo">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="avatar-info">
+                  <span class="avatar-name" id="display-name">Loading...</span>
+                  <span class="avatar-role" id="display-role">Loading...</span>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Full name</label>
+                  <input type="text" class="form-input" id="profile-name" value="" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Role / Job title</label>
+                  <input type="text" class="form-input" id="profile-role" value="" placeholder="Enter your role">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email address</label>
+                  <div class="input-with-badge">
+                    <input type="email" class="form-input" id="profile-email" value="" placeholder="your@email.com" readonly>
+                    <span class="input-badge verified">Verified</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Company / Workspace</label>
+                  <input type="text" class="form-input" id="profile-company" value="" placeholder="Your workspace">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Time zone</label>
+                  <select class="form-select" id="profile-timezone">
+                    <option value="Africa/Johannesburg">Africa/Johannesburg (SAST)</option>
+                    <option value="Europe/London">Europe/London (GMT)</option>
+                    <option value="America/New_York">America/New_York (EST)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+                    <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (AEST)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone number</label>
+                  <input type="tel" class="form-input" id="profile-phone" placeholder="+27 XX XXX XXXX">
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Last login</span>
+                  <span class="info-value" id="last-login">Today at 09:45 AM</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Account status</span>
+                  <span class="status-badge active">Active</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Member since</span>
+                  <span class="info-value" id="member-since">January 2025</span>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
+                <button class="btn btn-secondary" onclick="resetProfile()">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Notifications Tab -->
+          <section class="tab-content" id="tab-notifications">
+            <div class="tab-header">
+              <h1>Notifications</h1>
+              <p>Choose how and when you want to be notified.</p>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Email Notifications</h3>
+              <div class="toggle-group">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Risk updates</span>
+                    <span class="toggle-desc">When risks are created, updated, or status changes</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Control reviews</span>
+                    <span class="toggle-desc">Reminders for upcoming control reviews</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Report generation</span>
+                    <span class="toggle-desc">When reports are ready to download</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Mentions & comments</span>
+                    <span class="toggle-desc">When someone mentions you or comments on your items</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">AI suggestions</span>
+                    <span class="toggle-desc">Alerts when AI generates new suggestions</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">In-App Notifications</h3>
+              <div class="toggle-group">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Show in-app notifications</span>
+                    <span class="toggle-desc">Display notification badges and popups</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Sound alerts</span>
+                    <span class="toggle-desc">Play sound for new notifications</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Digest Frequency</h3>
+              <div class="radio-group">
+                <label class="radio-item">
+                  <input type="radio" name="digest" value="immediate">
+                  <span class="radio-control"></span>
+                  <div class="radio-info">
+                    <span class="radio-label">Immediate</span>
+                    <span class="radio-desc">Get notified as events happen</span>
+                  </div>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="digest" value="daily" checked>
+                  <span class="radio-control"></span>
+                  <div class="radio-info">
+                    <span class="radio-label">Daily digest</span>
+                    <span class="radio-desc">One email per day with all updates</span>
+                  </div>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="digest" value="weekly">
+                  <span class="radio-control"></span>
+                  <div class="radio-info">
+                    <span class="radio-label">Weekly digest</span>
+                    <span class="radio-desc">Summary email every Monday</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="saveNotifications()">Save preferences</button>
+            </div>
+          </section>
+
+          <!-- Preferences Tab -->
+          <section class="tab-content" id="tab-preferences">
+            <div class="tab-header">
+              <h1>Preferences</h1>
+              <p>Customize your experience and AI settings.</p>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                </svg>
+                AI Settings
+              </h3>
+              <div class="toggle-group">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Enable AI assistance</span>
+                    <span class="toggle-desc">Allow AI to help with risk and control suggestions</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="ai-enabled" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="subsection" id="ai-options">
+                <h4 class="subsection-title">AI can assist with</h4>
+                <div class="checkbox-group">
+                  <label class="checkbox-item">
+                    <input type="checkbox" checked>
+                    <span class="checkbox-control"></span>
+                    <span>Risk descriptions & causes</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" checked>
+                    <span class="checkbox-control"></span>
+                    <span>Control wording & suggestions</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" checked>
+                    <span class="checkbox-control"></span>
+                    <span>Report summaries</span>
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox">
+                    <span class="checkbox-control"></span>
+                    <span>Auto-suggest (vs manual trigger)</span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                  <label class="form-label">AI output style</label>
+                  <select class="form-select" id="ai-style">
+                    <option value="executive">Executive (concise, high-level)</option>
+                    <option value="operational" selected>Operational (balanced)</option>
+                    <option value="technical">Technical (detailed, specific)</option>
+                  </select>
+                </div>
+
+                <div class="info-box">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  <p>Your data is processed securely. AI suggestions are generated in real-time and not stored externally. <a href="#">Learn more about our AI practices</a></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Display</h3>
+              <div class="form-group">
+                <label class="form-label">Theme</label>
+                <div class="theme-selector">
+                  <label class="theme-option">
+                    <input type="radio" name="theme" value="light" checked>
+                    <div class="theme-preview light">
+                      <span>Light</span>
+                    </div>
+                  </label>
+                  <label class="theme-option">
+                    <input type="radio" name="theme" value="dark">
+                    <div class="theme-preview dark">
+                      <span>Dark</span>
+                    </div>
+                  </label>
+                  <label class="theme-option">
+                    <input type="radio" name="theme" value="system">
+                    <div class="theme-preview system">
+                      <span>System</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Default risk matrix</label>
+                <select class="form-select">
+                  <option value="5x5" selected>5x5 Matrix</option>
+                  <option value="4x4">4x4 Matrix</option>
+                  <option value="3x3">3x3 Matrix</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Date format</label>
+                <select class="form-select">
+                  <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="savePreferences()">Save preferences</button>
+            </div>
+          </section>
+
+          <!-- Security Tab -->
+          <section class="tab-content" id="tab-security">
+            <div class="tab-header">
+              <h1>Security</h1>
+              <p>Manage your password, sessions, and security settings.</p>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Change Password</h3>
+              <div class="form-stack">
+                <div class="form-group">
+                  <label class="form-label">Current password</label>
+                  <input type="password" class="form-input" id="current-password" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New password</label>
+                  <input type="password" class="form-input" id="new-password" placeholder="Enter new password">
+                  <span class="form-hint">At least 8 characters with a number and symbol</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm new password</label>
+                  <input type="password" class="form-input" id="confirm-password" placeholder="Confirm new password">
+                </div>
+                <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Two-Factor Authentication</h3>
+              <div class="mfa-status">
+                <div class="mfa-info">
+                  <div class="mfa-icon disabled">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span class="mfa-label">Two-factor authentication is <strong>disabled</strong></span>
+                    <span class="mfa-desc">Add an extra layer of security to your account</span>
+                  </div>
+                </div>
+                <button class="btn btn-outline" onclick="setupMFA()">Enable 2FA</button>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Active Sessions</h3>
+              <div class="session-list" id="session-list">
+                <!-- Sessions loaded dynamically -->
+                <div class="session-item current">
+                  <div class="session-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                  </div>
+                  <div class="session-info">
+                    <span class="session-device" id="current-device">Loading...</span>
+                    <span class="session-location" id="current-location">Detecting location...</span>
+                    <span class="session-time">Current session</span>
+                  </div>
+                  <span class="session-badge">This device</span>
+                </div>
+              </div>
+              <button class="btn btn-outline-danger" onclick="signOutAll()">Sign out of all devices</button>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Login History</h3>
+              <div class="history-list" id="login-history">
+                <!-- Login history loaded dynamically -->
+                <p class="empty-state" style="text-align: center; color: #64748b; padding: 20px;">No login history available</p>
+              </div>
+            </div>
+
+            <!-- Privacy & Data -->
+            <div class="settings-card">
+              <h3 class="card-title">Privacy & Data</h3>
+              <p class="card-desc">Control your data and privacy settings</p>
+
+              <div class="toggle-group">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Analytics</span>
+                    <span class="toggle-desc">Help us improve by sharing anonymous usage data</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="toggle-analytics" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <span class="toggle-label">Data Sharing</span>
+                    <span class="toggle-desc">Share anonymized data with industry benchmarks</span>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="toggle-data-sharing">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-actions" style="margin-top: 20px; border-top: none; padding-top: 0;">
+                <button class="btn btn-secondary" id="export-data-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Export My Data
+                </button>
+                <button class="btn btn-primary" id="save-privacy-btn">Save Privacy Settings</button>
+              </div>
+            </div>
+
+            <!-- Transfer Ownership (Owner only) -->
+            <div class="settings-card" id="transfer-ownership-section" style="display: none;">
+              <h3 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Transfer Ownership
+              </h3>
+              <p class="card-desc">Transfer workspace ownership to another team member</p>
+
+              <div class="info-box" style="margin-bottom: 20px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <p>Transferring ownership will make you a regular team member. The new owner will have full control over the workspace, billing, and team management.</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select new owner</label>
+                <select class="form-select" id="transfer-member-select">
+                  <option value="">Select a team member...</option>
+                  <!-- Team members loaded dynamically -->
+                </select>
+              </div>
+
+              <div class="form-actions" style="border-top: none; padding-top: 0;">
+                <button class="btn btn-warning" onclick="showTransferOwnershipModal()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <polyline points="17 11 19 13 23 9"/>
+                  </svg>
+                  Transfer Ownership
+                </button>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-card danger-zone">
+              <h3 class="card-title danger-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Danger Zone
+              </h3>
+              <p class="card-desc">Irreversible actions - proceed with caution</p>
+
+              <div class="danger-item">
+                <div class="danger-info">
+                  <span class="danger-label">Clear All Data</span>
+                  <span class="danger-desc">Delete all risks, controls, and settings from your workspace</span>
+                </div>
+                <button class="btn btn-outline-danger" id="clear-data-btn">Clear Data</button>
+              </div>
+
+              <div class="danger-item">
+                <div class="danger-info">
+                  <span class="danger-label">Delete Account</span>
+                  <span class="danger-desc">Permanently delete your account and all associated data</span>
+                </div>
+                <button class="btn btn-outline-danger" id="delete-account-btn">Delete Account</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Billing Tab (Admin Only) -->
+          <section class="tab-content" id="tab-billing">
+            <div class="tab-header">
+              <h1>Billing</h1>
+              <p>Manage your subscription, payment methods, and invoices.</p>
+            </div>
+
+            <!-- Admin View -->
+            <div id="billing-admin">
+              <div class="settings-card">
+                <h3 class="card-title">Current Plan</h3>
+                <div class="plan-display">
+                  <div class="plan-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  </div>
+                  <div class="plan-info">
+                    <span class="plan-name" id="billing-plan-name">Pro Plan</span>
+                    <span class="plan-price">$29/month</span>
+                  </div>
+                  <div class="plan-meta">
+                    <span>Billed monthly</span>
+                    <span>Next billing: January 15, 2025</span>
+                  </div>
+                </div>
+                <div class="plan-actions">
+                  <a href="upgrade.html" class="btn btn-outline">Change plan</a>
+                  <button class="btn btn-text-danger" onclick="showCancelModal()">Cancel subscription</button>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="card-title">Usage & Limits</h3>
+                <div class="usage-grid">
+                  <div class="usage-item">
+                    <div class="usage-header">
+                      <span class="usage-label">Risk Registers</span>
+                      <span class="usage-value"><strong id="usage-registers">3</strong> / Unlimited</span>
+                    </div>
+                    <div class="usage-bar">
+                      <div class="usage-fill" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-header">
+                      <span class="usage-label">Controls</span>
+                      <span class="usage-value"><strong id="usage-controls">18</strong> / Unlimited</span>
+                    </div>
+                    <div class="usage-bar">
+                      <div class="usage-fill" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-header">
+                      <span class="usage-label">Team Members</span>
+                      <span class="usage-value"><strong id="usage-members">4</strong> / 10</span>
+                    </div>
+                    <div class="usage-bar">
+                      <div class="usage-fill" style="width: 40%"></div>
+                    </div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-header">
+                      <span class="usage-label">Reports Generated</span>
+                      <span class="usage-value"><strong id="usage-reports">12</strong> this month</span>
+                    </div>
+                    <div class="usage-bar">
+                      <div class="usage-fill unlimited" style="width: 100%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Seat Management Card -->
+              <div class="settings-card" id="billing-seats-card">
+                <h3 class="card-title">Team Seats</h3>
+                <!-- Content will be dynamically loaded by billing-management.js -->
+              </div>
+
+              <div class="settings-card">
+                <h3 class="card-title">Payment Method</h3>
+                <div class="payment-method">
+                  <div class="card-display">
+                    <div class="card-brand">
+                      <svg viewBox="0 0 38 24" width="38" height="24"><rect fill="#1A1F71" width="38" height="24" rx="3"/><text x="19" y="15" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">VISA</text></svg>
+                    </div>
+                    <div class="card-details">
+                      <span class="card-number">•••• •••• •••• 4242</span>
+                      <span class="card-expiry">Expires 12/26</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline" onclick="updatePaymentMethod()">Update</button>
+                </div>
+
+                <div class="billing-address">
+                  <h4>Billing Address</h4>
+                  <p id="billing-address-display">
+                    Acme Corporation<br>
+                    123 Main Street<br>
+                    Johannesburg, Gauteng 2000<br>
+                    South Africa
+                  </p>
+                  <button class="btn btn-text" onclick="editBillingAddress()">Edit address</button>
+                </div>
+
+                <div class="tax-info">
+                  <h4>VAT Information</h4>
+                  <div class="form-group">
+                    <label class="form-label">VAT Number (optional)</label>
+                    <input type="text" class="form-input" id="vat-number" placeholder="e.g., ZA1234567890">
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <h3 class="card-title">Invoices & Receipts</h3>
+                <div class="invoice-list">
+                  <div class="invoice-item">
+                    <div class="invoice-info">
+                      <span class="invoice-date">December 2024</span>
+                      <span class="invoice-amount">$29.00</span>
+                    </div>
+                    <div class="invoice-status paid">Paid</div>
+                    <button class="btn btn-text" onclick="downloadInvoice('dec-2024')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      Download
+                    </button>
+                  </div>
+                  <div class="invoice-item">
+                    <div class="invoice-info">
+                      <span class="invoice-date">November 2024</span>
+                      <span class="invoice-amount">$29.00</span>
+                    </div>
+                    <div class="invoice-status paid">Paid</div>
+                    <button class="btn btn-text" onclick="downloadInvoice('nov-2024')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      Download
+                    </button>
+                  </div>
+                  <div class="invoice-item">
+                    <div class="invoice-info">
+                      <span class="invoice-date">October 2024</span>
+                      <span class="invoice-amount">$29.00</span>
+                    </div>
+                    <div class="invoice-status paid">Paid</div>
+                    <button class="btn btn-text" onclick="downloadInvoice('oct-2024')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      Download
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Non-Admin View -->
+            <div id="billing-user" style="display: none;">
+              <div class="settings-card">
+                <div class="info-box">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  <p>Billing and plan changes are managed by your workspace administrator.</p>
+                </div>
+
+                <div class="plan-info-readonly">
+                  <div class="info-row-simple">
+                    <span class="info-label">Current plan</span>
+                    <span class="info-value"><strong>Pro</strong></span>
+                  </div>
+                  <div class="info-row-simple">
+                    <span class="info-label">Billing managed by</span>
+                    <span class="info-value">Workspace Admin</span>
+                  </div>
+                </div>
+
+                <div class="upgrade-request">
+                  <p>Need more features or seats?</p>
+                  <button class="btn btn-outline" onclick="requestUpgrade()">Request upgrade</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Activity Tab -->
+          <section class="tab-content" id="tab-activity">
+            <div class="tab-header">
+              <h1>Activity</h1>
+              <p>Your recent actions and audit trail.</p>
+            </div>
+
+            <div class="settings-card">
+              <div class="activity-filters">
+                <select class="form-select" id="activity-filter">
+                  <option value="all">All activities</option>
+                  <option value="risks">Risk activities</option>
+                  <option value="controls">Control activities</option>
+                  <option value="reports">Report activities</option>
+                  <option value="ai">AI-assisted actions</option>
+                </select>
+                <select class="form-select" id="activity-period">
+                  <option value="7">Last 7 days</option>
+                  <option value="30" selected>Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                </select>
+              </div>
+
+              <div class="activity-timeline" id="activity-timeline">
+                <!-- Activities loaded dynamically from ERM.activityLogger -->
+                <div class="activity-empty">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  <p>Loading activities...</p>
+                </div>
+              </div>
+
+              <button class="btn btn-outline load-more" id="load-more-activities">Load more activities</button>
+            </div>
+          </section>
+
+          <!-- Support Tab -->
+          <section class="tab-content" id="tab-support">
+            <div class="tab-header">
+              <h1>Support</h1>
+              <p>Get help and access resources.</p>
+            </div>
+
+            <div class="support-grid">
+              <div class="support-card">
+                <div class="support-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <h3>Help Center</h3>
+                <p>Browse articles, guides, and FAQs</p>
+                <a href="help/index.html" class="btn btn-outline">Visit Help Center</a>
+              </div>
+
+              <div class="support-card">
+                <div class="support-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <h3>Contact Support</h3>
+                <p>Get help from our support team</p>
+                <a href="mailto:support@dimeri.ai" class="btn btn-outline">Email Support</a>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">Submit Feedback</h3>
+              <form id="feedback-form">
+                <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <select class="form-select" id="feedback-category">
+                    <option value="bug">Bug report</option>
+                    <option value="feature">Feature request</option>
+                    <option value="improvement">Improvement suggestion</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Message</label>
+                  <textarea class="form-textarea" id="feedback-message" rows="4" placeholder="Describe your feedback..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+              </form>
+            </div>
+
+            <div class="settings-card">
+              <h3 class="card-title">System Status</h3>
+              <div class="status-display">
+                <div class="status-indicator operational">
+                  <span class="status-dot"></span>
+                  <span>All systems operational</span>
+                </div>
+                <a href="#" class="btn btn-text">View status page</a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/core/global.js"></script>
+  <script src="assets/js/core/components.js"></script>
+  <script src="assets/js/team.js"></script>
+  <script src="assets/js/core/team-sync-manager.js"></script>
+  <script src="assets/js/core/billing-api.js"></script>
+  <script src="assets/js/core/invoice-generator.js"></script>
+  <script src="assets/js/plan-limits/plan-config.js"></script>
+  <script src="assets/js/plan-limits/usage-tracker.js"></script>
+  <script src="assets/js/plan-limits/upgrade-analytics.js"></script>
+  <script src="assets/js/plan-limits/billing-management.js"></script>
+  <script src="assets/js/utils/avatar-generator.js"></script>
+  <script src="assets/js/pages/profile.js"></script>
+  <script>
+    // Initialize billing management when page loads
+    if (typeof ERM !== 'undefined' && ERM.billingManagement) {
+      document.addEventListener('DOMContentLoaded', function() {
+        ERM.billingManagement.renderProfileSeats();
+      });
+    }
+  </script>
+
+  <!-- Stripe.js for Payment Processing -->
+  <script src="https://js.stripe.com/v3/"></script>
+</body>
+</html>

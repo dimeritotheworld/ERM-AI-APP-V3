@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Center - Dimeri ERM</title>
+  <link rel="stylesheet" href="../assets/css/core/global.css">
+  <link rel="stylesheet" href="../assets/css/core/components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #c41e3a;
+      --primary-dark: #a01830;
+      --primary-light: #e63946;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --border-color: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .help-center { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Header */
+    .help-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 40px 40px 80px;
+      text-align: center;
+      position: relative;
+      overflow: visible;
+    }
+    .help-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .help-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      position: relative;
+    }
+    .help-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .help-logo span:first-child { font-size: 24px; }
+    .back-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover { color: white; }
+
+    .help-title { font-size: 36px; font-weight: 700; margin: 0 0 12px; position: relative; }
+    .help-subtitle { font-size: 18px; opacity: 0.9; margin: 0 0 32px; font-weight: 400; position: relative; }
+
+    /* Search */
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+    .search-input {
+      width: 100%;
+      padding: 18px 24px 18px 56px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+    .search-input:focus {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 0 0 3px rgba(196,30,58,0.2);
+    }
+    .search-input::placeholder { color: #94a3b8; }
+    .search-input:focus::placeholder { color: transparent; }
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: var(--primary-color);
+    }
+
+    /* Search Results */
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      margin-top: 8px;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+      z-index: 20;
+      text-align: left;
+    }
+    .search-results.visible { display: block; }
+    .search-result-item {
+      display: block;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+    .search-result-item:hover { background: #fef2f2; }
+    .search-result-item:last-child { border-bottom: none; }
+    .result-title { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .result-category { font-size: 12px; color: var(--primary-color); margin-bottom: 4px; font-weight: 500; }
+    .result-excerpt { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .result-excerpt mark { background: #fecaca; padding: 0 2px; border-radius: 2px; }
+    .no-results { padding: 24px; text-align: center; color: var(--text-secondary); }
+
+    /* Main Content */
+    .help-main { flex: 1; padding: 0 40px 60px; margin-top: -40px; position: relative; }
+    .help-container { max-width: 1200px; margin: 0 auto; }
+
+    /* Quick Links */
+    .quick-links-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+    .quick-link-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .quick-link-card:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(196,30,58,0.15);
+    }
+    .quick-link-icon { font-size: 36px; margin-bottom: 16px; }
+    .quick-link-card h3 { font-size: 17px; font-weight: 600; color: var(--text-primary); margin: 0 0 8px; }
+    .quick-link-card p { font-size: 14px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+    /* Section Headers */
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    /* Topics Grid */
+    .topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 48px; }
+    .topic-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s;
+    }
+    .topic-card:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 16px rgba(196,30,58,0.1);
+    }
+    .topic-icon {
+      font-size: 24px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fef2f2;
+      border-radius: 10px;
+    }
+    .topic-content h4 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px; }
+    .topic-content p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+
+    /* FAQ Section */
+    .faq-section {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 48px;
+      border: 1px solid var(--border-color);
+    }
+    .faq-list { margin-top: 20px; }
+    .faq-item { border-bottom: 1px solid #f1f5f9; }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .faq-question:hover .faq-question-text { color: var(--primary-color); }
+    .faq-question-text { font-size: 15px; font-weight: 500; color: var(--text-primary); flex: 1; transition: color 0.2s; }
+    .faq-toggle {
+      font-size: 12px;
+      color: #94a3b8;
+      transition: transform 0.2s;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+    .faq-item.open .faq-toggle {
+      transform: rotate(180deg);
+      background: var(--primary-color);
+      color: white;
+    }
+    .faq-answer {
+      display: none;
+      padding: 0 0 20px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      padding-left: 16px;
+      border-left: 3px solid #fecaca;
+    }
+    .faq-item.open .faq-answer { display: block; }
+
+    /* Contact Section */
+    .contact-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 48px; }
+    .contact-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s;
+    }
+    .contact-card:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 16px rgba(196,30,58,0.1);
+    }
+    .contact-icon { font-size: 32px; margin-bottom: 16px; }
+    .contact-card h4 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0 0 8px; }
+    .contact-info { font-size: 14px; color: var(--primary-color); font-weight: 500; margin-bottom: 4px; }
+    .contact-hours { font-size: 13px; color: #94a3b8; }
+
+    /* Footer */
+    .help-footer {
+      background: white;
+      border-top: 1px solid var(--border-color);
+      padding: 24px 40px;
+    }
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-content p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--primary-color); }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .quick-links-grid { grid-template-columns: repeat(2, 1fr); }
+      .topics-grid { grid-template-columns: 1fr; }
+      .contact-section { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .help-header { padding: 24px 20px 60px; }
+      .help-main { padding: 0 20px 40px; }
+      .quick-links-grid { grid-template-columns: 1fr; }
+      .help-title { font-size: 28px; }
+      .help-nav { flex-direction: column; gap: 16px; }
+      .faq-section { padding: 24px 20px; }
+      .footer-content { flex-direction: column; gap: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="help-center">
+    <!-- Header -->
+    <header class="help-header">
+      <nav class="help-nav">
+        <a href="../index.html" class="help-logo">
+          <span>🛡️</span>
+          <span>Dimeri ERM</span>
+        </a>
+        <a href="../index.html" class="back-link">← Back to App</a>
+      </nav>
+
+      <h1 class="help-title">How can we help you?</h1>
+      <p class="help-subtitle">Search our help articles or browse popular topics below</p>
+
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="help-search" placeholder="Search for help (e.g., 'create risk', 'export data', 'controls')..." autocomplete="off">
+        <div class="search-results" id="search-results"></div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="help-main">
+      <div class="help-container">
+        <!-- Quick Links -->
+        <div class="quick-links-grid">
+          <a href="getting-started.html" class="quick-link-card">
+            <div class="quick-link-icon">🚀</div>
+            <h3>Getting Started</h3>
+            <p>New to Dimeri ERM? Learn the basics and create your first risk register.</p>
+          </a>
+          <a href="risk-management.html" class="quick-link-card">
+            <div class="quick-link-icon">📊</div>
+            <h3>Risk Management</h3>
+            <p>Create, score, and manage risks with AI-powered assistance.</p>
+          </a>
+          <a href="controls.html" class="quick-link-card">
+            <div class="quick-link-icon">🛡️</div>
+            <h3>Controls Guide</h3>
+            <p>Implement and track controls to mitigate identified risks.</p>
+          </a>
+          <a href="reports.html" class="quick-link-card">
+            <div class="quick-link-icon">📄</div>
+            <h3>Reports & Analytics</h3>
+            <p>Generate professional reports and analyze your risk portfolio.</p>
+          </a>
+          <a href="https://www.youtube.com/@dimeri-placeholder" target="_blank" class="quick-link-card" style="border: 2px solid #c41e3a;">
+            <div class="quick-link-icon">🎥</div>
+            <h3>Video Tutorials</h3>
+            <p>Watch step-by-step video guides and training materials.</p>
+          </a>
+          <a href="billing.html" class="quick-link-card">
+            <div class="quick-link-icon">💳</div>
+            <h3>Billing & Subscription</h3>
+            <p>Learn about plans, pricing, seats, and payment management.</p>
+          </a>
+          <a href="ai-features.html" class="quick-link-card" style="border: 2px solid #8b5cf6;">
+            <div class="quick-link-icon">✨</div>
+            <h3>AI Features</h3>
+            <p>Understand AI capabilities, usage limits, and how to maximize AI assistance.</p>
+          </a>
+        </div>
+
+        <!-- Popular Topics -->
+        <div class="section-header">
+          <h2 class="section-title">Popular Topics</h2>
+        </div>
+        <div class="topics-grid">
+          <a href="getting-started.html#first-risk" class="topic-card">
+            <div class="topic-icon">➕</div>
+            <div class="topic-content">
+              <h4>How do I create a new risk?</h4>
+              <p>Step-by-step guide to adding risks manually or with AI</p>
+            </div>
+          </a>
+          <a href="risk-management.html#risk-scoring" class="topic-card">
+            <div class="topic-icon">📏</div>
+            <div class="topic-content">
+              <h4>Understanding risk scoring</h4>
+              <p>Likelihood, impact, and the 5x5 risk matrix explained</p>
+            </div>
+          </a>
+          <a href="controls.html#linking-risks" class="topic-card">
+            <div class="topic-icon">🔗</div>
+            <div class="topic-content">
+              <h4>Linking controls to risks</h4>
+              <p>How to connect controls and see residual risk reduction</p>
+            </div>
+          </a>
+          <a href="reports.html#creating-reports" class="topic-card">
+            <div class="topic-icon">📊</div>
+            <div class="topic-content">
+              <h4>Creating and exporting reports</h4>
+              <p>Generate professional PDF reports for stakeholders</p>
+            </div>
+          </a>
+          <a href="settings.html#privacy" class="topic-card">
+            <div class="topic-icon">💾</div>
+            <div class="topic-content">
+              <h4>Backing up your data</h4>
+              <p>Export and import your risk data for backup</p>
+            </div>
+          </a>
+          <a href="risk-management.html#ai-features" class="topic-card">
+            <div class="topic-icon">✨</div>
+            <div class="topic-content">
+              <h4>Using AI features</h4>
+              <p>Get AI suggestions for risks, controls, and scoring</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section" id="faq">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <div class="faq-list" id="faq-list">
+            <!-- FAQs rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+          <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <h4>Email Support</h4>
+            <div class="contact-info">support@dimeri.ai</div>
+            <div class="contact-hours">Response within 24 hours</div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">💬</div>
+            <h4>Live Chat</h4>
+            <div class="contact-info">Available in-app</div>
+            <div class="contact-hours">9am - 5pm SAST, Mon-Fri</div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-icon">📚</div>
+            <h4>Documentation</h4>
+            <div class="contact-info">Complete guides</div>
+            <div class="contact-hours">Always available</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="help-footer">
+      <div class="footer-content">
+        <p>&copy; 2024 Dimeri Technologies. All rights reserved. v1.0.0</p>
+        <div class="footer-links">
+          <a href="#">Terms of Service</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">POPIA Compliance</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Searchable content database
+    var helpContent = [
+      { title: 'Creating your first risk', category: 'Getting Started', url: 'getting-started.html#first-risk', keywords: 'create risk new add manual ai describe', content: 'Click Risk Register in sidebar, then Add New Risk. Choose Manual Entry or Describe with AI.' },
+      { title: 'Setting up your account', category: 'Getting Started', url: 'getting-started.html#first-login', keywords: 'account setup profile email name role', content: 'Enter your name, email, create password. Set up workspace and select your industry.' },
+      { title: 'Dashboard overview', category: 'Getting Started', url: 'getting-started.html#dashboard-tour', keywords: 'dashboard tour overview heatmap charts activity', content: 'Dashboard shows risk summary cards, heatmap, inherent vs residual charts.' },
+      { title: 'Adding controls to reduce risk', category: 'Getting Started', url: 'getting-started.html#add-controls', keywords: 'add control link reduce mitigate', content: 'Open a risk, scroll to Linked Controls, check boxes or click + to create new.' },
+      { title: 'Understanding risk scoring', category: 'Risk Management', url: 'risk-management.html#risk-scoring', keywords: 'score scoring likelihood impact matrix inherent residual', content: 'Risk score = Likelihood × Impact. Scores: 1-4 Low, 5-9 Medium, 10-14 High, 15-25 Critical.' },
+      { title: 'Risk categories explained', category: 'Risk Management', url: 'risk-management.html#risk-categories', keywords: 'category operational financial compliance strategic environmental safety', content: 'Categories: Operational, Financial, Compliance, Strategic, Environmental, Health & Safety.' },
+      { title: 'Using AI to create risks', category: 'Risk Management', url: 'risk-management.html#ai-features', keywords: 'ai artificial intelligence describe generate suggest', content: 'Select Describe with AI, type your concern. AI generates complete risk with scoring.' },
+      { title: 'Inherent vs residual risk', category: 'Risk Management', url: 'risk-management.html#risk-scoring', keywords: 'inherent residual before after controls difference', content: 'Inherent is before controls. Residual is after. Controls reduce residual risk.' },
+      { title: 'Control types explained', category: 'Controls', url: 'controls.html#control-types', keywords: 'type preventive detective corrective directive', content: 'Preventive stops risks, Detective identifies, Corrective fixes, Directive guides.' },
+      { title: 'Control effectiveness testing', category: 'Controls', url: 'controls.html#effectiveness', keywords: 'effectiveness testing effective partially ineffective', content: 'Rate controls as Effective, Partially Effective, Ineffective, or Not Tested.' },
+      { title: 'Linking controls to risks', category: 'Controls', url: 'controls.html#linking-risks', keywords: 'link connect mitigate reduce associate', content: 'Open risk or control, find Linked section, select items to connect.' },
+      { title: 'Creating reports', category: 'Reports', url: 'reports.html#creating-reports', keywords: 'create report generate new template', content: 'Go to Reports, click Create Report, select template, customize, generate.' },
+      { title: 'Exporting data', category: 'Reports', url: 'reports.html#exporting', keywords: 'export download pdf csv json backup', content: 'Export as PDF, CSV for Excel, or JSON for backup.' },
+      { title: 'Account settings', category: 'Settings', url: 'settings.html#account', keywords: 'account profile name email role settings', content: 'Click Settings. Update name, email, role. Changes auto-save.' },
+      { title: 'Data backup and export', category: 'Settings', url: 'settings.html#privacy', keywords: 'backup export import data privacy json download', content: 'Settings > Privacy. Export My Data for JSON backup.' },
+      { title: 'Dark mode', category: 'Settings', url: 'settings.html#appearance', keywords: 'dark mode theme light appearance', content: 'Settings > Appearance. Choose Light, Dark, or System theme.' },
+      { title: 'Upgrading your plan', category: 'Settings', url: 'settings.html#upgrade', keywords: 'upgrade plan pro enterprise pricing', content: 'Compare Free, Pro ($29/mo), Enterprise ($99/mo) plans.' },
+      { title: 'Billing and subscription management', category: 'Billing', url: 'billing.html', keywords: 'billing subscription payment seats pricing plans invoice upgrade downgrade stripe credit card team members monthly annual', content: 'Manage your subscription, add/remove seats, update payment methods, download invoices.' },
+      { title: 'Adding team seats', category: 'Billing', url: 'billing.html#team-seats', keywords: 'seats add team members increase capacity pricing cost per seat', content: 'Add seats for new team members. Pro plan: $5/seat/month. See live cost preview before adding.' },
+      { title: 'Payment methods', category: 'Billing', url: 'billing.html#payment-methods', keywords: 'payment credit card stripe update billing method visa mastercard', content: 'Update your payment method securely via Stripe. Accepted: Visa, Mastercard, AmEx.' },
+      { title: 'Downloading invoices', category: 'Billing', url: 'billing.html#invoices', keywords: 'invoice download pdf billing history receipts', content: 'Download professional PDF invoices from Profile > Billing tab. Full billing history available.' },
+      { title: 'AI usage limits', category: 'AI Features', url: 'ai-features.html#usage-limits', keywords: 'ai limits queries free pro unlimited 50 per month quota usage', content: 'Free plan: 50 AI queries/month. Pro plan: Unlimited AI queries. Resets monthly on the 1st.' },
+      { title: 'AI features overview', category: 'AI Features', url: 'ai-features.html', keywords: 'ai artificial intelligence features limits queries toolbar dashboard risk controls reports chat assistant sparkle', content: 'AI available in Dashboard, Risk Register, Controls, Reports. Free: 50 queries/month. Pro: Unlimited.' },
+      { title: 'AI in risk register', category: 'AI Features', url: 'ai-features.html#ai-risk-register', keywords: 'ai risk register scoring suggestions create describe review', content: 'Describe with AI, AI field suggestions for root causes/consequences, Review Risk feature, smart scoring.' },
+      { title: 'AI toolbar in reports', category: 'AI Features', url: 'ai-features.html#ai-toolbar', keywords: 'ai toolbar reports improve expand summarize generate professional tone', content: 'Improve text, Expand content, Summarize sections, Generate new content, Professional tone rewrite.' },
+      { title: 'Video tutorials', category: 'Resources', url: 'https://www.youtube.com/@dimeri-placeholder', keywords: 'video tutorials youtube training demos walkthroughs guides learning', content: 'Watch step-by-step video guides on YouTube for getting started and advanced features.' }
+    ];
+
+    // FAQ data - Comprehensive AI Features
+    var faqs = [
+      { q: 'How do I create a new risk register?', a: 'Click on "Risk Register" in the sidebar, then click the "Add New Risk" button. You can choose between "Manual Entry" or "Describe with AI" to create your risk. Fill in the required fields including title, category, likelihood, and impact. The risk form has 5 sections: Risk Identification, Risk Assessment, Action Plan, Escalation, and Evidence & Attachments.' },
+      { q: 'What is the difference between inherent and residual risk?', a: 'Inherent risk is the level of risk before any controls are applied (Likelihood × Impact). Residual risk is the remaining level of risk after controls have been implemented. The dashboard shows the reduction achieved through your risk management efforts. Use the interactive heatmap in the risk form to visualize your risk scores.' },
+      { q: 'What AI features are available in Dimeri ERM?', a: '<strong>AI Features by Module:</strong><br><br><strong>🎯 Risk Register:</strong> Describe with AI, ✨ AI Field Suggestions (root causes, consequences, treatments), ✨ Review Risk, Smart Risk Scoring<br><br><strong>🛡️ Controls:</strong> ✨ Suggest Controls, Control Matching<br><br><strong>📄 Reports:</strong> ✨ Improve, ✨ Expand, ✨ Summarize, ✨ Generate Section, ✨ Professional Tone<br><br><strong>💬 AI Chat Assistant:</strong> Context-aware answers via purple ✨ button (bottom-right)' },
+      { q: 'How do I use the AI toolbar in Reports?', a: '<strong>✨ Improve:</strong> Select text → Click to enhance clarity and grammar<br><strong>✨ Expand:</strong> Select brief text → AI adds detail and depth<br><strong>✨ Summarize:</strong> Select long text → AI condenses to key points<br><strong>✨ Generate Section:</strong> Place cursor → Choose type (Executive Summary, Risk Analysis, etc.) → AI creates content from your data<br><strong>✨ Professional Tone:</strong> Select casual text → AI rewrites in formal business language' },
+      { q: 'How do I create a risk using AI ("Describe with AI")?', a: '1. Go to Risk Register → Add New Risk<br>2. Select "Describe with AI"<br>3. Type a natural language description (e.g., "Our database server could fail causing data loss")<br>4. Click "Generate Risk"<br>5. AI populates: title, description, category, scores, root causes, consequences, treatments<br>6. Review, adjust, and save' },
+      { q: 'How do I use AI to suggest controls?', a: '<strong>Method 1 - From Risk Form:</strong> Open a risk → Scroll to "Linked Controls" → Click "✨ Suggest Controls"<br><br><strong>Method 2 - From Controls Module:</strong> Go to Controls → Add Control → AI Suggest<br><br>AI considers: Risk category, industry context, severity, existing controls, and best practices.' },
+      { q: 'How does the AI Chat Assistant work?', a: 'Click the purple <strong>✨ AI</strong> button (bottom-right corner). It knows all your risks, controls, and dashboard stats.<br><br><strong>Example questions:</strong><br>• "What are my top 5 highest risks?"<br>• "Which risks don\'t have controls linked?"<br>• "Suggest controls for IT security risks"<br>• "Help me write an executive summary"' },
+      { q: 'How do I insert charts into reports?', a: '1. Open a report in the editor<br>2. Place cursor where you want the chart<br>3. Click "📊 Insert Chart"<br>4. Choose: Risk Heatmap, Risk by Category, Inherent vs Residual, Control Effectiveness, Risk Trend<br>5. Use "📋 Insert Table" for risk summary tables' },
+      { q: 'How do I link controls to risks?', a: 'When editing a risk, scroll to the "Linked Controls" section and check the boxes next to relevant controls. You can also click the "+" button to create a new control directly from the risk form. The AI will suggest relevant controls based on your risk description.' },
+      { q: 'Can I export my risk data?', a: 'Yes! Click "Export PDF" in Risk Register to configure: Document Setup (title, orientation), Logo & Branding (6 positions), Signature Blocks, Field Selection. Preview then export. Also available: CSV for Excel, JSON for backup from Settings.' },
+      { q: 'Is my data stored securely?', a: 'Yes. All data is stored locally in your browser\'s storage - nothing is transmitted to external servers. You have complete control over your data and can export or delete it at any time from Settings > Privacy.' },
+      { q: 'How many AI queries can I make on the Free plan?', a: '<strong>Free Plan: 50 AI queries per month</strong><br><strong>Pro Plan: Unlimited AI queries</strong><br><br>Your AI query count resets on the 1st of each month. Check your usage in Profile > Billing tab. When you reach 50 queries on Free plan, upgrade to Pro for unlimited access.' },
+      { q: 'How do I add more team seats?', a: 'Go to Profile > Billing tab and click "Add Seats". Enter the number of seats you need and see the live monthly cost preview. Pro plan: $5 per seat per month. After adding seats, invite new team members from Settings > Team Management.' },
+      { q: 'How do I download an invoice?', a: 'Go to Profile > Billing tab. Scroll to "Billing History" section and click the Download button next to any invoice. A professional PDF invoice with your company details will be generated and downloaded automatically.' },
+      { q: 'What payment methods are accepted?', a: 'We accept all major credit cards (Visa, Mastercard, American Express) via Stripe secure payment processing. You can update your payment method anytime in Profile > Billing > Payment Method section.' }
+    ];
+
+    // Render FAQs
+    function renderFAQs() {
+      var faqList = document.getElementById('faq-list');
+      var html = '';
+      for (var i = 0; i < faqs.length; i++) {
+        html += '<div class="faq-item" data-index="' + i + '">' +
+          '<div class="faq-question">' +
+          '<span class="faq-question-text">' + faqs[i].q + '</span>' +
+          '<span class="faq-toggle">▼</span>' +
+          '</div>' +
+          '<div class="faq-answer">' + faqs[i].a + '</div>' +
+          '</div>';
+      }
+      faqList.innerHTML = html;
+    }
+
+    // FAQ toggle
+    document.getElementById('faq-list').addEventListener('click', function(e) {
+      var question = e.target.closest('.faq-question');
+      if (question) {
+        var item = question.parentElement;
+        var wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+        if (!wasOpen) item.classList.add('open');
+      }
+    });
+
+    // Search
+    var searchInput = document.getElementById('help-search');
+    var searchResults = document.getElementById('search-results');
+    var searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      var query = this.value.trim().toLowerCase();
+      if (query.length < 2) { searchResults.classList.remove('visible'); return; }
+      searchTimeout = setTimeout(function() {
+        var results = searchHelpContent(query);
+        displaySearchResults(results, query);
+      }, 200);
+    });
+
+    searchInput.addEventListener('focus', function() {
+      if (this.value.trim().length >= 2) searchResults.classList.add('visible');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) searchResults.classList.remove('visible');
+    });
+
+    function searchHelpContent(query) {
+      var words = query.split(/\s+/);
+      var results = [];
+      for (var i = 0; i < helpContent.length; i++) {
+        var item = helpContent[i];
+        var searchText = (item.title + ' ' + item.keywords + ' ' + item.content).toLowerCase();
+        var score = 0;
+        for (var j = 0; j < words.length; j++) {
+          if (searchText.indexOf(words[j]) !== -1) {
+            score++;
+            if (item.title.toLowerCase().indexOf(words[j]) !== -1) score += 2;
+          }
+        }
+        if (score > 0) results.push({ item: item, score: score });
+      }
+      results.sort(function(a, b) { return b.score - a.score; });
+      return results.slice(0, 8);
+    }
+
+    function displaySearchResults(results, query) {
+      if (results.length === 0) {
+        searchResults.innerHTML = '<div class="no-results">No results found for "' + escapeHtml(query) + '"</div>';
+        searchResults.classList.add('visible');
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < results.length; i++) {
+        var item = results[i].item;
+        html += '<a href="' + item.url + '" class="search-result-item">' +
+          '<div class="result-category">' + item.category + '</div>' +
+          '<div class="result-title">' + item.title + '</div>' +
+          '<div class="result-excerpt">' + highlightText(item.content, query) + '</div>' +
+          '</a>';
+      }
+      searchResults.innerHTML = html;
+      searchResults.classList.add('visible');
+    }
+
+    function highlightText(text, query) {
+      var words = query.split(/\s+/);
+      var result = text;
+      for (var i = 0; i < words.length; i++) {
+        if (words[i].length < 2) continue;
+        var regex = new RegExp('(' + escapeRegex(words[i]) + ')', 'gi');
+        result = result.replace(regex, '<mark>$1</mark>');
+      }
+      return result;
+    }
+
+    function escapeHtml(text) { var d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+    function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+    // URL search param
+    function handleUrlSearch() {
+      var params = new URLSearchParams(window.location.search);
+      var query = params.get('search');
+      if (query) { searchInput.value = query; searchInput.dispatchEvent(new Event('input')); searchInput.focus(); }
+    }
+
+    // Check if user is logged in and update back link
+    function updateBackLink() {
+      var backLink = document.querySelector('.back-link');
+      if (!backLink) return;
+
+      // Check localStorage for user data (using same storage key as main app)
+      var userData = null;
+      try {
+        var rawData = localStorage.getItem('ERM_user');
+        if (rawData) {
+          userData = JSON.parse(rawData);
+        }
+      } catch (e) {
+        userData = null;
+      }
+
+      if (userData && userData.name) {
+        // User is logged in - go to dashboard
+        backLink.href = '../index.html';
+        backLink.textContent = '← Back to Dashboard';
+      } else {
+        // User is not logged in - go to login/signup
+        backLink.href = '../login.html';
+        backLink.textContent = '← Login / Create Account';
+      }
+    }
+
+    renderFAQs();
+    handleUrlSearch();
+    updateBackLink();
+  </script>
+</body>
+</html>

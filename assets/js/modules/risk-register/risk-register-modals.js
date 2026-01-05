@@ -546,110 +546,9 @@ ERM.riskRegister.parseScoreValue = function (value) {
 };
 
 /* ========================================
-   TEMPLATE SELECTION MODAL
-   ======================================== */
-ERM.riskRegister.showTemplateModal = function () {
-  var self = this;
-
-  var templates = [
-    {
-      id: "banking",
-      name: "Banking & Finance",
-      desc: "Basel III, AML/KYC, Market Risk",
-      icon: "🏦",
-    },
-    {
-      id: "healthcare",
-      name: "Healthcare",
-      desc: "HIPAA, Patient Safety, Clinical",
-      icon: "🏥",
-    },
-    {
-      id: "manufacturing",
-      name: "Manufacturing",
-      desc: "Supply Chain, Quality, Safety",
-      icon: "🏭",
-    },
-    {
-      id: "technology",
-      name: "Technology",
-      desc: "Cyber Security, Data Privacy",
-      icon: "💻",
-    },
-    {
-      id: "government",
-      name: "Government/Public",
-      desc: "PFMA, King IV, Compliance",
-      icon: "🏛️",
-    },
-    {
-      id: "retail",
-      name: "Retail",
-      desc: "Supply Chain, Consumer, Inventory",
-      icon: "🏪",
-    },
-  ];
-
-  var cardsHtml = "";
-  for (var i = 0; i < templates.length; i++) {
-    var t = templates[i];
-    cardsHtml +=
-      '<div class="template-card" data-template="' +
-      t.id +
-      '">' +
-      '<div class="template-card-icon">' +
-      t.icon +
-      "</div>" +
-      '<div class="template-card-content">' +
-      '<div class="template-card-title">' +
-      t.name +
-      "</div>" +
-      '<div class="template-card-desc">' +
-      t.desc +
-      "</div>" +
-      "</div>" +
-      "</div>";
-  }
-
-  var content =
-    '<div class="template-selection">' +
-    '<p class="text-secondary">Select an industry template to pre-populate your register with relevant risks:</p>' +
-    '<div class="template-cards">' +
-    cardsHtml +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showModal({
-    title: "Select Template",
-    content: content,
-    buttons: [{ label: "Back", type: "secondary", action: "back" }],
-    onAction: function (action) {
-      if (action === "back") {
-        ERM.components.closeModal();
-        setTimeout(function () {
-          self.showCreateModal();
-        }, 250);
-      }
-    },
-    onOpen: function () {
-      var cards = document.querySelectorAll(".template-card");
-      for (var j = 0; j < cards.length; j++) {
-        cards[j].addEventListener("click", function () {
-          var templateId = this.getAttribute("data-template");
-          ERM.components.closeModal();
-          setTimeout(function () {
-            self.showNameRegisterModal(templateId);
-          }, 250);
-        });
-      }
-    },
-  });
-};
-
-/* ========================================
    NAME REGISTER MODAL
    ======================================== */
-ERM.riskRegister.showNameRegisterModal = function (templateId) {
+ERM.riskRegister.showNameRegisterModal = function () {
   var self = this;
 
   // Get industry from onboarding - require selection if not set
@@ -726,35 +625,8 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
     { id: "other", name: "Other" },
   ];
 
-  // Check which industries have templates loaded
-  var getAvailableIndustries = function () {
-    var available = [];
-    for (var i = 0; i < allIndustries.length; i++) {
-      var ind = allIndustries[i];
-      // "Other" is always available (uses generic templates)
-      if (ind.id === "other") {
-        available.push({
-          id: ind.id,
-          name: ind.name,
-          available: true,
-        });
-        continue;
-      }
-      // Check if templates exist for this industry
-      var hasTemplates =
-        typeof ERM_TEMPLATES !== "undefined" &&
-        ERM_TEMPLATES[ind.id] &&
-        (ERM_TEMPLATES[ind.id].categories || ERM_TEMPLATES[ind.id].risks);
-      available.push({
-        id: ind.id,
-        name: ind.name,
-        available: hasTemplates,
-      });
-    }
-    return available;
-  };
-
-  var industries = getAvailableIndustries();
+  // All industries are available (AI suggestions work for all)
+  var industries = allIndustries;
 
   // Build register type cards
   var typeCardsHtml = '<div class="register-type-grid">';
@@ -818,12 +690,7 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
   industryDropdownHtml += '</div></div>';
   industryDropdownHtml += '<input type="hidden" id="register-industry-select" value="' + (defaultIndustry || '') + '">';
 
-  var placeholder = templateId
-    ? "e.g., " +
-      templateId.charAt(0).toUpperCase() +
-      templateId.slice(1) +
-      " Risk Register 2025"
-    : "e.g., Operational Risk Register 2025";
+  var placeholder = "e.g., Operational Risk Register 2025";
 
   var content =
     '<div class="create-register-form">' +
@@ -850,7 +717,7 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
     title: "Create Risk Register",
     content: content,
     buttons: [
-      { label: "Back", type: "secondary", action: "back" },
+      { label: "Cancel", type: "secondary", action: "back" },
       { label: "Create Register", type: "primary", action: "create" },
     ],
     onOpen: function () {
@@ -951,13 +818,6 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
     onAction: function (action) {
       if (action === "back") {
         ERM.components.closeModal();
-        setTimeout(function () {
-          if (templateId) {
-            self.showTemplateModal();
-          } else {
-            self.showCreateModal();
-          }
-        }, 250);
       } else if (action === "create") {
         var nameInput = document.getElementById("register-name-input");
         var industrySelect = document.getElementById(
@@ -1004,7 +864,6 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
           name: name,
           type: registerType,
           industry: industry,
-          template: templateId,
           createdAt: new Date().toISOString(),
           createdBy: (ERM.state.user && ERM.state.user.name) || "User",
           riskCount: 0,
@@ -1022,19 +881,11 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
           });
         }
 
-        // Generate template risks if applicable (from pre-built templates)
-        if (templateId) {
-          self.generateTemplateRisks(newRegister.id, templateId);
-          ERM.components.closeModal();
-          self.renderRegisterList();
-          ERM.toast.success("Register created successfully");
-        } else {
-          // Show AI starter risks prompt
-          ERM.components.closeModal();
-          setTimeout(function () {
-            self.showAIStarterPrompt(newRegister);
-          }, 300);
-        }
+        // Show AI starter risks prompt
+        ERM.components.closeModal();
+        setTimeout(function () {
+          self.showAIStarterPrompt(newRegister);
+        }, 300);
       }
     },
   });
@@ -1442,58 +1293,11 @@ ERM.riskRegister.showAIStarterTemplates = function (register, deepSeekTemplates)
 };
 
 /* ========================================
-   GET STARTER TEMPLATES
+   GET STARTER TEMPLATES (stub - templates removed, use AI instead)
    ======================================== */
 ERM.riskRegister.getStarterTemplates = function (industry, registerType) {
-  // Check if templates exist
-  if (typeof ERM_TEMPLATES === "undefined" || !ERM_TEMPLATES[industry]) {
-    return [];
-  }
-
-  var risks = ERM_TEMPLATES[industry].risks;
-  if (!risks) return [];
-
-  // Map register type to risk category keys
-  var categoryMap = {
-    enterprise: ["strategic", "operational", "financial", "governance", "reputation"],
-    strategic: ["strategic", "governance", "reputation", "market"],
-    operational: ["operational", "production", "quality", "business-continuity", "supply-chain"],
-    financial: ["financial", "cash-flow", "fraud", "financial-reporting"],
-    compliance: ["compliance", "regulatory", "contract", "litigation", "employment-law"],
-    hse: ["fatal-risk-management", "hse", "safety", "environmental", "workplace-safety"],
-    technology: ["technology", "cyber", "it", "cybersecurity", "data-privacy", "system-failure"],
-    project: ["project"],
-  };
-
-  var targetCategories = categoryMap[registerType] || [registerType];
-  var templates = [];
-
-  // Search through risk categories
-  for (var catKey in risks) {
-    if (!risks.hasOwnProperty(catKey)) continue;
-
-    // Check if this category matches our target
-    var matches = false;
-    for (var i = 0; i < targetCategories.length; i++) {
-      if (catKey.toLowerCase().indexOf(targetCategories[i]) !== -1) {
-        matches = true;
-        break;
-      }
-    }
-
-    if (matches && Array.isArray(risks[catKey])) {
-      for (var j = 0; j < risks[catKey].length; j++) {
-        templates.push(risks[catKey][j]);
-      }
-    }
-  }
-
-  // Shuffle and return
-  if (typeof ERM.riskAI !== "undefined" && ERM.riskAI.shuffleArray) {
-    templates = ERM.riskAI.shuffleArray(templates);
-  }
-
-  return templates;
+  // Templates removed - return empty, AI will provide suggestions
+  return [];
 };
 
 /* ========================================

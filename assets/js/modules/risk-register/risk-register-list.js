@@ -864,7 +864,6 @@ ERM.riskRegister.duplicateRegister = function (register) {
   var newRegister = {
     id: ERM.utils.generateId("reg"),
     name: newName,
-    template: register.template,
     createdAt: new Date().toISOString(),
     createdBy: (ERM.state.user && ERM.state.user.name) || "User",
     riskCount: 0,
@@ -955,62 +954,12 @@ ERM.riskRegister.openRegister = function (registerId) {
 };
 
 /* ========================================
-   TEMPLATE RISK GENERATION
+   TEMPLATE RISK GENERATION (stub - templates removed, use AI instead)
    ======================================== */
 ERM.riskRegister.generateTemplateRisks = function (registerId, templateId) {
-  var risks = ERM.storage.get("risks") || [];
-  var registers = ERM.storage.get("registers") || [];
-
-  // Get template risks from templates.js
-  var templateRisks = [];
-  if (typeof ERM.templates !== "undefined" && ERM.templates[templateId]) {
-    templateRisks = ERM.templates[templateId].risks || [];
-  }
-
-  // Create risk records
-  for (var i = 0; i < templateRisks.length; i++) {
-    var tr = templateRisks[i];
-    var inherentScore = (tr.inherentLikelihood || 3) * (tr.inherentImpact || 3);
-    var residualScore = (tr.residualLikelihood || 2) * (tr.residualImpact || 2);
-
-    risks.push({
-      id: ERM.utils.generateId("risk"),
-      registerId: registerId,
-      title: tr.title,
-      description: tr.description || "",
-      category: tr.category || "operational",
-      owner: tr.owner || "",
-      strategicObjective: tr.strategicObjective || "",
-      causes: (tr.causes || []).slice(0, 3),
-      consequences: (tr.consequences || []).slice(0, 3),
-      inherentLikelihood: tr.inherentLikelihood || 3,
-      inherentImpact: tr.inherentImpact || 3,
-      inherentScore: inherentScore,
-      inherentRisk: this.getRiskLevelFromScore(inherentScore),
-      residualLikelihood: tr.residualLikelihood || 2,
-      residualImpact: tr.residualImpact || 2,
-      residualScore: residualScore,
-      residualRisk: this.getRiskLevelFromScore(residualScore),
-      treatment: tr.treatment || "Mitigate",
-      status: tr.status || "Open",
-      linkedControls: [],
-      reviewDate: null,
-      actionPlan: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  // Update register risk count
-  for (var j = 0; j < registers.length; j++) {
-    if (registers[j].id === registerId) {
-      registers[j].riskCount = templateRisks.length;
-      break;
-    }
-  }
-
-  ERM.storage.set("risks", risks);
-  ERM.storage.set("registers", registers);
+  // Templates removed - this function is no longer used
+  // AI-generated risks are now the primary way to populate registers
+  console.log('[RiskRegister] generateTemplateRisks called but templates are removed');
 };
 
 /* ========================================

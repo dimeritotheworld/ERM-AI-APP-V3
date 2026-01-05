@@ -59,7 +59,8 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(git remote set-url:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nERM AI APP V2 - No Templates\n\nRemoved all industry template files and references to reduce codebase size.\n\nRemoved:\n- assets/templates/ folder \\(53 files, 2.8MB\\)\n- Template script references from index.html\n- Template documentation files\n\nThe app still works - AI-generated risks via DeepSeek are still available.\nStatic template-based starter risks will return empty gracefully.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nERM AI APP V2 - No Templates\n\nRemoved all industry template files and references to reduce codebase size.\n\nRemoved:\n- assets/templates/ folder \\(53 files, 2.8MB\\)\n- Template script references from index.html\n- Template documentation files\n\nThe app still works - AI-generated risks via DeepSeek are still available.\nStatic template-based starter risks will return empty gracefully.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(grep:*)"
     ]
   }
 }

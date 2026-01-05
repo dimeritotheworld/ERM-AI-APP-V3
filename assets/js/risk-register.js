@@ -577,7 +577,6 @@ ERM.riskRegister.duplicateRegister = function (register) {
   var newRegister = {
     id: ERM.utils.generateId("reg"),
     name: newName,
-    template: register.template,
     createdAt: new Date().toISOString(),
     createdBy: (ERM.state.user && ERM.state.user.name) || "User",
     riskCount: 0,
@@ -710,116 +709,13 @@ ERM.riskRegister.showBulkDeleteRegistersModal = function (registerIds) {
    CREATE REGISTER MODALS
    ======================================== */
 ERM.riskRegister.showCreateModal = function () {
-  var self = this;
-
-  var content =
-    '<div class="option-cards">' +
-    '<div class="option-card" data-option="scratch">' +
-    '<div class="option-card-icon">📝</div>' +
-    '<div class="option-card-title">Start from Scratch</div>' +
-    '<div class="option-card-desc">Create an empty register</div>' +
-    "</div>" +
-    '<div class="option-card" data-option="template">' +
-    '<div class="option-card-icon">📋</div>' +
-    '<div class="option-card-title">Use a Template</div>' +
-    '<div class="option-card-desc">Pre-populated with industry risks</div>' +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showModal({
-    title: "Create Risk Register",
-    content: content,
-    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
-    onOpen: function () {
-      var options = document.querySelectorAll(".option-card");
-      for (var i = 0; i < options.length; i++) {
-        options[i].addEventListener("click", function () {
-          var option = this.getAttribute("data-option");
-          ERM.components.closeModal();
-          setTimeout(function () {
-            if (option === "scratch") {
-              self.showNameRegisterModal(null);
-            } else {
-              self.showTemplateModal();
-            }
-          }, 250);
-        });
-      }
-    },
-  });
+  // Go directly to naming the register
+  this.showNameRegisterModal();
 };
 
-ERM.riskRegister.showTemplateModal = function () {
+ERM.riskRegister.showNameRegisterModal = function () {
   var self = this;
-
-  var templates = [
-    { id: "banking", name: "Banking & Finance", icon: "🏦" },
-    { id: "mining", name: "Mining & Resources", icon: "⛏️" },
-    { id: "telecom", name: "Telecommunications", icon: "📡" },
-    { id: "healthcare", name: "Healthcare", icon: "🏥" },
-    { id: "public", name: "Public Sector", icon: "🏛️" },
-    { id: "manufacturing", name: "Manufacturing", icon: "🏭" },
-  ];
-
-  var content =
-    '<p class="template-note success">Templates include 12 pre-populated risks based on industry best practices.</p>' +
-    '<div class="template-grid">';
-
-  for (var i = 0; i < templates.length; i++) {
-    var t = templates[i];
-    content +=
-      '<div class="template-card" data-template="' +
-      t.id +
-      '">' +
-      '<div class="template-card-icon">' +
-      t.icon +
-      "</div>" +
-      '<div class="template-card-title">' +
-      t.name +
-      "</div>" +
-      "</div>";
-  }
-
-  content += "</div>";
-
-  ERM.components.showModal({
-    title: "Select Industry Template",
-    content: content,
-    buttons: [
-      { label: "Back", type: "secondary", action: "back" },
-      { label: "Cancel", type: "ghost", action: "close" },
-    ],
-    onAction: function (action) {
-      if (action === "back") {
-        ERM.components.closeModal();
-        setTimeout(function () {
-          self.showCreateModal();
-        }, 250);
-      }
-    },
-    onOpen: function () {
-      var cards = document.querySelectorAll(".template-card");
-      for (var j = 0; j < cards.length; j++) {
-        cards[j].addEventListener("click", function () {
-          var templateId = this.getAttribute("data-template");
-          ERM.components.closeModal();
-          setTimeout(function () {
-            self.showNameRegisterModal(templateId);
-          }, 250);
-        });
-      }
-    },
-  });
-};
-
-ERM.riskRegister.showNameRegisterModal = function (templateId) {
-  var self = this;
-  var placeholder = templateId
-    ? "e.g., " +
-      templateId.charAt(0).toUpperCase() +
-      templateId.slice(1) +
-      " Risk Register 2025"
-    : "e.g., Corporate Risk Register 2025";
+  var placeholder = "e.g., Corporate Risk Register 2025";
 
   var content =
     '<div class="form-group">' +
@@ -831,23 +727,14 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
     "</div>";
 
   ERM.components.showModal({
-    title: "Name Your Register",
+    title: "Create Risk Register",
     content: content,
     buttons: [
-      { label: "Back", type: "secondary", action: "back" },
+      { label: "Cancel", type: "secondary", action: "close" },
       { label: "Create Register", type: "primary", action: "create" },
     ],
     onAction: function (action) {
-      if (action === "back") {
-        ERM.components.closeModal();
-        setTimeout(function () {
-          if (templateId) {
-            self.showTemplateModal();
-          } else {
-            self.showCreateModal();
-          }
-        }, 250);
-      } else if (action === "create") {
+      if (action === "create") {
         var input = document.getElementById("register-name-input");
         var name = input ? input.value.trim() : "";
 
@@ -869,7 +756,6 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
         var newRegister = {
           id: ERM.utils.generateId("reg"),
           name: name,
-          template: templateId,
           createdAt: new Date().toISOString(),
           createdBy: (ERM.state.user && ERM.state.user.name) || "User",
           riskCount: 0,
@@ -878,76 +764,12 @@ ERM.riskRegister.showNameRegisterModal = function (templateId) {
         registers.push(newRegister);
         ERM.storage.set("registers", registers);
 
-        // Generate template risks if applicable
-        if (templateId) {
-          self.generateTemplateRisks(newRegister.id, templateId);
-        }
-
         ERM.components.closeModal();
         self.renderRegisterList();
         ERM.toast.success("Register created successfully");
       }
     },
   });
-};
-
-/* ========================================
-   TEMPLATE RISK GENERATION
-   ======================================== */
-ERM.riskRegister.generateTemplateRisks = function (registerId, templateId) {
-  var risks = ERM.storage.get("risks") || [];
-  var registers = ERM.storage.get("registers") || [];
-
-  // Get template risks from templates.js
-  var templateRisks = [];
-  if (typeof ERM.templates !== "undefined" && ERM.templates[templateId]) {
-    templateRisks = ERM.templates[templateId].risks || [];
-  }
-
-  // Create risk records
-  for (var i = 0; i < templateRisks.length; i++) {
-    var tr = templateRisks[i];
-    var inherentScore = (tr.inherentLikelihood || 3) * (tr.inherentImpact || 3);
-    var residualScore = (tr.residualLikelihood || 2) * (tr.residualImpact || 2);
-
-    risks.push({
-      id: ERM.utils.generateId("risk"),
-      registerId: registerId,
-      title: tr.title,
-      description: tr.description || "",
-      category: tr.category || "operational",
-      owner: tr.owner || "",
-      strategicObjective: tr.strategicObjective || "",
-      causes: tr.causes || [],
-      consequences: tr.consequences || [],
-      inherentLikelihood: tr.inherentLikelihood || 3,
-      inherentImpact: tr.inherentImpact || 3,
-      inherentScore: inherentScore,
-      inherentRisk: this.getRiskLevelFromScore(inherentScore),
-      residualLikelihood: tr.residualLikelihood || 2,
-      residualImpact: tr.residualImpact || 2,
-      residualScore: residualScore,
-      residualRisk: this.getRiskLevelFromScore(residualScore),
-      treatment: tr.treatment || "Mitigate",
-      status: tr.status || "Open",
-      linkedControls: [],
-      reviewDate: null,
-      actionPlan: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  // Update register risk count
-  for (var j = 0; j < registers.length; j++) {
-    if (registers[j].id === registerId) {
-      registers[j].riskCount = templateRisks.length;
-      break;
-    }
-  }
-
-  ERM.storage.set("risks", risks);
-  ERM.storage.set("registers", registers);
 };
 
 /* ========================================

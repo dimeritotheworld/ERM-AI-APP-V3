@@ -52,7 +52,14 @@
       "Bash(npx kill-port:*)",
       "Bash(git config:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nERM AI APP V1 - Complete Enterprise Risk Management Platform\n\nFeatures:\n- Notion-style block-based report editor with AI assistance\n- Professional PDF export with A4 layout and proper margins\n- Auto-pagination system with overflow handling\n- AI content insertion with formatting preservation\n- Risk register with AI suggestions\n- Control library management\n- Team collaboration with mentions\n- Admin portal for workspace management\n- Multi-industry templates \\(Healthcare, Manufacturing, Energy, etc.\\)\n\nTechnical:\n- Express.js server with Puppeteer PDF generation\n- ES5 compatible JavaScript for broad browser support\n- Professional margins: 25mm top/bottom, 25mm left, 20mm right\n- Orphan heading prevention in page breaks\nEOF\n\\)\")",
+      "Bash(gh repo create:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nERM AI APP V2 - No Templates\n\nRemoved all industry template files and references to reduce codebase size.\n\nRemoved:\n- assets/templates/ folder \\(53 files, 2.8MB\\)\n- Template script references from index.html\n- Template documentation files\n\nThe app still works - AI-generated risks via DeepSeek are still available.\nStatic template-based starter risks will return empty gracefully.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

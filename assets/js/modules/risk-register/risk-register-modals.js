@@ -4,6 +4,135 @@
  *
  * @version 3.0.0
  * ES5 Compatible
+ *
+ * ============================================================================
+ * TABLE OF CONTENTS - Use Ctrl+F to jump to sections
+ * ============================================================================
+ *
+ * SECTION 1: REGISTER CRUD (Lines ~30-540)
+ * -----------------------------------------
+ *   - showCreateModal()              - Create new register modal
+ *   - showUpgradeModal()             - Upgrade plan prompt
+ *   - showImportPreviewModal()       - Import preview for free users
+ *   - showImportFileModal()          - Import file for PRO users
+ *   - processImportFile()            - Process imported CSV/Excel
+ *   - parseCSVToRisks()              - Parse CSV content
+ *   - parseCSVRow()                  - Parse single CSV row
+ *   - parseScoreValue()              - Parse score from string
+ *
+ * SECTION 2: REGISTER NAMING & AI STARTER (Lines ~540-1460)
+ * ----------------------------------------------------------
+ *   - showNameRegisterModal()        - Name new register form
+ *   - showAIStarterPrompt()          - AI starter risks prompt
+ *   - showAIStarterThinking()        - AI thinking animation
+ *   - showAIStarterTemplates()       - Show AI-generated templates
+ *   - getStarterTemplates()          - Get templates (stub - uses AI)
+ *   - addStarterRisks()              - Add selected starter risks
+ *   - calculateTargetDate()          - Calculate future date
+ *
+ * SECTION 3: REGISTER MANAGEMENT (Lines ~1460-1660)
+ * --------------------------------------------------
+ *   - showRenameModal()              - Rename register
+ *   - showDeleteRegisterModal()      - Delete register confirm
+ *   - showBulkDeleteRegistersModal() - Bulk delete confirm
+ *   - showModifyRegisterModal()      - Modify register details
+ *   - showImportModal()              - Import risks to register
+ *
+ * SECTION 4: PDF EXPORT (Lines ~1660-4100)
+ * -----------------------------------------
+ *   - showExportModal()              - Export format selection
+ *   - showExportUpgradeModal()       - Upgrade for Excel/CSV
+ *   - showPDFConfigModal()           - PDF configuration modal
+ *   - buildFieldCheckboxesHtml()     - Build field selection UI
+ *   - savePDFConfig()                - Save PDF configuration
+ *   - showPDFPreviewInModal()        - Preview PDF in modal
+ *   - buildInModalPreviewHtml()      - Build preview HTML
+ *   - initPDFConfigHandlers()        - Initialize config handlers
+ *   - initPDFConfigHandlersFull()    - Full config handlers
+ *   - bindRemoveSignatureHandlers()  - Signature removal handlers
+ *   - updateSignaturePreview()       - Update signature preview
+ *   - generatePDFReport()            - Generate PDF report
+ *   - showPDFExportProgress()        - Show export progress
+ *   - animatePDFExportProgress()     - Animate progress stages
+ *   - exportConfiguredPDF()          - Export with config
+ *   - generatePDFReportFull()        - Full PDF generation
+ *   - generatePDFReportFullWithConfig() - PDF with stored config
+ *   - gatherPDFConfig()              - Gather config from form
+ *   - getRiskColor()                 - Get color for risk score
+ *   - formatCategory()               - Format category name
+ *
+ * SECTION 5: RISK DRAFTS (Lines ~4100-4400)
+ * ------------------------------------------
+ *   - getRiskDrafts()                - Get saved drafts
+ *   - saveRiskDraft()                - Save draft to storage
+ *   - deleteRiskDraft()              - Delete a draft
+ *   - loadRiskDraft()                - Load draft into form
+ *   - showRiskDraftsModal()          - Show drafts modal
+ *
+ * SECTION 6: RISK FORM MODAL (Lines ~4400-5800)
+ * ----------------------------------------------
+ *   - showRiskModal()                - Main risk add/edit modal
+ *   - buildRiskFormHtml()            - Build risk form HTML
+ *   - initRiskFormEvents()           - Initialize form events
+ *   - bindListInputEvents()          - List input handlers
+ *   - addListItem()                  - Add item to list
+ *   - removeListItem()               - Remove item from list
+ *   - handleEscalationToggle()       - Escalation checkbox
+ *   - updateInherentScore()          - Calculate inherent score
+ *   - updateResidualScore()          - Calculate residual score
+ *   - populateRiskForm()             - Populate form with data
+ *   - gatherRiskFormData()           - Gather form data
+ *   - saveRisk()                     - Save risk to storage
+ *   - validateRiskForm()             - Validate required fields
+ *
+ * SECTION 7: ATTACHMENTS (Lines ~5800-6200)
+ * ------------------------------------------
+ *   - initAttachmentHandlers()       - Initialize attachment UI
+ *   - addAttachment()                - Add attachment
+ *   - removeAttachment()             - Remove attachment
+ *   - renderAttachmentsList()        - Render attachments list
+ *   - formatFileSize()               - Format bytes to KB/MB
+ *
+ * SECTION 8: CONTROL LINKING (Lines ~6200-6550)
+ * ----------------------------------------------
+ *   - buildInlineControlSelector()   - Build control selector
+ *   - showControlTooltip()           - Show control tooltip
+ *   - hideControlTooltip()           - Hide control tooltip
+ *   - showTeamFeatureModal()         - Team feature upsell
+ *
+ * SECTION 9: AI CONTROL SUGGESTIONS (Lines ~6550-7200)
+ * -----------------------------------------------------
+ *   - showAIControlSuggestions()     - AI control suggestions
+ *   - gatherFullRiskContext()        - Gather risk context for AI
+ *   - getControlGenerationSystemPrompt() - System prompt for AI
+ *   - buildControlGenerationPrompt() - Build AI prompt
+ *   - parseControlSuggestionsResponse() - Parse AI response
+ *   - renderDeepSeekControlSuggestions() - Render AI suggestions
+ *   - createControlFromAISuggestion() - Create control from AI
+ *   - linkControlToCurrentRisk()     - Link control to risk
+ *   - showNoControlSuggestions()     - No suggestions fallback
+ *   - renderControlSuggestions()     - Render template suggestions
+ *   - useAIControl()                 - Use AI control (legacy)
+ *   - showCreateControlModal()       - Create control choice modal
+ *   - aiGenerateControlFromRisk()    - AI generate from risk
+ *   - openManualControlForm()        - Open manual control form
+ *
+ * SECTION 10: AI RISK SCORING (Lines ~7200-7400)
+ * -----------------------------------------------
+ *   - handleAIScoring()              - Handle AI scoring
+ *   - getLinkedControlsFromForm()    - Get linked controls
+ *   - applyAIScore()                 - Apply AI score to form
+ *
+ * SECTION 11: BULK OPERATIONS (Lines ~7400-7600)
+ * -----------------------------------------------
+ *   - showBulkDeleteModal()          - Bulk delete risks
+ *   - showBulkEditModal()            - Bulk edit risks
+ *
+ * SECTION 12: GLOBAL EVENT LISTENERS (Lines ~7600-7680)
+ * -------------------------------------------------------
+ *   - erm:controls-updated listener  - Refresh on control update
+ *
+ * ============================================================================
  */
 
 console.log("Loading risk-register-modals.js...");
@@ -198,25 +327,19 @@ ERM.riskRegister.showImportPreviewModal = function () {
     "</div>" +
     '<div class="import-preview-benefits">' +
     '<div class="import-benefit">' +
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
     "<span>AI auto-categorizes your risks</span>" +
     "</div>" +
     '<div class="import-benefit">' +
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
     "<span>Suggests missing controls & actions</span>" +
     "</div>" +
     '<div class="import-benefit">' +
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>' +
     "<span>Populates dashboards & reports instantly</span>" +
     "</div>" +
     "</div>" +
-    '<div class="import-template-download">' +
-    '<a href="/assets/templates/dimeri-erm-import-template.xlsx" download class="btn btn-ghost" id="download-template-btn">' +
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-    " Download Template" +
-    "</a>" +
-    '<span class="template-hint">See the format before upgrading</span>' +
-    "</div>" +
+    "<!-- Template download removed - template file not available -->" +
     "</div>";
 
   ERM.components.showModal({
@@ -267,12 +390,7 @@ ERM.riskRegister.showImportFileModal = function () {
     '<span class="checkbox-label">AI enhance imported risks (recommended)</span>' +
     "</label>" +
     "</div>" +
-    '<div class="import-template-download" style="margin-top: 16px;">' +
-    '<a href="/assets/templates/dimeri-erm-import-template.xlsx" download class="btn btn-ghost">' +
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-    " Download Template" +
-    "</a>" +
-    "</div>" +
+    "<!-- Template download removed - template file not available -->" +
     "</div>";
 
   var selectedFile = null;
@@ -708,7 +826,7 @@ ERM.riskRegister.showNameRegisterModal = function () {
     "</div>" +
     // Industry
     '<div class="form-group">' +
-    '<label class="form-label">Industry <span class="text-muted">(for AI suggestions)</span></label>' +
+    '<label class="form-label">Industry <span class="label-hint">(for AI suggestions)</span></label>' +
     industryDropdownHtml +
     "</div>" +
     "</div>";
@@ -800,19 +918,24 @@ ERM.riskRegister.showNameRegisterModal = function () {
           });
         }
 
-        // Close dropdown when clicking outside
-        document.addEventListener("click", function (e) {
-          if (industryDropdown && !industryDropdown.contains(e.target)) {
-            industryDropdown.classList.remove("open");
-          }
-        });
+        // Close dropdown when clicking outside (guarded)
+        if (!ERM.riskRegister._modalIndustryClickBound) {
+          ERM.riskRegister._modalIndustryClickBound = true;
+          document.addEventListener("click", function (e) {
+            var dd = document.querySelector(".industry-dropdown");
+            if (dd && !dd.contains(e.target)) {
+              dd.classList.remove("open");
+            }
+          });
 
-        // Close on escape key
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape" && industryDropdown.classList.contains("open")) {
-            industryDropdown.classList.remove("open");
-          }
-        });
+          // Close on escape key
+          document.addEventListener("keydown", function (e) {
+            var dd = document.querySelector(".industry-dropdown");
+            if (e.key === "Escape" && dd && dd.classList.contains("open")) {
+              dd.classList.remove("open");
+            }
+          });
+        }
       }
     },
     onAction: function (action) {
@@ -929,23 +1052,22 @@ ERM.riskRegister.showAIStarterPrompt = function (register) {
   var industryName = industryNames[register.industry] || register.industry;
 
   var content =
-    '<div class="ai-starter-prompt">' +
-    '<div class="ai-starter-icon">✨</div>' +
-    '<p class="ai-starter-text">Would you like AI to suggest starter risks for your <strong>' +
+    '<div class="ai-starter-prompt compact">' +
+    '<p class="ai-starter-text">Would you like AI to suggest a starter set of risks for your <strong>' +
     typeName +
     "</strong> register?</p>" +
     '<p class="ai-starter-subtext">Based on ' +
     industryName +
-    " industry best practices</p>" +
+    " industry best practices and common ERM frameworks</p>" +
     "</div>";
 
   ERM.components.showModal({
-    title: "AI Risk Assistant",
+    title: "✨ AI Risk Assistant",
     content: content,
     size: "small",
     buttons: [
-      { label: "No, start empty", type: "secondary", action: "skip" },
-      { label: "Yes, help me start", type: "primary", action: "suggest" },
+      { label: "Continue empty", type: "secondary", action: "skip" },
+      { label: "Generate starter risks", type: "primary", action: "suggest" },
     ],
     onAction: function (action) {
       if (action === "skip") {
@@ -953,7 +1075,15 @@ ERM.riskRegister.showAIStarterPrompt = function (register) {
         self.renderRegisterList();
         ERM.toast.success("Register created successfully");
       } else if (action === "suggest") {
-        self.showAIStarterThinking(register, typeName, industryName);
+        // Use unified button animation before showing progress
+        var btn = document.querySelector('.modal-footer .btn-primary');
+        if (btn && ERM.aiSuggestions && ERM.aiSuggestions.startButtonThinking) {
+          ERM.aiSuggestions.startButtonThinking(btn, "Loading suggestions");
+        }
+        // Small delay then show the thinking modal
+        setTimeout(function() {
+          self.showAIStarterThinking(register, typeName, industryName);
+        }, 200);
       }
     },
   });
@@ -971,27 +1101,27 @@ ERM.riskRegister.showAIStarterThinking = function (
 ) {
   var self = this;
 
-  // Sparkles icon for header
-  var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+  // Setup icon for header (gear/cog - deterministic, not "thinking")
+  var setupIcon = '<svg class="setup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
 
-  // Build steps HTML with the same pattern as showThinkingModal
+  // Build steps HTML - SYSTEM ACTIONS not AI reasoning
+  // These are deterministic process steps, not "thinking" steps
   var steps = [
-    { text: "Consulting " + industryName + " industry expert", delay: 800 },
-    { text: "Analyzing " + typeName + " risk landscape", delay: 800 },
-    { text: "Identifying high-priority risks", delay: 800 },
-    { text: "Preparing personalized recommendations", delay: 800 }
+    { text: "Applying " + industryName + " risk taxonomy", delay: 600 },
+    { text: "Initializing " + typeName + " risk categories", delay: 600 },
+    { text: "Generating starter risk entries", delay: 700 },
+    { text: "Preparing editable draft register", delay: 500 }
   ];
 
   var stepsHtml = "";
   for (var i = 0; i < steps.length; i++) {
     stepsHtml +=
-      '<div class="ai-step" data-step="' + i + '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
+      '<div class="setup-step" data-step="' + i + '">' +
+      '<div class="setup-step-icon">' +
+      '<svg class="setup-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
+      '<svg class="setup-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
       "</div>" +
-      '<span class="ai-step-text">' + steps[i].text + "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
+      '<span class="setup-step-text">' + steps[i].text + "</span>" +
       "</div>";
   }
 
@@ -999,21 +1129,24 @@ ERM.riskRegister.showAIStarterThinking = function (
   var modalBody = document.querySelector(".modal-body");
   if (!modalBody) return;
 
+  // Progress ring: viewBox 72x72, radius 30, circumference = 2 * π * 30 ≈ 188
   modalBody.innerHTML =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    sparklesIcon +
+    '<div class="setup-container">' +
+    '<div class="setup-header">' +
+    '<div class="setup-progress-ring">' +
+    '<svg class="progress-ring" viewBox="0 0 72 72">' +
+    '<circle class="progress-ring-bg" cx="36" cy="36" r="30" fill="none" stroke="#e5e7eb" stroke-width="4"/>' +
+    '<circle class="progress-ring-fill" cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188"/>' +
+    '</svg>' +
+    setupIcon +
     "</div>" +
-    "<h3>AI is generating starter risks</h3>" +
-    '<p class="ai-input-preview">' + industryName + " - " + typeName + '</p>' +
+    "<h3>Setting up your " + typeName + " Register</h3>" +
+    '<p class="setup-subtitle">Creating a starter risk register based on ' + industryName + ' industry practices</p>' +
     "</div>" +
-    '<div class="ai-steps-container">' +
+    '<div class="setup-steps-container">' +
     stepsHtml +
     "</div>" +
+    '<p class="setup-reassurance">You can edit, delete, or customize all risks after setup.</p>' +
     "</div>";
 
   // Style the modal body
@@ -1046,11 +1179,16 @@ ERM.riskRegister.showAIStarterThinking = function (
   // Helper to show results when both animation and API are done
   function tryShowResults() {
     if (animationComplete && apiComplete) {
-      // Mark last step as complete
-      var lastStep = modalBody.querySelector('.ai-step[data-step="3"]');
+      // Mark last step as complete and update progress ring to 100%
+      var lastStep = modalBody.querySelector('.setup-step[data-step="3"]');
       if (lastStep) {
         lastStep.classList.remove("active");
         lastStep.classList.add("complete");
+      }
+      // Complete the progress ring
+      var progressFill = modalBody.querySelector('.progress-ring-fill');
+      if (progressFill) {
+        progressFill.style.strokeDashoffset = '0';
       }
 
       setTimeout(function () {
@@ -1115,9 +1253,17 @@ ERM.riskRegister.showAIStarterThinking = function (
       return;
     }
 
-    var stepEl = modalBody.querySelector('.ai-step[data-step="' + stepIndex + '"]');
+    var stepEl = modalBody.querySelector('.setup-step[data-step="' + stepIndex + '"]');
     if (stepEl) {
       stepEl.classList.add("active");
+
+      // Update progress ring based on step (25% per step)
+      var progressFill = modalBody.querySelector('.progress-ring-fill');
+      if (progressFill) {
+        // 188 is full circumference (2πr where r=30), reduce by 47 per step
+        var offset = 188 - ((stepIndex + 1) * 47);
+        progressFill.style.strokeDashoffset = offset;
+      }
 
       setTimeout(function () {
         stepEl.classList.remove("active");
@@ -1230,18 +1376,31 @@ ERM.riskRegister.showAIStarterTemplates = function (register, deepSeekTemplates)
   var modalFooter = document.querySelector(".modal-footer");
 
   // Different intro text for AI-generated vs static templates
+  // Decision is hero, not AI - reduce AI confidence tone
   var introText = isAIGenerated
-    ? '<p class="ai-starter-templates-intro">✨ AI-Generated Starter Risks</p>' +
-      '<p class="ai-starter-templates-subtext">Personalized recommendations from our industry expert</p>'
-    : '<p class="ai-starter-templates-intro">✨ Recommended Starter Risks</p>';
+    ? '<p class="ai-starter-templates-intro">Review suggested starter risks</p>' +
+      '<p class="ai-starter-templates-subtext">Generated based on ' + register.industry + ' – ' + register.type + ' context</p>'
+    : '<p class="ai-starter-templates-intro">Review suggested starter risks</p>';
+
+  // Batch selection controls
+  var controlsHtml =
+    '<div class="ai-starter-controls">' +
+    '<button type="button" id="btn-select-all">Select all</button>' +
+    '<button type="button" id="btn-clear-selection">Clear selection</button>' +
+    '</div>';
+
+  // Trust signal - reduces fear of commitment
+  var trustSignal = '<p class="ai-starter-trust">You can edit, delete, or refine these risks at any time.</p>';
 
   if (modalBody) {
     modalBody.innerHTML =
       '<div class="ai-starter-templates">' +
       introText +
+      controlsHtml +
       '<div class="ai-starter-cards">' +
       cardsHtml +
       "</div>" +
+      trustSignal +
       "</div>";
 
     // Bind card clicks to toggle checkbox
@@ -1267,13 +1426,43 @@ ERM.riskRegister.showAIStarterTemplates = function (register, deepSeekTemplates)
         });
       }
     }
+
+    // Bind Select All / Clear Selection controls
+    var selectAllBtn = document.getElementById("btn-select-all");
+    var clearSelectionBtn = document.getElementById("btn-clear-selection");
+
+    if (selectAllBtn) {
+      selectAllBtn.addEventListener("click", function () {
+        var allCards = modalBody.querySelectorAll(".ai-starter-card");
+        for (var k = 0; k < allCards.length; k++) {
+          var cb = allCards[k].querySelector('input[type="checkbox"]');
+          if (cb) {
+            cb.checked = true;
+            allCards[k].classList.add("selected");
+          }
+        }
+      });
+    }
+
+    if (clearSelectionBtn) {
+      clearSelectionBtn.addEventListener("click", function () {
+        var allCards = modalBody.querySelectorAll(".ai-starter-card");
+        for (var k = 0; k < allCards.length; k++) {
+          var cb = allCards[k].querySelector('input[type="checkbox"]');
+          if (cb) {
+            cb.checked = false;
+            allCards[k].classList.remove("selected");
+          }
+        }
+      });
+    }
   }
 
   if (modalFooter) {
     modalFooter.style.display = "flex";
     modalFooter.innerHTML =
-      '<button type="button" class="btn btn-ghost" id="btn-starter-skip">Skip</button>' +
-      '<button type="button" class="btn btn-primary" id="btn-starter-add">Add Selected</button>';
+      '<button type="button" class="btn btn-ghost" id="btn-starter-skip">Cancel</button>' +
+      '<button type="button" class="btn btn-primary" id="btn-starter-add">Add selected risks</button>';
 
     // Bind buttons
     document
@@ -1915,6 +2104,7 @@ ERM.riskRegister.buildFieldCheckboxesHtml = function () {
         { id: "riskId", label: "Risk ID", checked: true },
         { id: "title", label: "Risk Title", checked: true },
         { id: "category", label: "Category", checked: true },
+        { id: "strategicObjective", label: "Strategic Objective", checked: false },
         { id: "description", label: "Description", checked: false },
         { id: "rootCauses", label: "Root Causes", checked: false },
         { id: "consequences", label: "Consequences", checked: false },
@@ -2103,6 +2293,7 @@ ERM.riskRegister.buildInModalPreviewHtml = function (register, risks, config) {
     riskId: { label: "ID", getter: function(r, index) { return r.reference || ("R-" + String((index || 0) + 1).padStart(3, "0")); } },
     title: { label: "Risk Title", getter: function(r) { return r.title || "-"; } },
     category: { label: "Category", getter: function(r) { return self.formatCategory(r.category) || "-"; } },
+    strategicObjective: { label: "Strategic Objective", getter: function(r) { return r.strategicObjective || "-"; } },
     description: { label: "Description", getter: function(r) { return r.description || "-"; } },
     rootCauses: { label: "Root Causes", getter: function(r) { return (r.rootCauses && r.rootCauses.length) ? r.rootCauses.join("; ") : "-"; } },
     consequences: { label: "Consequences", getter: function(r) { return (r.consequences && r.consequences.length) ? r.consequences.join("; ") : "-"; } },
@@ -2630,6 +2821,7 @@ ERM.riskRegister.exportConfiguredPDF = function (register, risks, config) {
     riskId: { label: "ID", getter: function(r, index) { return r.reference || ("R-" + String((index || 0) + 1).padStart(3, "0")); } },
     title: { label: "Risk Title", getter: function(r) { return r.title || "-"; } },
     category: { label: "Category", getter: function(r) { return self.formatCategory(r.category) || "-"; } },
+    strategicObjective: { label: "Strategic Objective", getter: function(r) { return r.strategicObjective || "-"; } },
     description: { label: "Description", getter: function(r) { return r.description || "-"; } },
     rootCauses: { label: "Root Causes", getter: function(r) { return (r.rootCauses && r.rootCauses.length) ? r.rootCauses.join("; ") : "-"; } },
     consequences: { label: "Consequences", getter: function(r) { return (r.consequences && r.consequences.length) ? r.consequences.join("; ") : "-"; } },
@@ -3212,6 +3404,16 @@ ERM.riskRegister.performFullPDFExport = function (register, risks, config, repor
   // Build HTML content for PDF
   var htmlContent = this.buildPDFHtmlContent(register, risks, config);
 
+  // Debug: Log content length and preview
+  console.log('[PDF Export] HTML content length:', htmlContent ? htmlContent.length : 0);
+  console.log('[PDF Export] Risks count:', risks ? risks.length : 0);
+  console.log('[PDF Export] Config:', config);
+  if (htmlContent && htmlContent.length < 500) {
+    console.log('[PDF Export] Full content:', htmlContent);
+  } else if (htmlContent) {
+    console.log('[PDF Export] Content preview:', htmlContent.substring(0, 500));
+  }
+
   // Generate filename
   var fileName = register.name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
   fileName += '-' + new Date().toISOString().split('T')[0] + '.pdf';
@@ -3314,6 +3516,7 @@ ERM.riskRegister.buildPDFHtmlContent = function (register, risks, config) {
     riskId: { label: "ID", getter: function(r, index) { return r.reference || ("R-" + String((index || 0) + 1).padStart(3, "0")); } },
     title: { label: "Risk Title", getter: function(r) { return r.title || "-"; } },
     category: { label: "Category", getter: function(r) { return self.formatCategory(r.category) || "-"; } },
+    strategicObjective: { label: "Strategic Objective", getter: function(r) { return r.strategicObjective || "-"; } },
     description: { label: "Description", getter: function(r) { return r.description ? r.description.substring(0, 80) + (r.description.length > 80 ? "..." : "") : "-"; } },
     rootCauses: { label: "Root Causes", getter: function(r) { return (r.rootCauses && r.rootCauses.length) ? r.rootCauses.join("; ") : "-"; } },
     consequences: { label: "Consequences", getter: function(r) { return (r.consequences && r.consequences.length) ? r.consequences.join("; ") : "-"; } },
@@ -3370,6 +3573,9 @@ ERM.riskRegister.buildPDFHtmlContent = function (register, risks, config) {
   var headerPadding = colCount > 10 ? "4px 3px" : "8px 6px";
   var cellPadding = colCount > 10 ? "3px 2px" : "6px 4px";
 
+  // Debug: log build info
+  console.log('[buildPDFHtmlContent] Building table for', risks.length, 'risks with', activeFields.length, 'columns');
+
   // Risk details table
   html += '<h2 style="color: #1e293b; margin: 24px 0 12px 0; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Risk Details</h2>';
   html += '<table style="width: 100%; border-collapse: collapse; font-size: ' + fontSize + 'px; table-layout: fixed;">';
@@ -3381,24 +3587,28 @@ ERM.riskRegister.buildPDFHtmlContent = function (register, risks, config) {
   }
   html += '</tr></thead><tbody>';
 
-  // Build rows
-  for (var j = 0; j < risks.length; j++) {
-    var risk = risks[j];
-    html += '<tr>';
-    for (var c = 0; c < activeFields.length; c++) {
-      var field = activeFields[c];
-      var value = field.getter(risk, j);
-      var cellStyle = "padding: " + cellPadding + "; border: 1px solid #e2e8f0; word-wrap: break-word; overflow: hidden;";
+  // Build rows - handle empty case
+  if (risks.length === 0) {
+    html += '<tr><td colspan="' + activeFields.length + '" style="padding: 20px; text-align: center; color: #64748b; font-style: italic;">No risks found in this register</td></tr>';
+  } else {
+    for (var j = 0; j < risks.length; j++) {
+      var risk = risks[j];
+      html += '<tr>';
+      for (var c = 0; c < activeFields.length; c++) {
+        var field = activeFields[c];
+        var value = field.getter(risk, j);
+        var cellStyle = "padding: " + cellPadding + "; border: 1px solid #e2e8f0; word-wrap: break-word; overflow: hidden;";
 
-      if (field.isScore) {
-        var scoreVal = field.scoreType === "inherent" ? risk.inherentScore : risk.residualScore;
-        var color = self.getRiskColor(scoreVal);
-        cellStyle += " text-align: center; color: " + color.text + "; font-weight: 600;";
+        if (field.isScore) {
+          var scoreVal = field.scoreType === "inherent" ? risk.inherentScore : risk.residualScore;
+          var color = self.getRiskColor(scoreVal);
+          cellStyle += " text-align: center; color: " + color.text + "; font-weight: 600;";
+        }
+
+        html += '<td style="' + cellStyle + '">' + ERM.utils.escapeHtml(String(value)) + '</td>';
       }
-
-      html += '<td style="' + cellStyle + '">' + ERM.utils.escapeHtml(String(value)) + '</td>';
+      html += '</tr>';
     }
-    html += '</tr>';
   }
   html += '</tbody></table>';
 
@@ -3557,6 +3767,7 @@ ERM.riskRegister.generatePDFPreviewWindow = function (register, risks, config, a
     riskId: { label: "ID", getter: function(r, index) { return r.reference || ("R-" + String((index || 0) + 1).padStart(3, "0")); } },
     title: { label: "Risk Title", getter: function(r) { return r.title || "-"; } },
     category: { label: "Category", getter: function(r) { return self.formatCategory(r.category) || "-"; } },
+    strategicObjective: { label: "Strategic Objective", getter: function(r) { return r.strategicObjective || "-"; } },
     description: { label: "Description", getter: function(r) { return r.description || "-"; } },
     rootCauses: { label: "Root Causes", getter: function(r) { return (r.rootCauses && r.rootCauses.length) ? r.rootCauses.join("; ") : "-"; } },
     consequences: { label: "Consequences", getter: function(r) { return (r.consequences && r.consequences.length) ? r.consequences.join("; ") : "-"; } },
@@ -4105,6 +4316,236 @@ ERM.riskRegister.showImportModal = function () {
 };
 
 /* ========================================
+   RISK FORM DRAFTS (LOCAL STORAGE)
+   ======================================== */
+ERM.riskRegister.getRiskDraftKey = function (riskId) {
+  var registerId =
+    this.state && this.state.currentRegister ? this.state.currentRegister.id : "default";
+  var id = riskId || "new";
+  return "erm:riskDraft:" + registerId + ":" + id;
+};
+
+ERM.riskRegister.getRiskDraft = function (riskId) {
+  var key = this.getRiskDraftKey(riskId);
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+};
+
+ERM.riskRegister.shouldRestoreRiskDraft = function (draft, risk) {
+  if (!draft) return false;
+  if (!risk) return true;
+  var draftTime = Date.parse(draft.updatedAt || "") || 0;
+  var savedTime = Date.parse(risk.updatedAt || risk.createdAt || "") || 0;
+  return draftTime > savedTime;
+};
+
+ERM.riskRegister.saveRiskDraftFromForm = function (riskId) {
+  var form = document.getElementById("risk-form");
+  if (!form) return;
+
+  var getValue = function (id) {
+    var el = document.getElementById(id);
+    return el ? el.value : "";
+  };
+
+  var linkedControls = [];
+  var controlCheckboxes = document.querySelectorAll(".control-checkbox:checked");
+  for (var i = 0; i < controlCheckboxes.length; i++) {
+    var controlId = controlCheckboxes[i].getAttribute("data-control-id");
+    if (controlId) linkedControls.push(controlId);
+  }
+
+  var draft = {
+    updatedAt: new Date().toISOString(),
+    title: getValue("risk-title"),
+    categoryId: getValue("risk-category-id"),
+    categoryText: getValue("risk-category"),
+    strategicObjective: getValue("risk-strategic-objective"),
+    description: getValue("risk-description"),
+    rootCauses: this.getListItems("rootCauses"),
+    consequences: this.getListItems("consequences"),
+    inherentLikelihood: parseInt(getValue("inherent-likelihood"), 10) || 0,
+    inherentImpact: parseInt(getValue("inherent-impact"), 10) || 0,
+    residualLikelihood: parseInt(getValue("residual-likelihood"), 10) || 0,
+    residualImpact: parseInt(getValue("residual-impact"), 10) || 0,
+    treatment: getValue("risk-treatment"),
+    actionPlan: this.getListItems("actionPlan"),
+    owner: getValue("risk-owner"),
+    actionOwner: getValue("risk-action-owner"),
+    targetDate: getValue("risk-target-date"),
+    status: getValue("risk-status"),
+    reviewDate: getValue("risk-review-date"),
+    linkedControls: linkedControls,
+    escalation: getValue("risk-escalation"),
+    escalationLevel: getValue("escalation-level"),
+    escalationLevelOther: getValue("escalation-level-other"),
+    escalationOwner: getValue("escalation-owner")
+  };
+
+  try {
+    localStorage.setItem(this.getRiskDraftKey(riskId), JSON.stringify(draft));
+  } catch (e) {}
+};
+
+ERM.riskRegister.scheduleRiskDraftSave = function (riskId) {
+  var self = this;
+  if (this._riskDraftTimer) {
+    clearTimeout(this._riskDraftTimer);
+  }
+  this._riskDraftTimer = setTimeout(function () {
+    self.saveRiskDraftFromForm(riskId);
+  }, 150);
+};
+
+ERM.riskRegister.clearRiskDraft = function (riskId) {
+  try {
+    localStorage.removeItem(this.getRiskDraftKey(riskId));
+  } catch (e) {}
+};
+
+ERM.riskRegister.setListItemsFromDraft = function (listType, items) {
+  var container = document.getElementById(listType + "-list");
+  if (!container) return;
+  items = items || [];
+
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    html +=
+      '<div class="list-input-item" data-index="' +
+      i +
+      '">' +
+      '<span class="list-input-text">' +
+      ERM.utils.escapeHtml(items[i]) +
+      "</span>" +
+      '<button type="button" class="list-input-remove" data-list="' +
+      listType +
+      '" data-index="' +
+      i +
+      '">' +
+      this.icons.close +
+      "</button>" +
+      "</div>";
+  }
+
+  container.innerHTML = html;
+  this.initRemoveListItemHandlers();
+};
+
+ERM.riskRegister.applyRiskDraftToForm = function (riskId) {
+  var draft = this.getRiskDraft(riskId);
+  if (!draft) return;
+
+  var risk = null;
+  if (riskId) {
+    var risks = ERM.storage.get("risks") || [];
+    for (var i = 0; i < risks.length; i++) {
+      if (risks[i].id === riskId) {
+        risk = risks[i];
+        break;
+      }
+    }
+  }
+
+  if (!this.shouldRestoreRiskDraft(draft, risk)) {
+    return;
+  }
+
+  var setValue = function (id, value) {
+    var el = document.getElementById(id);
+    if (!el || value === undefined || value === null) return false;
+    el.value = value;
+    return true;
+  };
+
+  setValue("risk-title", draft.title);
+  setValue("risk-description", draft.description);
+
+  if (draft.categoryId !== undefined) {
+    setValue("risk-category-id", draft.categoryId);
+  }
+  if (draft.categoryText !== undefined) {
+    setValue("risk-category", draft.categoryText);
+  } else if (draft.categoryId) {
+    setValue("risk-category", this.formatCategory(draft.categoryId));
+  }
+
+  if (draft.strategicObjective !== undefined) {
+    setValue("risk-strategic-objective", draft.strategicObjective);
+  }
+
+  if (draft.rootCauses !== undefined) {
+    this.setListItemsFromDraft("rootCauses", draft.rootCauses);
+  }
+  if (draft.consequences !== undefined) {
+    this.setListItemsFromDraft("consequences", draft.consequences);
+  }
+  if (draft.actionPlan !== undefined) {
+    this.setListItemsFromDraft("actionPlan", draft.actionPlan);
+  }
+
+  if (draft.inherentLikelihood !== undefined) {
+    setValue("inherent-likelihood", draft.inherentLikelihood);
+  }
+  if (draft.inherentImpact !== undefined) {
+    setValue("inherent-impact", draft.inherentImpact);
+  }
+  if (draft.residualLikelihood !== undefined) {
+    setValue("residual-likelihood", draft.residualLikelihood);
+  }
+  if (draft.residualImpact !== undefined) {
+    setValue("residual-impact", draft.residualImpact);
+  }
+
+  this.updateHeatMap("inherent");
+  this.updateHeatMap("residual");
+
+  setValue("risk-treatment", draft.treatment);
+  setValue("risk-owner", draft.owner);
+  setValue("risk-action-owner", draft.actionOwner);
+  setValue("risk-target-date", draft.targetDate);
+  setValue("risk-status", draft.status);
+  setValue("risk-review-date", draft.reviewDate);
+
+  setValue("risk-escalation", draft.escalation);
+  setValue("escalation-level", draft.escalationLevel);
+  setValue("escalation-level-other", draft.escalationLevelOther);
+  setValue("escalation-owner", draft.escalationOwner);
+
+  var escalationFields = document.getElementById("escalation-fields");
+  if (escalationFields) {
+    escalationFields.style.display = draft.escalation === "Yes" ? "block" : "none";
+  }
+
+  var escalationLevelOtherGroup = document.getElementById("escalation-level-other-group");
+  if (escalationLevelOtherGroup) {
+    escalationLevelOtherGroup.style.display =
+      draft.escalationLevel === "Other" ? "block" : "none";
+  }
+
+  if (draft.linkedControls && draft.linkedControls.length > 0) {
+    var checkboxes = document.querySelectorAll(".control-checkbox");
+    for (var c = 0; c < checkboxes.length; c++) {
+      var id = checkboxes[c].getAttribute("data-control-id");
+      var isChecked = draft.linkedControls.indexOf(id) !== -1;
+      checkboxes[c].checked = isChecked;
+      var label = checkboxes[c].closest(".inline-control-item");
+      if (label) {
+        if (isChecked) {
+          label.classList.add("selected");
+        } else {
+          label.classList.remove("selected");
+        }
+      }
+    }
+  }
+};
+
+/* ========================================
    RISK FORM MODAL
    ======================================== */
 ERM.riskRegister.showRiskModal = function (riskId) {
@@ -4162,11 +4603,43 @@ ERM.riskRegister.showRiskModal = function (riskId) {
     r.actionPlan = [];
   }
 
+  // Apply draft values if newer than saved data
+  var draft = this.getRiskDraft(riskId);
+  var categoryTextOverride = "";
+  if (draft && this.shouldRestoreRiskDraft(draft, risk)) {
+    if (draft.hasOwnProperty("title")) r.title = draft.title;
+    if (draft.hasOwnProperty("categoryId")) r.category = draft.categoryId;
+    if (draft.hasOwnProperty("category")) r.category = draft.category;
+    if (draft.hasOwnProperty("categoryText")) categoryTextOverride = draft.categoryText;
+    if (draft.hasOwnProperty("description")) r.description = draft.description;
+    if (draft.hasOwnProperty("rootCauses")) r.rootCauses = draft.rootCauses;
+    if (draft.hasOwnProperty("consequences")) r.consequences = draft.consequences;
+    if (draft.hasOwnProperty("inherentLikelihood")) r.inherentLikelihood = draft.inherentLikelihood;
+    if (draft.hasOwnProperty("inherentImpact")) r.inherentImpact = draft.inherentImpact;
+    if (draft.hasOwnProperty("residualLikelihood")) r.residualLikelihood = draft.residualLikelihood;
+    if (draft.hasOwnProperty("residualImpact")) r.residualImpact = draft.residualImpact;
+    if (draft.hasOwnProperty("treatment")) r.treatment = draft.treatment;
+    if (draft.hasOwnProperty("actionPlan")) r.actionPlan = draft.actionPlan;
+    if (draft.hasOwnProperty("owner")) r.owner = draft.owner;
+    if (draft.hasOwnProperty("actionOwner")) r.actionOwner = draft.actionOwner;
+    if (draft.hasOwnProperty("targetDate")) r.targetDate = draft.targetDate;
+    if (draft.hasOwnProperty("status")) r.status = draft.status;
+    if (draft.hasOwnProperty("reviewDate")) r.reviewDate = draft.reviewDate;
+    if (draft.hasOwnProperty("linkedControls")) r.linkedControls = draft.linkedControls;
+    if (draft.hasOwnProperty("escalation")) r.escalation = draft.escalation;
+    if (draft.hasOwnProperty("escalationLevel")) r.escalationLevel = draft.escalationLevel;
+    if (draft.hasOwnProperty("escalationLevelOther")) r.escalationLevelOther = draft.escalationLevelOther;
+    if (draft.hasOwnProperty("escalationOwner")) r.escalationOwner = draft.escalationOwner;
+  }
+
   var inherentScore = r.inherentLikelihood * r.inherentImpact;
   var residualScore = r.residualLikelihood * r.residualImpact;
 
   // Get category label for display (category value stored in hidden field)
   var categoryLabel = r.category ? this.formatCategory(r.category) : "";
+  if (!r.category && categoryTextOverride) {
+    categoryLabel = categoryTextOverride;
+  }
 
   // Build root causes list
   var rootCausesHtml = "";
@@ -4293,6 +4766,17 @@ ERM.riskRegister.showRiskModal = function (riskId) {
     "</div>" +
     '<div class="form-group">' +
     '<div class="form-label-row">' +
+    '<label class="form-label">Strategic Objective</label>' +
+    '<button type="button" class="btn-ai-suggest" data-field="strategicObjective">' +
+    this.icons.sparkles +
+    " AI</button>" +
+    "</div>" +
+    '<input type="text" class="form-input" id="risk-strategic-objective" value="' +
+    ERM.utils.escapeHtml(r.strategicObjective || "") +
+    '" placeholder="Which strategic objective does this risk impact?">' +
+    "</div>" +
+    '<div class="form-group">' +
+    '<div class="form-label-row">' +
     '<label class="form-label">Risk Description</label>' +
     '<button type="button" class="btn-ai-suggest" data-field="description">' +
     this.icons.sparkles +
@@ -4342,9 +4826,9 @@ ERM.riskRegister.showRiskModal = function (riskId) {
     '<label class="form-label">Linked Controls</label>' +
     "</div>" +
     this.buildInlineControlSelector(riskId) +
-    '<button type="button" class="btn btn-add-inline-control" id="add-inline-control" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none;">' +
+    '<button type="button" class="btn btn-add-inline-control" id="add-inline-control" style="background: #3b82f6; color: white; border: none;">' +
     this.icons.plus +
-    ' Create New Control <span style="display: inline-block; padding: 2px 8px; background: rgba(255,255,255,0.25); border-radius: 4px; font-weight: 600; margin-left: 4px;">✨ AI</span>' +
+    ' Create New Control' +
     "</button>" +
     "</div>" +
     "</div>" +
@@ -4656,7 +5140,7 @@ ERM.riskRegister.showRiskModal = function (riskId) {
     '<div class="form-section">' +
     '<div class="form-section-header-with-ai">' +
     '<h3 class="form-section-title">5. Evidence & Attachments</h3>' +
-    '<button type="button" class="btn-ai-suggest-evidence" id="ai-suggest-evidence" title="AI will suggest relevant documents based on risk details">' +
+    '<button type="button" class="btn-ai-suggest btn-ai-sm" id="ai-suggest-evidence" title="AI will suggest relevant documents based on risk details">' +
     this.icons.sparkles +
     ' Suggest Documents</button>' +
     '</div>' +
@@ -4757,6 +5241,17 @@ ERM.riskRegister.initRiskFormEvents = function () {
     });
   }
 
+  // Control checkboxes - update residual heatmap when controls change
+  var controlsContainer = document.getElementById("controls-section") || document.querySelector(".modal-body");
+  if (controlsContainer) {
+    controlsContainer.addEventListener("change", function (e) {
+      if (e.target && e.target.classList.contains("control-checkbox")) {
+        // Recalculate residual risk when controls are checked/unchecked
+        self.updateHeatMap("residual");
+      }
+    });
+  }
+
   // List input handlers (causes, consequences)
   this.initListInputHandlers();
 
@@ -4813,7 +5308,7 @@ ERM.riskRegister.initRiskFormEvents = function () {
     });
   }
 
-  // Create New Control button (hybrid: AI Generate vs Manual)
+  // Create New Control button - directly triggers AI control generation
   var addInlineControlBtn = document.getElementById("add-inline-control");
   if (addInlineControlBtn) {
     console.log('[Risk Form] "Create New Control" button found, binding click handler');
@@ -4843,7 +5338,7 @@ ERM.riskRegister.initRiskFormEvents = function () {
       console.log('[Risk Form] Risk context extracted:', riskContext);
       console.log('[Risk Form] Calling showAIControlSuggestions()...');
 
-      // Show AI control suggestions
+      // Directly trigger AI control suggestions with thinking animation
       self.showAIControlSuggestions(riskContext);
     });
   } else {
@@ -4887,6 +5382,18 @@ ERM.riskRegister.initRiskFormEvents = function () {
   }
 
   // Inline control creation button - handled above in AI suggest section
+
+  // Draft persistence (input/change + restore)
+  var form = document.getElementById("risk-form");
+  if (form) {
+    var scheduleSave = function () {
+      self.scheduleRiskDraftSave(self.state.editingRiskId);
+    };
+    form.addEventListener("input", scheduleSave);
+    form.addEventListener("change", scheduleSave);
+  }
+
+  self.applyRiskDraftToForm(self.state.editingRiskId);
 
   // Attachment handlers
   this.initAttachmentHandlers();
@@ -5017,6 +5524,7 @@ ERM.riskRegister.addListItem = function (listType, value) {
 
   container.insertAdjacentHTML("beforeend", itemHtml);
   this.initRemoveListItemHandlers();
+  this.scheduleRiskDraftSave(this.state.editingRiskId);
 };
 
 ERM.riskRegister.initRemoveListItemHandlers = function () {
@@ -5029,6 +5537,7 @@ ERM.riskRegister.initRemoveListItemHandlers = function () {
       if (item) {
         item.remove();
       }
+      ERM.riskRegister.scheduleRiskDraftSave(ERM.riskRegister.state.editingRiskId);
     };
   }
 };
@@ -5722,9 +6231,13 @@ ERM.riskRegister.saveRisk = function (riskId) {
   var escalationLevelOther = escalationLevelOtherEl ? escalationLevelOtherEl.value.trim() : "";
   var escalationOwner = escalationOwnerEl ? escalationOwnerEl.value.trim() : "";
 
+  var strategicObjectiveEl = document.getElementById("risk-strategic-objective");
+  var strategicObjective = strategicObjectiveEl ? strategicObjectiveEl.value.trim() : "";
+
   var riskData = {
     title: title,
     category: category,
+    strategicObjective: strategicObjective,
     description: document.getElementById("risk-description").value.trim(),
     rootCauses: this.getListItems("rootCauses"),
     consequences: this.getListItems("consequences"),
@@ -5831,6 +6344,12 @@ ERM.riskRegister.saveRisk = function (riskId) {
         registerId: riskData.registerId
       });
     }
+  }
+
+  // Clear drafts on successful save
+  this.clearRiskDraft(riskId || null);
+  if (!riskId && riskData.id) {
+    this.clearRiskDraft(riskData.id);
   }
 
   ERM.components.closeModal();
@@ -6228,7 +6747,6 @@ ERM.riskRegister.showAIControlSuggestions = function (riskContext) {
   if (typeof ERM.enforcement !== 'undefined' && ERM.enforcement.canUseAI) {
     var aiCheck = ERM.enforcement.canUseAI();
     if (!aiCheck.allowed && typeof ERM.upgradeModal !== 'undefined') {
-      // Show upgrade modal for AI limit
       ERM.upgradeModal.show({
         title: 'AI Limit Reached',
         message: aiCheck.message,
@@ -6248,7 +6766,6 @@ ERM.riskRegister.showAIControlSuggestions = function (riskContext) {
   // Check if AI service is available
   if (typeof ERM.aiService === "undefined" || !ERM.aiService.callAPI) {
     console.log("[Controls AI] AI service not available, falling back to template matching");
-    // Fallback to template-based if AI not available
     if (typeof ERM.controlsAI !== "undefined" && ERM.controlsAI.findControlsForRisk) {
       var suggestions = ERM.controlsAI.findControlsForRisk(riskContext);
       if (suggestions && suggestions.length > 0) {
@@ -6256,153 +6773,43 @@ ERM.riskRegister.showAIControlSuggestions = function (riskContext) {
         return;
       }
     }
-    this.showCreateControlModal(riskContext.riskId);
+    ERM.toast.error("AI service not available");
     return;
   }
 
+  // Start button animation using unified module
+  var btn = document.getElementById("add-inline-control");
+  var thinkingState = ERM.aiSuggestions.startButtonThinking(btn, "Loading suggestions");
+
   // Gather full risk context from the form
   var fullContext = this.gatherFullRiskContext(riskContext);
-
-  // Sparkles icon for header
-  var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-
-  // Build steps HTML with the same pattern as showThinkingModal
-  var aiSteps = [
-    { text: "Analyzing risk context", delay: 600 },
-    { text: "Reviewing root causes", delay: 700 },
-    { text: "Generating tailored controls", delay: 800 },
-    { text: "Prioritizing recommendations", delay: 600 }
-  ];
-
-  var stepsHtml = "";
-  for (var i = 0; i < aiSteps.length; i++) {
-    stepsHtml +=
-      '<div class="ai-step" data-step="' + i + '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-      "</div>" +
-      '<span class="ai-step-text">' + aiSteps[i].text + "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-      "</div>";
-  }
-
-  var thinkingContent =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    sparklesIcon +
-    "</div>" +
-    "<h3>AI is generating controls</h3>" +
-    "</div>" +
-    '<div class="ai-steps-container">' +
-    stepsHtml +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showSecondaryModal({
-    title: "",
-    content: thinkingContent,
-    buttons: [],
-    onOpen: function() {
-      // Style the modal to match ai-thinking-modal pattern
-      var modal = document.querySelector(".secondary-overlay .modal");
-      var modalHeader = document.querySelector(".secondary-overlay .modal-header");
-      var modalBody = document.querySelector(".secondary-overlay .modal-body");
-      var modalFooter = document.querySelector(".secondary-overlay .modal-footer");
-      var modalContent = document.querySelector(".secondary-overlay .modal-content");
-
-      if (modal) {
-        modal.classList.add("ai-thinking-modal");
-      }
-
-      // Hide header
-      if (modalHeader) {
-        modalHeader.style.display = "none";
-      }
-
-      // Hide footer
-      if (modalFooter) {
-        modalFooter.style.display = "none";
-      }
-
-      // Fix body styling
-      if (modalBody) {
-        modalBody.style.cssText = "padding: 0 !important; max-height: none !important; overflow: visible !important;";
-      }
-
-      // Fix modal content wrapper
-      if (modalContent) {
-        modalContent.style.cssText = "max-height: none !important; overflow: visible !important;";
-      }
-    }
-  });
-
-  // Animate steps sequentially
-  var currentStep = 0;
-  function animateStep(stepIndex) {
-    if (stepIndex >= aiSteps.length) {
-      return; // Animation complete, API callback will handle next
-    }
-
-    var stepEl = document.querySelector('.secondary-overlay .ai-step[data-step="' + stepIndex + '"]');
-    if (stepEl) {
-      stepEl.classList.add("active");
-
-      setTimeout(function() {
-        stepEl.classList.remove("active");
-        stepEl.classList.add("complete");
-        animateStep(stepIndex + 1);
-      }, aiSteps[stepIndex].delay);
-    } else {
-      animateStep(stepIndex + 1);
-    }
-  }
-
-  // Start animation after brief delay
-  setTimeout(function() {
-    animateStep(0);
-  }, 300);
 
   // Build the prompt for DeepSeek
   var prompt = this.buildControlGenerationPrompt(fullContext);
   var systemPrompt = this.getControlGenerationSystemPrompt();
 
   console.log("[Controls AI] Calling DeepSeek for control suggestions...");
-  console.log("[Controls AI] Risk context:", fullContext);
 
   // Call DeepSeek API
   ERM.aiService.callAPI(
     prompt,
     function (response) {
-      // Mark all steps as complete when API responds
-      var allSteps = document.querySelectorAll('.secondary-overlay .ai-step');
-      for (var j = 0; j < allSteps.length; j++) {
-        allSteps[j].classList.remove("active");
-        allSteps[j].classList.add("complete");
-      }
+      // Stop button animation
+      ERM.aiSuggestions.stopButtonThinking(thinkingState);
 
-      setTimeout(function() {
-        if (response && response.success && response.text) {
-          console.log("[Controls AI] DeepSeek response received");
-          // Parse the JSON response
-          var controls = self.parseControlSuggestionsResponse(response.text);
-          if (controls && controls.length > 0) {
-            setTimeout(function() {
-              self.renderDeepSeekControlSuggestions(controls, riskContext);
-            }, 400);
-          } else {
-            console.log("[Controls AI] Failed to parse controls, showing fallback");
-            self.showNoControlSuggestions(riskContext);
-          }
+      if (response && response.success && response.text) {
+        console.log("[Controls AI] DeepSeek response received");
+        var controls = self.parseControlSuggestionsResponse(response.text);
+        if (controls && controls.length > 0) {
+          self.renderDeepSeekControlSuggestions(controls, riskContext);
         } else {
-          console.log("[Controls AI] API call failed:", response ? response.error : "Unknown error");
+          console.log("[Controls AI] Failed to parse controls");
           self.showNoControlSuggestions(riskContext);
         }
-      }, 500);
+      } else {
+        console.log("[Controls AI] API call failed:", response ? response.error : "Unknown error");
+        self.showNoControlSuggestions(riskContext);
+      }
     },
     {
       systemPrompt: systemPrompt,
@@ -6620,10 +7027,8 @@ ERM.riskRegister.parseControlSuggestionsResponse = function (responseText) {
 ERM.riskRegister.renderDeepSeekControlSuggestions = function (controls, riskContext) {
   var self = this;
 
-  // Store for "Generate More"
-  this.allControlSuggestions = controls;
-  this.shownControlSuggestions = controls.slice(0, 3);
-  this.currentRiskContext = riskContext;
+  // Store controls for Use button click handler
+  this.shownControlSuggestions = controls;
 
   var content = '<div class="ai-suggestions-container">';
   content += '<p class="ai-suggestions-intro">Based on your risk, AI recommends starting with:</p>';
@@ -6675,9 +7080,6 @@ ERM.riskRegister.renderDeepSeekControlSuggestions = function (controls, riskCont
 
   content += '</div>'; // End list
 
-  // Generate More button
-  content += '<button type="button" class="btn btn-ai-discover" id="btn-more-controls">✨ Generate More</button>';
-
   // Fallback options
   content += '<hr class="ai-divider">';
   content += '<p class="ai-fallback-text">Don\'t see what you need?</p>';
@@ -6702,17 +7104,6 @@ ERM.riskRegister.renderDeepSeekControlSuggestions = function (controls, riskCont
           if (selectedControl) {
             self.createControlFromAISuggestion(selectedControl, riskContext);
           }
-        });
-      }
-
-      // Bind "Generate More" button
-      var moreBtn = document.getElementById("btn-more-controls");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function () {
-          ERM.components.closeSecondaryModal();
-          setTimeout(function () {
-            self.showAIControlSuggestions(riskContext);
-          }, 300);
         });
       }
 
@@ -6780,63 +7171,22 @@ ERM.riskRegister.createControlFromAISuggestion = function (controlData, riskCont
 
   console.log("[Controls AI] Created new control from DeepSeek:", newControl);
 
-  // Notify other modules that controls have been updated
-  document.dispatchEvent(new CustomEvent("erm:controls-updated"));
+  // Store the new control ID so the event listener can check it
+  self._newlyCreatedControlId = newControl.id;
 
-  // Close suggestions modal
-  ERM.components.closeSecondaryModal();
+  // Close suggestions modal FIRST, then update UI after modal transition completes
+  ERM.components.closeSecondaryModal(function() {
+    // Small delay to ensure DOM is fully restored
+    setTimeout(function() {
+      // Notify other modules - this triggers the event listener which will rebuild the selector
+      document.dispatchEvent(new CustomEvent("erm:controls-updated", {
+        detail: { newControlId: newControl.id, controlName: newControl.name }
+      }));
 
-  // Rebuild the inline control selector to show the new control immediately
-  setTimeout(function () {
-    // Find the container that holds the inline control selector
-    var container = document.querySelector(".inline-control-selector");
-    if (container && container.parentElement) {
-      // Rebuild the entire selector HTML with the new control included
-      var newHtml = self.buildInlineControlSelector(riskId);
-
-      // Replace the old selector with the new one
-      var tempDiv = document.createElement("div");
-      tempDiv.innerHTML = newHtml;
-      var newSelector = tempDiv.firstChild;
-
-      container.parentElement.replaceChild(newSelector, container);
-
-      // Check the newly added control's checkbox and ensure it's visible
-      var newCheckbox = newSelector.querySelector('input[data-control-id="' + newControl.id + '"]');
-      if (newCheckbox) {
-        newCheckbox.checked = true;
-        // Also add the selected class to its parent label
-        var parentLabel = newCheckbox.closest(".inline-control-item");
-        if (parentLabel) {
-          parentLabel.classList.add("selected");
-        }
-        // Trigger change event to ensure any listeners are notified
-        newCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-
-      // Re-bind tooltip events for the new control items (ES5 compatible)
-      var tooltipItems = newSelector.querySelectorAll('[data-control-tooltip]');
-      for (var t = 0; t < tooltipItems.length; t++) {
-        (function(item) {
-          item.addEventListener('mouseenter', function(e) {
-            if (typeof self.showControlTooltip === 'function') {
-              self.showControlTooltip(e, item);
-            }
-          });
-          item.addEventListener('mouseleave', function() {
-            if (typeof self.hideControlTooltip === 'function') {
-              self.hideControlTooltip();
-            }
-          });
-        })(tooltipItems[t]);
-      }
-    }
-
-    // Also update the visible linked controls list in the form
-    self.linkControlToCurrentRisk(newControl.id, newControl.name);
-
-    ERM.toast.success("Control added and linked to risk");
-  }, 100); // Reduced timeout for faster sync
+      // Show success toast
+      ERM.toast.success("Control '" + newControl.name + "' added and linked");
+    }, 50);
+  });
 };
 
 /**
@@ -6937,12 +7287,6 @@ ERM.riskRegister.renderControlSuggestions = function (suggestions, riskContext) 
   // Take top 3
   var recommended = suggestions[0];
   var others = suggestions.slice(1, 3);
-  var hasMore = suggestions.length > 3;
-
-  // Store for "Generate More"
-  this.allControlSuggestions = suggestions;
-  this.shownControlSuggestions = [recommended].concat(others);
-  this.currentRiskContext = riskContext;
 
   var content = '<div class="ai-suggestions-container">';
   content +=
@@ -7023,12 +7367,6 @@ ERM.riskRegister.renderControlSuggestions = function (suggestions, riskContext) 
 
   content += "</div>"; // End list
 
-  // Generate More button
-  if (hasMore) {
-    content +=
-      '<button type="button" class="btn btn-ai-discover" id="btn-more-controls">✨ Generate More</button>';
-  }
-
   // Fallback options
   content += '<hr class="ai-divider">';
   content += '<p class="ai-fallback-text">Don\'t see what you need?</p>';
@@ -7052,14 +7390,6 @@ ERM.riskRegister.renderControlSuggestions = function (suggestions, riskContext) 
         useBtns[j].addEventListener("click", function () {
           var controlId = this.getAttribute("data-control-id");
           self.useAIControl(controlId, riskContext.riskId);
-        });
-      }
-
-      // Bind "Generate More" button
-      var moreBtn = document.getElementById("btn-more-controls");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function () {
-          self.showMoreControlSuggestions();
         });
       }
 
@@ -7092,223 +7422,12 @@ ERM.riskRegister.renderControlSuggestions = function (suggestions, riskContext) 
 };
 
 /**
- * Show more control suggestions (reshuffle)
- */
-ERM.riskRegister.showMoreControlSuggestions = function () {
-  var self = this;
-  if (!this.allControlSuggestions || this.allControlSuggestions.length === 0)
-    return;
-
-  // Show thinking animation
-  var listContainer = document.querySelector(".control-suggestions-list");
-  if (!listContainer) return;
-
-  listContainer.innerHTML =
-    '<div class="ai-thinking-inline">' +
-    '<div class="ai-sparkle-pulse"></div>' +
-    '<p>Generating more suggestions...</p>' +
-    "</div>";
-
-  setTimeout(function () {
-    // Get unshown suggestions
-    var shown = self.shownControlSuggestions || [];
-    var all = self.allControlSuggestions;
-    var remaining = [];
-
-    for (var i = 0; i < all.length; i++) {
-      var isShown = false;
-      for (var j = 0; j < shown.length; j++) {
-        if (all[i].control.id === shown[j].control.id) {
-          isShown = true;
-          break;
-        }
-      }
-      if (!isShown) {
-        remaining.push(all[i]);
-      }
-    }
-
-    // If no remaining, reshuffle all
-    if (remaining.length === 0) {
-      remaining = all.slice();
-      // Shuffle
-      for (var k = remaining.length - 1; k > 0; k--) {
-        var r = Math.floor(Math.random() * (k + 1));
-        var temp = remaining[k];
-        remaining[k] = remaining[r];
-        remaining[r] = temp;
-      }
-    }
-
-    // Take 3
-    var newSuggestions = remaining.slice(0, 3);
-    self.shownControlSuggestions = newSuggestions;
-
-    // Render new suggestions
-    var html = "";
-    for (var m = 0; m < newSuggestions.length; m++) {
-      var ctrl = newSuggestions[m].control;
-      var name = ctrl.titles ? ctrl.titles[0] : ctrl.name || "Control";
-      var desc = ctrl.descriptions
-        ? ctrl.descriptions[0]
-        : ctrl.description || "";
-      var delay = m * 0.12;
-
-      html +=
-        '<div class="control-suggestion-card ai-stagger-item" style="animation-delay: ' +
-        delay +
-        's">';
-      html +=
-        '<h4 class="control-suggestion-name">' +
-        ERM.utils.escapeHtml(name) +
-        "</h4>";
-      html +=
-        '<p class="control-suggestion-desc">' +
-        ERM.utils.escapeHtml(desc.substring(0, 100)) +
-        (desc.length > 100 ? "..." : "") +
-        "</p>";
-      html += '<div class="control-suggestion-actions">';
-      html +=
-        '<button type="button" class="btn btn-secondary btn-use-control" data-control-id="' +
-        ERM.utils.escapeHtml(ctrl.id) +
-        '">Use This</button>';
-      html += "</div>";
-      html += "</div>";
-    }
-
-    listContainer.innerHTML = html;
-
-    // Rebind use buttons
-    var useBtns = listContainer.querySelectorAll(".btn-use-control");
-    for (var n = 0; n < useBtns.length; n++) {
-      useBtns[n].addEventListener("click", function () {
-        var controlId = this.getAttribute("data-control-id");
-        self.useAIControl(controlId, self.currentRiskContext.riskId);
-      });
-    }
-  }, 800);
-};
-
-/**
  * Use AI-suggested control (open form pre-filled)
+ * NOTE: Templates removed - this function now shows error
  */
 ERM.riskRegister.useAIControl = function (controlId, riskId) {
-  var self = this;
-
-  // Get industry
-  var industry = localStorage.getItem("ERM_industry") || "mining";
-
-  // Find control across all categories
-  var controlTemplate = null;
-  var categories = [
-    "strategic",
-    "financial",
-    "operational",
-    "compliance",
-    "technology",
-    "hr",
-    "hse",
-    "reputational",
-    "project",
-  ];
-
-  if (
-    window.ERM_TEMPLATES &&
-    window.ERM_TEMPLATES[industry] &&
-    window.ERM_TEMPLATES[industry].controls
-  ) {
-    for (var i = 0; i < categories.length; i++) {
-      var cat = categories[i];
-      var controls = window.ERM_TEMPLATES[industry].controls[cat];
-      if (controls) {
-        for (var j = 0; j < controls.length; j++) {
-          if (controls[j].id === controlId) {
-            controlTemplate = controls[j];
-            break;
-          }
-        }
-      }
-      if (controlTemplate) break;
-    }
-  }
-
-  if (!controlTemplate) {
-    ERM.toast.error("Control not found");
-    return;
-  }
-
-  // Get next sequential control number (CTRL-001, CTRL-002, etc.)
-  var controlRef = ERM.controls && ERM.controls.getNextControlNumber
-    ? ERM.controls.getNextControlNumber()
-    : "CTRL-" + String(Date.now()).slice(-6);
-
-  // Create new control from template
-  var newControl = {
-    id: controlRef,
-    reference: controlRef,
-    name: controlTemplate.titles
-      ? controlTemplate.titles[0]
-      : controlTemplate.name || "",
-    description: controlTemplate.descriptions
-      ? controlTemplate.descriptions[0]
-      : controlTemplate.description || "",
-    type: controlTemplate.type || "preventive",
-    category: controlTemplate.category || "policy",
-    owner: controlTemplate.owners && controlTemplate.owners.primary
-      ? controlTemplate.owners.primary[0]
-      : "",
-    effectiveness: controlTemplate.effectiveness || "effective",
-    status: controlTemplate.status || "active",
-    linkedRisks: riskId ? [riskId] : [],
-    lastReviewDate: "",
-    nextReviewDate: "",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  // Save control to storage
-  var controls = ERM.storage.get("controls") || [];
-  controls.push(newControl);
-  ERM.storage.set("controls", controls);
-
-  // Notify other modules that controls have been updated
-  document.dispatchEvent(new CustomEvent("erm:controls-updated"));
-
-  // Close suggestions modal
-  ERM.components.closeSecondaryModal();
-
-  // Rebuild the inline control selector to show the new control
-  setTimeout(function () {
-    // Find the container that holds the inline control selector
-    var container = document.querySelector(".inline-control-selector");
-    if (container && container.parentElement) {
-      // Rebuild the entire selector HTML with the new control included
-      var newHtml = self.buildInlineControlSelector(riskId);
-
-      // Replace the old selector with the new one
-      var tempDiv = document.createElement("div");
-      tempDiv.innerHTML = newHtml;
-      var newSelector = tempDiv.firstChild;
-
-      container.parentElement.replaceChild(newSelector, container);
-
-      // Check the newly added control's checkbox
-      var newCheckbox = newSelector.querySelector('input[data-control-id="' + newControl.id + '"]');
-      if (newCheckbox) {
-        newCheckbox.checked = true;
-        // Also add the selected class to its parent label
-        var parentLabel = newCheckbox.closest(".inline-control-item");
-        if (parentLabel) {
-          parentLabel.classList.add("selected");
-        }
-      }
-    }
-
-    // Also update the visible linked controls list in the form
-    self.linkControlToCurrentRisk(newControl.id, newControl.name);
-
-    ERM.toast.success("Control added and linked to risk");
-  }, 250);
+  // Templates removed - control templates no longer available
+  ERM.toast.error("Control templates not available");
 };
 
 /**
@@ -7449,6 +7568,7 @@ ERM.riskRegister.openManualControlForm = function (riskId) {
     reference: ERM.controls.getNextControlNumber(),
     name: "",
     description: [],
+    describeRisk: "",
     type: "",
     category: "",
     owner: "",
@@ -7534,8 +7654,11 @@ ERM.riskRegister.applyAIScore = function (field, score) {
 
 // Listen for controls being updated (from any module)
 // This ensures the risk register UI refreshes instantly when controls are created
-document.addEventListener('erm:controls-updated', function() {
+document.addEventListener('erm:controls-updated', function(e) {
   console.log('[Risk Register] Controls updated event received, refreshing UI');
+
+  // Get newly created control ID if provided
+  var newControlId = (e.detail && e.detail.newControlId) ? e.detail.newControlId : null;
 
   // Find if we're currently in a risk edit modal with an inline control selector
   var inlineSelector = document.querySelector('.inline-control-selector');
@@ -7555,11 +7678,16 @@ document.addEventListener('erm:controls-updated', function() {
       currentSelections.push(currentCheckboxes[i].getAttribute('data-control-id'));
     }
 
+    // Add newly created control to selections
+    if (newControlId && currentSelections.indexOf(newControlId) === -1) {
+      currentSelections.push(newControlId);
+    }
+
     // Replace the selector
     if (inlineSelector.parentElement) {
       inlineSelector.parentElement.replaceChild(newSelector, inlineSelector);
 
-      // Restore selections
+      // Restore selections (including newly created control)
       for (var j = 0; j < currentSelections.length; j++) {
         var checkbox = newSelector.querySelector('input[data-control-id="' + currentSelections[j] + '"]');
         if (checkbox) {
@@ -7588,7 +7716,24 @@ document.addEventListener('erm:controls-updated', function() {
         })(tooltipItems[t]);
       }
 
-      console.log('[Risk Register] Inline control selector refreshed');
+      // Highlight newly added control with animation
+      if (newControlId) {
+        var newControlItem = newSelector.querySelector('input[data-control-id="' + newControlId + '"]');
+        if (newControlItem) {
+          var parentLabel = newControlItem.closest('.inline-control-item');
+          if (parentLabel) {
+            parentLabel.classList.add('newly-added');
+            // Scroll the new control into view
+            parentLabel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Remove highlight class after animation
+            setTimeout(function() {
+              parentLabel.classList.remove('newly-added');
+            }, 2000);
+          }
+        }
+      }
+
+      console.log('[Risk Register] Inline control selector refreshed, new control checked:', newControlId);
     }
   }
 });

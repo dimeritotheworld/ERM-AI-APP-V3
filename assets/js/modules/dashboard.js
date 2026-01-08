@@ -965,19 +965,24 @@ ERM.dashboard = {
     });
    }
 
-   // Close dropdown when clicking outside
-   document.addEventListener('click', function(e) {
-    if (dropdown && !dropdown.contains(e.target)) {
-     dropdown.classList.remove('open');
-    }
-   });
+   // Close dropdown when clicking outside (guarded)
+   if (!self._dropdownClickBound) {
+    self._dropdownClickBound = true;
+    document.addEventListener('click', function(e) {
+     var dd = document.getElementById('register-dropdown');
+     if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+     }
+    });
 
-   // Close on escape key
-   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && dropdown.classList.contains('open')) {
-     dropdown.classList.remove('open');
-    }
-   });
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+     var dd = document.getElementById('register-dropdown');
+     if (e.key === 'Escape' && dd && dd.classList.contains('open')) {
+      dd.classList.remove('open');
+     }
+    });
+   }
   }
 
   var heatmapCells = document.querySelectorAll('.heatmap-cell');
@@ -1567,6 +1572,287 @@ ERM.dashboard = {
   if (score >= 5) return 'Consider controls. Regular monitoring required.';
   return 'Acceptable risk level. Monitor periodically.';
  }
+};
+
+// ========================================
+// DASHBOARD RENDERERS - Shared functions for Reports embedding
+// Reports must use these to ensure consistent styling
+// ========================================
+ERM.dashboard.renderers = {
+  /**
+   * Helper: Get register name from register ID
+   * Dashboard uses names for filtering, embed uses IDs
+   */
+  getRegisterNameFromId: function(registerId) {
+    if (!registerId || registerId === 'all') return null;
+    // Try both storage keys for compatibility - 'registers' is the primary key
+    var registers = ERM.storage.get('registers') || ERM.storage.get('riskRegisters') || [];
+    for (var i = 0; i < registers.length; i++) {
+      if (registers[i].id === registerId) {
+        return registers[i].name;
+      }
+    }
+    return null;
+  },
+
+  /**
+   * Render heatmap into a container
+   * @param {HTMLElement} containerEl - Container to render into
+   * @param {Object} options - Options: { registerId, layout, type }
+   */
+  renderHeatmap: function(containerEl, options) {
+    options = options || {};
+    var registerId = options.registerId || 'all';
+    var layout = options.layout || 'side-by-side';
+    var type = options.type || 'both'; // 'inherent', 'residual', or 'both'
+
+    // Get risks filtered by register
+    var allRisks = ERM.storage.get('risks') || [];
+    var risks = registerId === 'all' ? allRisks : allRisks.filter(function(r) {
+      return r.registerId === registerId;
+    });
+
+    // Get register NAME from ID (selectedRegister uses names, not IDs)
+    var registerName = this.getRegisterNameFromId(registerId);
+
+    // Store original selected register, temporarily set for rendering
+    var originalRegister = ERM.dashboard.selectedRegister;
+    ERM.dashboard.selectedRegister = registerName;
+
+    // Build heatmap HTML - wrap in heatmaps-row for side-by-side layout
+    var html = '<div class="dashboard-section heatmaps-section heatmaps-embedded">';
+    html += '<div class="heatmaps-row">';
+    if (type === 'both' || type === 'inherent') {
+      html += ERM.dashboard.buildHeatMapCard('inherent', 'Inherent Risk', 'Before Controls');
+    }
+    if (type === 'both' || type === 'residual') {
+      html += ERM.dashboard.buildHeatMapCard('residual', 'Residual Risk', 'After Controls');
+    }
+    html += '</div>';
+    html += ERM.dashboard.buildHeatMapLegend();
+    html += '</div>';
+
+    // Restore original register
+    ERM.dashboard.selectedRegister = originalRegister;
+
+    // Set container content - preserve existing classes (especially editor-v2-embed-content)
+    containerEl.innerHTML = html;
+    containerEl.classList.add('dashboard-embed-container');
+    containerEl.classList.add(layout === 'stacked' ? 'layout-stacked' : 'layout-side-by-side');
+    containerEl.classList.remove(layout === 'stacked' ? 'layout-side-by-side' : 'layout-stacked');
+
+    // Bind cell click events for interaction
+    ERM.dashboard.bindHeatmapEvents(containerEl);
+
+    return {
+      risksCount: risks.length,
+      registerId: registerId
+    };
+  },
+
+  /**
+   * Render top risks table into a container
+   * @param {HTMLElement} containerEl - Container to render into
+   * @param {Object} options - Options: { registerId, limit }
+   */
+  renderTopRisks: function(containerEl, options) {
+    options = options || {};
+    var registerId = options.registerId || 'all';
+    var limit = options.limit || 10;
+
+    // Get risks filtered by register
+    var allRisks = ERM.storage.get('risks') || [];
+    var risks = registerId === 'all' ? allRisks : allRisks.filter(function(r) {
+      return r.registerId === registerId;
+    });
+
+    // Get register NAME from ID
+    var registerName = this.getRegisterNameFromId(registerId);
+
+    // Store original and render
+    var originalRegister = ERM.dashboard.selectedRegister;
+    ERM.dashboard.selectedRegister = registerName;
+
+    var html = '<div class="dashboard-section top-risks-embedded">';
+    html += ERM.dashboard.buildTopRisksTable();
+    html += '</div>';
+
+    ERM.dashboard.selectedRegister = originalRegister;
+
+    containerEl.innerHTML = html;
+    containerEl.classList.add('dashboard-embed-container');
+
+    // Bind row click events
+    var rows = containerEl.querySelectorAll('.top-risk-row');
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].addEventListener('click', function() {
+        var riskId = this.getAttribute('data-risk-id');
+        if (riskId && ERM.riskRegister && ERM.riskRegister.openRiskDetail) {
+          ERM.riskRegister.openRiskDetail(riskId);
+        }
+      });
+    }
+
+    return {
+      risksCount: risks.length,
+      registerId: registerId
+    };
+  },
+
+  /**
+   * Render risk concentration chart into a container
+   * @param {HTMLElement} containerEl - Container to render into
+   * @param {Object} options - Options: { registerId }
+   */
+  renderRiskConcentration: function(containerEl, options) {
+    options = options || {};
+    var registerId = options.registerId || 'all';
+
+    var registerName = this.getRegisterNameFromId(registerId);
+    var originalRegister = ERM.dashboard.selectedRegister;
+    ERM.dashboard.selectedRegister = registerName;
+
+    var html = ERM.dashboard.buildRiskConcentrationChart();
+
+    ERM.dashboard.selectedRegister = originalRegister;
+
+    containerEl.innerHTML = html;
+    containerEl.classList.add('dashboard-embed-container');
+
+    return { registerId: registerId };
+  },
+
+  /**
+   * Render control coverage into a container
+   * @param {HTMLElement} containerEl - Container to render into
+   * @param {Object} options - Options: { registerId }
+   */
+  renderControlCoverage: function(containerEl, options) {
+    options = options || {};
+    var registerId = options.registerId || 'all';
+
+    var registerName = this.getRegisterNameFromId(registerId);
+    var originalRegister = ERM.dashboard.selectedRegister;
+    ERM.dashboard.selectedRegister = registerName;
+
+    var html = ERM.dashboard.buildControlCoverage();
+
+    ERM.dashboard.selectedRegister = originalRegister;
+
+    containerEl.innerHTML = html;
+    containerEl.classList.add('dashboard-embed-container');
+
+    return { registerId: registerId };
+  },
+
+  /**
+   * Render KPI cards into a container
+   * @param {HTMLElement} containerEl - Container to render into
+   * @param {Object} options - Options: { registerId }
+   */
+  renderKPICards: function(containerEl, options) {
+    options = options || {};
+    var registerId = options.registerId || 'all';
+
+    var registerName = this.getRegisterNameFromId(registerId);
+    var originalRegister = ERM.dashboard.selectedRegister;
+    ERM.dashboard.selectedRegister = registerName;
+
+    var html = ERM.dashboard.buildKPICardsV2 ? ERM.dashboard.buildKPICardsV2() : '';
+
+    ERM.dashboard.selectedRegister = originalRegister;
+
+    containerEl.innerHTML = html;
+    containerEl.classList.add('dashboard-embed-container');
+    containerEl.classList.add('kpi-embedded');
+
+    return { registerId: registerId };
+  },
+
+  /**
+   * Get available render types
+   */
+  getTypes: function() {
+    return [
+      { id: 'heatmap', label: 'Risk Heat Maps', description: 'Inherent and Residual risk heatmaps' },
+      { id: 'topRisks', label: 'Top Risks Table', description: 'Highest priority risks' },
+      { id: 'riskConcentration', label: 'Risk Concentration', description: 'Risks by category' },
+      { id: 'controlCoverage', label: 'Control Coverage', description: 'Control effectiveness overview' },
+      { id: 'kpiCards', label: 'KPI Summary Cards', description: 'Key metrics overview' }
+    ];
+  },
+
+  /**
+   * Get data summary for AI context
+   * @param {string} contentType - The type of content
+   * @param {string} registerId - Register filter
+   */
+  getDataSummary: function(contentType, registerId) {
+    var allRisks = ERM.storage.get('risks') || [];
+    var allControls = ERM.storage.get('controls') || [];
+
+    var risks = registerId === 'all' ? allRisks : allRisks.filter(function(r) {
+      return r.registerId === registerId;
+    });
+
+    var controls = registerId === 'all' ? allControls : allControls.filter(function(c) {
+      // Filter controls by linked risks in this register
+      if (!c.linkedRisks || c.linkedRisks.length === 0) return false;
+      for (var i = 0; i < c.linkedRisks.length; i++) {
+        for (var j = 0; j < risks.length; j++) {
+          if (risks[j].id === c.linkedRisks[i]) return true;
+        }
+      }
+      return false;
+    });
+
+    // Calculate summary stats
+    var criticalCount = 0, highCount = 0, mediumCount = 0, lowCount = 0;
+    var categories = {};
+    for (var i = 0; i < risks.length; i++) {
+      var r = risks[i];
+      var scores = ERM.dashboard.computeRiskScores(r);
+      var score = scores.inherentScore || 0;
+      if (score >= 15) criticalCount++;
+      else if (score >= 10) highCount++;
+      else if (score >= 5) mediumCount++;
+      else lowCount++;
+
+      var cat = r.category || 'uncategorized';
+      categories[cat] = (categories[cat] || 0) + 1;
+    }
+
+    return {
+      contentType: contentType,
+      registerId: registerId,
+      totalRisks: risks.length,
+      totalControls: controls.length,
+      risksByLevel: {
+        critical: criticalCount,
+        high: highCount,
+        medium: mediumCount,
+        low: lowCount
+      },
+      risksByCategory: categories,
+      timestamp: new Date().toISOString()
+    };
+  }
+};
+
+// Helper: Bind heatmap cell events
+ERM.dashboard.bindHeatmapEvents = function(container) {
+  var cells = container.querySelectorAll('.heatmap-cell');
+  var self = this;
+  for (var i = 0; i < cells.length; i++) {
+    cells[i].addEventListener('click', function(e) {
+      var type = this.getAttribute('data-type');
+      var row = parseInt(this.getAttribute('data-row'), 10);
+      var col = parseInt(this.getAttribute('data-col'), 10);
+      if (self.handleCellClick) {
+        self.handleCellClick(type, row, col, this);
+      }
+    });
+  }
 };
 
 

@@ -137,20 +137,18 @@
       html += '</div>';
     }
 
-    // Page Header - only show Create Report button if reports exist
-    html += '<div class="page-header">';
-    html += '  <div class="page-header-content">';
-    html += '    <h1 class="page-title">Risk Reporting Hub</h1>';
-    html += '    <p class="page-subtitle">Generate stakeholder-specific risk reports</p>';
-    html += '  </div>';
+    // Page Header - only show when there are reports (matches Risk Register behavior)
     if (state.recentReports.length > 0) {
+      html += '<div class="page-header">';
+      html += '  <div class="page-header-content">';
+      html += '  </div>';
       html += '  <div class="page-header-actions">';
       html += '    <button class="btn btn-primary" onclick="ERM.reports.showCreateReportModal()">';
       html += '      + Create Report';
       html += '    </button>';
       html += '  </div>';
+      html += '</div>';
     }
-    html += '</div>';
 
     // Reports Content Area (Windows Explorer style)
     html += this.renderReportsContent();
@@ -250,7 +248,7 @@
 
     if (state.recentReports.length === 0) {
       // Empty state with nice illustration
-      html += '    <div class="reports-empty-state">';
+      html += '    <div class="module-empty-state">';
       html += '      <div class="empty-illustration">';
       html += '        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">';
       html += '          <rect x="20" y="10" width="80" height="100" rx="4" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>';
@@ -871,117 +869,23 @@
 
   /**
    * Show animated AI thinking modal during report generation
-   * Uses the same design pattern as "Describe with AI" thinking modal
+   * Uses unified ERM.components.showThinkingModal
    */
   ERM.reports.showAIThinkingModal = function(prompt, period, format, audience, sectionType) {
     var self = this;
 
-    // Sparkles icon for header
-    var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-
-    var steps = [
-      { text: 'Analyzing your risk data', delay: 800 },
-      { text: 'Understanding report requirements', delay: 1000 },
-      { text: 'Identifying key insights', delay: 1200 },
-      { text: 'Crafting executive narrative', delay: 1500 },
-      { text: 'Finalizing report structure', delay: 1000 }
-    ];
-
-    var stepsHtml = '';
-    for (var i = 0; i < steps.length; i++) {
-      stepsHtml +=
-        '<div class="ai-step" data-step="' + i + '">' +
-        '<div class="ai-step-icon">' +
-        '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-        '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-        '</div>' +
-        '<span class="ai-step-text">' + steps[i].text + '</span>' +
-        '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-        '</div>';
-    }
-
-    var modalContent = '';
-    modalContent += '<div class="ai-thinking-container">';
-    modalContent += '<div class="ai-thinking-header">';
-    modalContent += '<div class="ai-brain-animation">';
-    modalContent += '<div class="ai-brain-circle"></div>';
-    modalContent += '<div class="ai-brain-circle"></div>';
-    modalContent += '<div class="ai-brain-circle"></div>';
-    modalContent += sparklesIcon;
-    modalContent += '</div>';
-    modalContent += '<h3>AI is generating your report</h3>';
-    modalContent += '<p class="ai-input-preview">"' + ERM.utils.escapeHtml(prompt.substring(0, 60)) + (prompt.length > 60 ? '...' : '') + '"</p>';
-    modalContent += '</div>';
-    modalContent += '<div class="ai-steps-container">';
-    modalContent += stepsHtml;
-    modalContent += '</div>';
-    modalContent += '</div>';
-
-    ERM.components.showModal({
-      title: '',
-      content: modalContent,
-      size: 'sm',
-      buttons: [],
-      footer: false,
-      closeOnBackdrop: false,
-      showCloseButton: false,
-      onOpen: function() {
-        // Style the modal to match ai-thinking-modal pattern
-        var modal = document.querySelector('.modal');
-        var modalContent = document.querySelector('.modal-content');
-        var modalHeader = document.querySelector('.modal-header');
-        var modalBody = document.querySelector('.modal-body');
-        var modalFooter = document.querySelector('.modal-footer');
-
-        if (modal) {
-          modal.classList.add('ai-thinking-modal');
-        }
-
-        // Hide header
-        if (modalHeader && modalHeader.parentNode) {
-          modalHeader.parentNode.removeChild(modalHeader);
-        }
-
-        // Hide footer
-        if (modalFooter && modalFooter.parentNode) {
-          modalFooter.parentNode.removeChild(modalFooter);
-        }
-
-        // Fix body styling
-        if (modalBody) {
-          modalBody.style.cssText = 'padding: 0 !important; max-height: none !important; overflow: visible !important;';
-        }
-
-        // Fix modal content wrapper
-        if (modalContent) {
-          modalContent.style.cssText = 'max-height: none !important; overflow: visible !important;';
-        }
-
-        // Animate steps sequentially
-        function animateStep(stepIndex) {
-          if (stepIndex >= steps.length) {
-            return; // Animation complete, modal will be closed by API callback
-          }
-
-          var stepEl = document.querySelector('.ai-step[data-step="' + stepIndex + '"]');
-          if (stepEl) {
-            stepEl.classList.add('active');
-
-            setTimeout(function() {
-              stepEl.classList.remove('active');
-              stepEl.classList.add('complete');
-              animateStep(stepIndex + 1);
-            }, steps[stepIndex].delay);
-          } else {
-            animateStep(stepIndex + 1);
-          }
-        }
-
-        // Start animation after brief delay
-        setTimeout(function() {
-          animateStep(0);
-        }, 300);
-      }
+    // Show thinking modal (no onComplete - modal closed by API callback)
+    ERM.components.showThinkingModal({
+      input: prompt,
+      title: "AI is generating your report",
+      steps: [
+        { text: 'Analyzing your risk data', delay: 800 },
+        { text: 'Understanding report requirements', delay: 1000 },
+        { text: 'Identifying key insights', delay: 1200 },
+        { text: 'Crafting executive narrative', delay: 1500 },
+        { text: 'Finalizing report structure', delay: 1000 }
+      ],
+      namespace: ERM.reports
     });
 
     // Actually call the AI
@@ -1236,8 +1140,8 @@
       ERM.components.closeModal();
       self.render();
 
-      // Open in the report content editor modal (Edit/Preview mode)
-      ERM.reports.showReportContentEditor(report.id);
+      // Open in the editor (routes through V2/V1 toggle)
+      ERM.reports.editReport(report.id);
       ERM.toast.show({ type: 'success', message: 'Report generated! You can now edit and preview.' });
     }, 1200);
   };
@@ -1303,9 +1207,9 @@
     ERM.components.closeModal();
     this.render();
 
-    // Open in the report content editor modal
+    // Open in the editor (routes through V2/V1 toggle)
     setTimeout(function () {
-      ERM.reports.showReportContentEditor(report.id);
+      ERM.reports.editReport(report.id);
     }, 300);
 
     ERM.toast.show({ type: 'success', message: 'Report generated! You can now edit and preview.' });
@@ -3089,6 +2993,9 @@
   // ========================================
 
   ERM.reports.bindEvents = function () {
+    if (ERM.reports._eventsBound) return;
+    ERM.reports._eventsBound = true;
+
     var self = this;
 
     // View toggle buttons
@@ -3497,13 +3404,6 @@
     html += '      </svg>';
     html += '      <span>Rename</span>';
     html += '    </button>';
-    html += '    <button class="kebab-menu-item" onclick="event.stopPropagation(); ERM.reports.showPreviewModal(\'' + reportId + '\'); ERM.reports.closeAllKebabMenus();">';
-    html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-    html += '        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>';
-    html += '        <circle cx="12" cy="12" r="3"></circle>';
-    html += '      </svg>';
-    html += '      <span>Preview</span>';
-    html += '    </button>';
     html += '    <button class="kebab-menu-item" onclick="event.stopPropagation(); ERM.reports.showExportPDFModal(\'' + reportId + '\'); ERM.reports.closeAllKebabMenus();">';
     html += '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
     html += '        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>';
@@ -3652,14 +3552,12 @@
       });
     }
 
-    // Check if V2 editor is available and enabled
-    var useV2 = ERM.storage.get('useEditorV2') !== false && typeof ERM.reportEditorV2 !== 'undefined';
-
-    if (useV2) {
+    // V2 is the canonical editor (V1 legacy editor removed)
+    if (typeof ERM.reportEditorV2 !== 'undefined') {
       this.openEditorV2(reportId);
     } else {
-      // Open the legacy content editor modal
-      this.showReportContentEditor(reportId);
+      console.error('[Reports] Report Editor V2 not available');
+      ERM.toast.show({ type: 'error', message: 'Editor not available. Please refresh the page.' });
     }
   };
 
@@ -3805,267 +3703,9 @@
     this.showList();
   };
 
-  /**
-   * Show report content editor with toggle view (Edit/Preview) and cover page
-   */
-  ERM.reports.showReportContentEditor = function(reportId) {
-    var self = this;
-    var report = this.getRecentReportById(reportId);
-    if (!report) return;
-
-    // Get sections from report - check both report.sections and report.config.sections
-    var sections = report.sections ||
-                   (report.config && report.config.sections) ||
-                   [
-                     { id: 'exec_summary', name: 'Executive Summary', enabled: true },
-                     { id: 'risk_overview', name: 'Risk Overview', enabled: true },
-                     { id: 'top_risks', name: 'Top Risks', enabled: true },
-                     { id: 'recommendations', name: 'Recommendations', enabled: true }
-                   ];
-
-    // Filter to only enabled sections
-    sections = sections.filter(function(s) { return s.enabled !== false; });
-
-    // Initialize edited content from report or defaults
-    this.editedContent = report.content || {};
-    this.activeSectionId = sections[0].id;
-    this.editorViewMode = 'edit'; // 'edit' or 'preview'
-
-    var content = '';
-    content += '<div class="report-edit-layout">';
-
-    // Top Bar with Section Dropdown and View Toggle
-    content += '  <div class="edit-top-bar">';
-
-    // Section Dropdown (replacing tabs)
-    content += '    <div class="edit-section-selector">';
-    content += '      <label for="section-dropdown" style="font-size: 13px; font-weight: 600; color: #64748b; margin-right: 8px;">Section:</label>';
-    content += '      <select id="section-dropdown" class="section-dropdown">';
-    for (var i = 0; i < sections.length; i++) {
-      var section = sections[i];
-      if (section.enabled !== false) {
-        var isSelected = section.id === this.activeSectionId ? ' selected' : '';
-        content += '        <option value="' + section.id + '"' + isSelected + '>' + ERM.utils.escapeHtml(section.name) + '</option>';
-      }
-    }
-    content += '      </select>';
-    content += '    </div>';
-
-    // View Mode Toggle
-    content += '    <div class="view-mode-toggle">';
-    content += '      <button type="button" class="toggle-btn active" data-mode="edit">✏️ Edit</button>';
-    content += '      <button type="button" class="toggle-btn" data-mode="preview">👁️ Preview</button>';
-    content += '    </div>';
-
-    content += '  </div>';
-
-    // Main Content Area - Single View with Toggle
-    content += '  <div class="edit-main-area">';
-
-    // Editor Panel
-    content += '    <div class="edit-editor-panel" id="editor-panel-view" style="display: flex;">';
-    content += '      <div class="editor-toolbar" id="editor-toolbar">';
-    content += this.renderEditorToolbar();
-    content += '      </div>';
-    content += '      <div class="editor-content-area" id="editor-content-area" contenteditable="true">';
-    content += this.getEditableSectionContent(this.activeSectionId, report);
-    content += '      </div>';
-    content += '    </div>';
-
-    // Preview Panel (PDF-like)
-    content += '    <div class="edit-preview-panel" id="preview-panel-view" style="display: none;">';
-    content += '      <div class="preview-page-indicator">Page <span id="current-page-num">1</span> of <span id="total-pages-num">' + (sections.length + 1) + '</span></div>';
-    content += '      <div class="preview-pages-container" id="preview-pages-container">';
-    content += this.renderFullReportPreview(report, sections);
-    content += '      </div>';
-    content += '    </div>';
-
-    content += '  </div>';
-    content += '</div>';
-
-    ERM.components.showModal({
-      title: 'Edit Report: ' + ERM.utils.escapeHtml(report.name),
-      content: content,
-      size: 'fullscreen',
-      buttons: [
-        { label: 'Cancel', type: 'secondary', action: 'close' },
-        { label: 'Save Changes', type: 'primary', action: 'save' }
-      ],
-      onAction: function(action) {
-        self.handleEditAction(action, reportId);
-      }
-    });
-
-    // Initialize events after modal renders
-    setTimeout(function() {
-      self.initContentEditorEvents(reportId);
-      // Initialize the Report Editor floating toolbar (AI-assisted editing)
-      if (ERM.reportEditor) {
-        ERM.reportEditor.init(reportId);
-        console.log('[Reports] Report editor initialized for report:', reportId);
-      }
-    }, 100);
-  };
-
-  /**
-   * Render editor toolbar
-   */
-  ERM.reports.renderEditorToolbar = function() {
-    var html = '';
-
-    // Format selector
-    html += '<select class="toolbar-select" id="format-select" onchange="ERM.reports.execFormatBlock(this.value)">';
-    html += '  <option value="">Format</option>';
-    html += '  <option value="p">Normal</option>';
-    html += '  <option value="h1">Heading 1</option>';
-    html += '  <option value="h2">Heading 2</option>';
-    html += '  <option value="h3">Heading 3</option>';
-    html += '</select>';
-
-    html += '<span class="toolbar-divider"></span>';
-
-    // Text formatting
-    html += '<button type="button" class="toolbar-btn" onclick="document.execCommand(\'bold\')" title="Bold"><b>B</b></button>';
-    html += '<button type="button" class="toolbar-btn" onclick="document.execCommand(\'italic\')" title="Italic"><i>I</i></button>';
-    html += '<button type="button" class="toolbar-btn" onclick="document.execCommand(\'underline\')" title="Underline"><u>U</u></button>';
-
-    html += '<span class="toolbar-divider"></span>';
-
-    // Lists - Microsoft Word style icons
-    html += '<button type="button" class="toolbar-btn" onclick="ERM.reports.insertList(\'unordered\')" title="Bullet List">';
-    html += '  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">';
-    html += '    <circle cx="2.5" cy="3" r="1.5"/>';
-    html += '    <circle cx="2.5" cy="8" r="1.5"/>';
-    html += '    <circle cx="2.5" cy="13" r="1.5"/>';
-    html += '    <rect x="6" y="2" width="9" height="2" rx="0.5"/>';
-    html += '    <rect x="6" y="7" width="9" height="2" rx="0.5"/>';
-    html += '    <rect x="6" y="12" width="9" height="2" rx="0.5"/>';
-    html += '  </svg>';
-    html += '</button>';
-    html += '<button type="button" class="toolbar-btn" onclick="ERM.reports.insertList(\'ordered\')" title="Numbered List">';
-    html += '  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="font-family: Arial, sans-serif;">';
-    html += '    <text x="1" y="4.5" font-size="5" font-weight="bold">1.</text>';
-    html += '    <text x="1" y="9.5" font-size="5" font-weight="bold">2.</text>';
-    html += '    <text x="1" y="14.5" font-size="5" font-weight="bold">3.</text>';
-    html += '    <rect x="6" y="2" width="9" height="2" rx="0.5"/>';
-    html += '    <rect x="6" y="7" width="9" height="2" rx="0.5"/>';
-    html += '    <rect x="6" y="12" width="9" height="2" rx="0.5"/>';
-    html += '  </svg>';
-    html += '</button>';
-
-    return html;
-  };
-
-  /**
-   * Execute format block command
-   */
-  ERM.reports.execFormatBlock = function(value) {
-    if (value) {
-      document.execCommand('formatBlock', false, '<' + value + '>');
-    }
-  };
-
-  /**
-   * Insert list (bullet or numbered) into the editor
-   * Ensures editor is focused and handles list insertion properly
-   */
-  ERM.reports.insertList = function(type) {
-    var editorArea = document.getElementById('editor-content-area');
-    if (!editorArea) {
-      console.warn('[Reports] No editor area found for list insertion');
-      return;
-    }
-
-    // Focus the editor first
-    editorArea.focus();
-
-    // Get current selection
-    var selection = window.getSelection();
-    var range;
-
-    // If no selection or selection is outside editor, place cursor at end
-    if (!selection.rangeCount || !editorArea.contains(selection.anchorNode)) {
-      range = document.createRange();
-      range.selectNodeContents(editorArea);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-
-    // Execute the appropriate list command
-    var command = type === 'ordered' ? 'insertOrderedList' : 'insertUnorderedList';
-    var success = document.execCommand(command, false, null);
-
-    if (!success) {
-      // Fallback: manually insert list HTML
-      var listTag = type === 'ordered' ? 'ol' : 'ul';
-      var listHtml = '<' + listTag + '><li>List item</li></' + listTag + '>';
-
-      // Insert at cursor position
-      range = selection.getRangeAt(0);
-      range.deleteContents();
-
-      var tempDiv = document.createElement('div');
-      tempDiv.innerHTML = listHtml;
-      var listElement = tempDiv.firstChild;
-
-      range.insertNode(listElement);
-
-      // Move cursor inside the list item
-      var li = listElement.querySelector('li');
-      if (li) {
-        range = document.createRange();
-        range.selectNodeContents(li);
-        range.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-
-      console.log('[Reports] List inserted via fallback method');
-    }
-
-    // Trigger input event to update preview
-    var inputEvent = new Event('input', { bubbles: true, cancelable: true });
-    editorArea.dispatchEvent(inputEvent);
-
-    // Update live preview
-    if (typeof this.updateLivePreview === 'function') {
-      this.updateLivePreview();
-    }
-  };
-
-  /**
-   * Get editable content for a section
-   */
-  ERM.reports.getEditableSectionContent = function(sectionId, report) {
-    // Check if we have edited content
-    if (this.editedContent && this.editedContent[sectionId]) {
-      return this.editedContent[sectionId];
-    }
-
-    // Check if report has stored content
-    if (report && report.content && report.content[sectionId]) {
-      return report.content[sectionId];
-    }
-
-    // Default content based on section type
-    var defaults = {
-      'exec_summary': '<h2>Executive Summary</h2><p>This report provides a comprehensive overview of enterprise risk exposure for the current reporting period.</p><p>Key highlights include:</p><ul><li>Overall risk posture remains within acceptable thresholds</li><li>3 high-priority risks require immediate attention</li><li>Control effectiveness has improved by 12% quarter-over-quarter</li></ul>',
-      'risk_overview': '<h2>Risk Overview</h2><p>The organization currently tracks <strong>24 active risks</strong> across 6 categories.</p><p>Risk distribution by severity:</p><ul><li>Critical: 2 risks</li><li>High: 5 risks</li><li>Medium: 10 risks</li><li>Low: 7 risks</li></ul>',
-      'top_risks': '<h2>Top Enterprise Risks</h2><p>The following risks represent the highest priority items requiring management attention:</p><ol><li><strong>Cybersecurity Threat Landscape</strong> - Score: 20 (Critical)</li><li><strong>Regulatory Compliance Changes</strong> - Score: 16 (High)</li><li><strong>Third-Party Vendor Dependencies</strong> - Score: 15 (High)</li></ol>',
-      'recommendations': '<h2>Recommendations</h2><p>Based on the current risk assessment, the following actions are recommended:</p><ol><li>Enhance cybersecurity monitoring capabilities</li><li>Review and update vendor risk assessment procedures</li><li>Conduct quarterly risk appetite review with the Board</li></ol>'
-    };
-
-    return defaults[sectionId] || '<h2>' + sectionId.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) + '</h2><p>Content for this section...</p>';
-  };
-
-  /**
-   * Render preview for a section
-   */
-  ERM.reports.renderEditPreview = function(sectionId, report) {
-    var content = this.getEditableSectionContent(sectionId, report);
-    return '<div class="preview-section-rendered">' + content + '</div>';
-  };
+  // ========================================
+  // PDF STYLES & COVER PAGE (shared by export)
+  // ========================================
 
   /**
    * Get comprehensive PDF styles that match the preview CSS
@@ -4235,228 +3875,6 @@
     return html;
   };
 
-  /**
-   * Render full report preview with cover page
-   */
-  ERM.reports.renderFullReportPreview = function(report, sections) {
-    var user = ERM.state.user || {};
-    var isFreeUser = !user.subscription || user.subscription === 'free' || user.subscription === 'trial';
-    var html = '';
-
-    // Add cover page first
-    html += this.renderCoverPage(report);
-
-    // Add content pages with watermark and page numbers at bottom
-    for (var i = 0; i < sections.length; i++) {
-      var section = sections[i];
-      if (section.enabled !== false) {
-        var content = this.editedContent[section.id] || this.getEditableSectionContent(section.id, report);
-        var pageNum = i + 1;
-
-        html += '<div class="preview-page" data-page="' + pageNum + '">';
-
-        // Only show watermark for free users
-        if (isFreeUser) {
-          html += '  <div class="page-watermark">';
-          html += '    <img src="assets/images/watermark-logo.png" alt="Dimeri ERM" onerror="this.style.display=\'none\'">';
-          html += '  </div>';
-        }
-        html += '  <div class="page-content">';
-        html += content;
-        html += '  </div>';
-        html += '  <div class="page-number-footer">Page ' + pageNum + '</div>';
-        html += '</div>';
-      }
-    }
-
-    return html;
-  };
-
-  /**
-   * Initialize content editor events
-   */
-  ERM.reports.initContentEditorEvents = function(reportId) {
-    var self = this;
-    var report = this.getRecentReportById(reportId);
-
-    // View Mode Toggle
-    var toggleBtns = document.querySelectorAll('.toggle-btn');
-    console.log('[Toggle] Found toggle buttons:', toggleBtns.length);
-
-    for (var t = 0; t < toggleBtns.length; t++) {
-      toggleBtns[t].addEventListener('click', function () {
-        var mode = this.getAttribute('data-mode');
-        console.log('[Toggle] Clicked button, switching to mode:', mode);
-
-        // Update toggle buttons
-        for (var j = 0; j < toggleBtns.length; j++) {
-          toggleBtns[j].classList.remove('active');
-        }
-        this.classList.add('active');
-
-        // Save ALL section content before switching (not just current section)
-        var editorArea = document.getElementById('editor-content-area');
-        if (editorArea && self.activeSectionId) {
-          if (!self.editedContent) self.editedContent = {};
-          self.editedContent[self.activeSectionId] = editorArea.innerHTML;
-          console.log('[Toggle] Saved content for section:', self.activeSectionId);
-        }
-
-        // Toggle views
-        var editorPanel = document.getElementById('editor-panel-view');
-        var previewPanel = document.getElementById('preview-panel-view');
-        console.log('[Toggle] Found panels - editor:', editorPanel, 'preview:', previewPanel);
-
-        if (mode === 'edit') {
-          // Edit mode: Show editable editor panel
-          console.log('[Toggle] Switching to EDIT mode - showing editor, hiding preview');
-          editorPanel.style.setProperty('display', 'flex', 'important');
-          previewPanel.style.setProperty('display', 'none', 'important');
-          console.log('[Toggle] Editor display:', editorPanel.style.display, 'Preview display:', previewPanel.style.display);
-        } else {
-          // Preview mode: Show read-only full report preview with ALL edited content
-          console.log('[Toggle] Switching to PREVIEW mode - hiding editor, showing preview');
-          editorPanel.style.setProperty('display', 'none', 'important');
-          previewPanel.style.setProperty('display', 'flex', 'important');
-          console.log('[Toggle] Editor display:', editorPanel.style.display, 'Preview display:', previewPanel.style.display);
-
-          // Refresh preview with all edited content and cover page
-          var previewContainer = document.getElementById('preview-pages-container');
-          if (previewContainer) {
-            var sections = report.sections || [
-              { id: 'exec_summary', name: 'Executive Summary', enabled: true },
-              { id: 'risk_overview', name: 'Risk Overview', enabled: true },
-              { id: 'top_risks', name: 'Top Risks', enabled: true },
-              { id: 'recommendations', name: 'Recommendations', enabled: true }
-            ];
-            console.log('[Toggle] Rendering preview with editedContent:', self.editedContent);
-            previewContainer.innerHTML = self.renderFullReportPreview(report, sections);
-            console.log('[Toggle] Preview content refreshed');
-          }
-        }
-
-        self.editorViewMode = mode;
-      });
-    }
-
-    // Section dropdown switching (replacing tabs)
-    var sectionDropdown = document.getElementById('section-dropdown');
-    if (sectionDropdown) {
-      sectionDropdown.addEventListener('change', function(e) {
-        var sectionId = this.value;
-        self.switchEditorSection(sectionId, reportId);
-      });
-    }
-
-    // Live preview update on input
-    var editorArea = document.getElementById('editor-content-area');
-    if (editorArea) {
-      editorArea.addEventListener('input', function() {
-        // Store edited content
-        if (!self.editedContent) self.editedContent = {};
-        self.editedContent[self.activeSectionId] = editorArea.innerHTML;
-      });
-    }
-
-    // Initialize chart click handlers for any existing charts
-    this.attachChartClickHandlers();
-  };
-
-  /**
-   * Switch editor section
-   */
-  ERM.reports.switchEditorSection = function(sectionId, reportId) {
-    var self = this;
-    var report = this.getRecentReportById(reportId);
-
-    // Save current content before switching
-    var editorArea = document.getElementById('editor-content-area');
-    if (editorArea && this.activeSectionId) {
-      if (!this.editedContent) this.editedContent = {};
-      this.editedContent[this.activeSectionId] = editorArea.innerHTML;
-    }
-
-    // Update active section
-    this.activeSectionId = sectionId;
-
-    // Update dropdown selected value
-    var sectionDropdown = document.getElementById('section-dropdown');
-    if (sectionDropdown) {
-      sectionDropdown.value = sectionId;
-    }
-
-    // Update editor content
-    if (editorArea) {
-      editorArea.innerHTML = this.getEditableSectionContent(sectionId, report);
-    }
-
-    // Update preview
-    this.updateLivePreview();
-  };
-
-  /**
-   * Update live preview
-   */
-  ERM.reports.updateLivePreview = function() {
-    var editorArea = document.getElementById('editor-content-area');
-    var previewArea = document.getElementById('edit-preview-content');
-
-    if (editorArea && previewArea) {
-      previewArea.innerHTML = '<div class="preview-section-rendered">' + editorArea.innerHTML + '</div>';
-    }
-  };
-
-  /**
-   * Handle edit action buttons
-   */
-  ERM.reports.handleEditAction = function(action, reportId) {
-    var self = this;
-
-    if (action === 'close') {
-      ERM.components.closeModal();
-    } else if (action === 'ai') {
-      ERM.toast.show({ type: 'info', message: 'AI Assistant: Select text in the editor to get AI suggestions' });
-    } else if (action === 'save') {
-      this.saveReportContent(reportId);
-    }
-  };
-
-  /**
-   * Save report content
-   */
-  ERM.reports.saveReportContent = function(reportId) {
-    var self = this;
-
-    // Save current section content
-    var editorArea = document.getElementById('editor-content-area');
-    if (editorArea && this.activeSectionId) {
-      if (!this.editedContent) this.editedContent = {};
-      this.editedContent[this.activeSectionId] = editorArea.innerHTML;
-    }
-
-    // Find and update the report
-    for (var i = 0; i < state.recentReports.length; i++) {
-      if (state.recentReports[i].id === reportId) {
-        state.recentReports[i].content = this.editedContent;
-        state.recentReports[i].modifiedDate = new Date().toISOString();
-
-        // Log activity
-        if (ERM.activityLogger) {
-          ERM.activityLogger.log('report', 'updated', 'report', state.recentReports[i].name, {
-            reportId: reportId,
-            action: 'content_edited'
-          });
-        }
-        break;
-      }
-    }
-
-    this.saveRecentReports();
-    ERM.components.closeModal();
-    this.render();
-    ERM.toast.show({ type: 'success', message: 'Report content saved successfully' });
-  };
-
   // ========================================
   // RENAME REPORT
   // ========================================
@@ -4546,85 +3964,6 @@
     ERM.components.closeModal();
     this.render();
     ERM.toast.show({ type: 'success', message: 'Report renamed to "' + newName + '"' });
-  };
-
-  // ========================================
-  // PREVIEW REPORT
-  // ========================================
-
-  /**
-   * Show report preview in modal - routes to correct previewer based on format
-   */
-  ERM.reports.showPreviewModal = function(reportId) {
-    var self = this;
-    this.closeAllKebabMenus();
-
-    var report = this.getRecentReportById(reportId);
-    if (!report) {
-      ERM.toast.show({ type: 'error', message: 'Report not found' });
-      return;
-    }
-
-    // Check if this is a V2 report - if so, use V2 preview
-    if (report.format === 'v2') {
-      console.log('[Reports] Detected V2 report, using V2 preview');
-      // Open the report in V2 editor and trigger preview
-      this.editReport(reportId);
-      // Wait for editor to load, then trigger preview
-      setTimeout(function() {
-        if (window.ERM && ERM.reportEditorV2 && ERM.reportEditorV2.showPreview) {
-          ERM.reportEditorV2.showPreview();
-        }
-      }, 500);
-      return;
-    }
-
-    // Otherwise use legacy preview for old reports
-    console.log('[Reports] Using legacy preview for old format report');
-
-    // Generate the report HTML for preview
-    var previewHtml = this.generateReportHTML(report);
-
-    // Use same PDF styles for consistent preview - scoped to avoid conflicts
-    var previewStyles = this.getPDFStyles().replace(/\n/g, ' ');
-
-    var content = '';
-    content += '<div class="report-preview-modal">';
-    content += '  <style scoped>' + previewStyles + '</style>';
-    content += '  <div class="report-preview-container" style="background: #f0f0f0; padding: 20px; max-height: calc(85vh - 180px); overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">';
-    content += previewHtml;
-    content += '  </div>';
-    content += '</div>';
-
-    ERM.components.showModal({
-      title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 8px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Report Preview',
-      content: content,
-      size: 'xl',
-      buttons: [
-        { label: 'Close', type: 'secondary', action: 'close' },
-        { label: 'Export PDF', type: 'primary', action: 'export' }
-      ],
-      onOpen: function() {
-        // Ensure modal body is scrollable
-        var modal = document.querySelector("#modal-overlay .modal");
-        var modalBody = document.querySelector(".modal-body");
-        if (modal) {
-          modal.style.overflow = "visible";
-        }
-        if (modalBody) {
-          modalBody.style.overflowY = "auto";
-          modalBody.style.maxHeight = "calc(85vh - 140px)";
-        }
-      },
-      onAction: function(action) {
-        if (action === 'export') {
-          ERM.components.closeModal();
-          setTimeout(function() {
-            self.showExportPDFModal(reportId);
-          }, 200);
-        }
-      }
-    });
   };
 
   // ========================================

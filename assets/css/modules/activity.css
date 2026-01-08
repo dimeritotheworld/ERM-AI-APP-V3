@@ -31,14 +31,14 @@
 
 .activity-view-all {
   font-size: 13px;
-  color: #3b82f6;
+  color: var(--ai-accent);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 }
 
 .activity-view-all:hover {
-  color: #2563eb;
+  color: var(--ai-accent-hover);
 }
 
 .activity-list {
@@ -86,7 +86,7 @@
 }
 
 .activity-info .activity-icon {
-  background: #dbeafe;
+  background: var(--blue-100);
 }
 
 .activity-neutral .activity-icon {
@@ -243,7 +243,7 @@
 .activity-filter-input:focus,
 .activity-filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -310,7 +310,7 @@
 }
 
 .activity-log-item.activity-info .activity-log-icon {
-  background: #dbeafe;
+  background: var(--blue-100);
 }
 
 .activity-log-item.activity-neutral .activity-log-icon {
@@ -385,8 +385,8 @@
 }
 
 .activity-badge-risk {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--blue-100);
+  color: var(--blue-800);
 }
 
 .activity-badge-control {
@@ -400,8 +400,8 @@
 }
 
 .activity-badge-settings {
-  background: #f3e8ff;
-  color: #6b21a8;
+  background: var(--blue-100);
+  color: var(--blue-700);
 }
 
 /* ========================================
@@ -615,11 +615,11 @@
 }
 
 .audit-item-indicator.action-create { background: #16a34a; }
-.audit-item-indicator.action-update { background: #2563eb; }
+.audit-item-indicator.action-update { background: var(--ai-accent-hover); }
 .audit-item-indicator.action-delete { background: #dc2626; }
 .audit-item-indicator.action-link { background: #d97706; }
 .audit-item-indicator.action-unlink { background: #ea580c; }
-.audit-item-indicator.action-export { background: #7c3aed; }
+.audit-item-indicator.action-export { background: var(--ai-accent); }
 .audit-item-indicator.action-neutral { background: #94a3b8; }
 
 /* Item content */

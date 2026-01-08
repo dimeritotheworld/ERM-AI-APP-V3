@@ -131,8 +131,8 @@
   display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  color: #7c3aed;
-  background: rgba(124, 58, 237, 0.1);
+  color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.1);
   padding: 2px 8px;
   border-radius: 4px;
   margin-left: 8px;
@@ -163,7 +163,7 @@
 .settings-select:focus,
 .settings-textarea:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -258,7 +258,7 @@
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: #3b82f6;
+  background-color: var(--ai-accent);
 }
 
 .toggle-switch input:checked + .toggle-slider:before {
@@ -294,7 +294,7 @@
 
 .settings-radio-option:hover,
 .settings-checkbox-option:hover {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   background: #f8fafc;
 }
 
@@ -407,13 +407,13 @@
 }
 
 .preference-card:hover {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   background: white;
 }
 
 .preference-card.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
 }
 
 .preference-card-icon {
@@ -528,7 +528,7 @@
 
 .team-role-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -547,8 +547,8 @@
 }
 
 .role-badge.admin {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--blue-100);
+  color: var(--ai-accent-dark);
 }
 
 .role-badge.editor {

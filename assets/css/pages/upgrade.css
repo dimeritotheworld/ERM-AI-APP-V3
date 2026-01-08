@@ -295,7 +295,7 @@
 }
 
 .feature-list li.included.ai svg {
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .feature-list li.excluded svg {

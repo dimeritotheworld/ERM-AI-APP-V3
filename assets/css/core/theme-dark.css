@@ -28,7 +28,7 @@ html.theme-dark {
   /* Input backgrounds */
   --input-bg: #334155;
   --input-border: #475569;
-  --input-focus-border: #3b82f6;
+  --input-focus-border: var(--blue-500);
 
   /* Sidebar */
   --sidebar-bg: #1e293b;
@@ -292,7 +292,7 @@ html.theme-dark .quick-link {
 }
 
 html.theme-dark .quick-link:hover {
-  border-color: #3b82f6;
+  border-color: var(--blue-500);
 }
 
 html.theme-dark .quick-link-text {
@@ -329,8 +329,8 @@ html.theme-dark .preference-card:hover {
 }
 
 html.theme-dark .preference-card.active {
-  border-color: #3b82f6;
-  background: #1e3a8a;
+  border-color: var(--blue-500);
+  background: var(--blue-900);
 }
 
 html.theme-dark .preference-card-title {

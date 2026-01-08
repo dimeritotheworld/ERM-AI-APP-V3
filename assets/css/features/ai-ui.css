@@ -1,0 +1,1187 @@
+/**
+ * Dimeri ERM - AI UI System (Canonical)
+ *
+ * This is the SINGLE source of truth for all shared AI components.
+ * Module CSS files should NOT define these selectors.
+ *
+ * Ownership:
+ * - AI buttons (.btn-ai-*)
+ * - AI thinking states (.ai-thinking-*)
+ * - AI loading states (.ai-loading-*)
+ * - AI suggestions (.ai-suggestions-*)
+ * - AI check bar (.ai-check-*)
+ * - AI filled animation (.ai-filled)
+ * - AI brain animation (.ai-brain-*)
+ * - All AI keyframes
+ *
+ * @version 1.0.0
+ */
+
+/* ============================================
+   AI DESIGN TOKENS (Enterprise Blue - No Purple)
+   Primary tokens defined in core/global.css:
+   --ai-accent, --ai-accent-hover, --ai-border,
+   --ai-bg, --ai-recommended-bg, --ai-text-primary, --ai-text-muted
+
+   DESIGN RULES:
+   - NO purple (#8b5cf6, #7c3aed, etc.)
+   - NO glow effects
+   - NO pulse animations on content
+   - NO "generate more" patterns
+   - Max 3 suggestions, 1 recommended
+   ============================================ */
+:root {
+  /* AI Status colors (supplements global.css) */
+  --c-ai-success: #16a34a;
+  --c-ai-success-soft: rgba(22, 163, 74, 0.1);
+  --c-ai-error: #dc2626;
+  --c-ai-error-soft: rgba(220, 38, 38, 0.1);
+}
+
+/* ============================================
+   AI BUTTONS
+   ============================================ */
+
+/* Base AI button - Enterprise blue, no glow */
+.btn-ai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: var(--ai-accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ai:hover {
+  background: var(--ai-accent-hover);
+}
+
+.btn-ai:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* AI Outline variant - transparent with border */
+.btn-ai-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ai-accent);
+  background: transparent;
+  border: 1px solid var(--ai-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-ai-outline:hover {
+  background: var(--ai-bg);
+  border-color: var(--ai-accent);
+}
+
+/* AI Primary button - Enterprise blue, no glow */
+.btn-ai-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: var(--ai-accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ai-primary:hover {
+  background: var(--ai-accent-hover);
+}
+
+/* AI Suggest button (inline field trigger) - 28x28 per spec */
+.btn-ai-suggest {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ai-accent);
+  background: transparent;
+  border: 1px solid var(--ai-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-ai-suggest:hover {
+  background: var(--ai-bg);
+}
+
+.btn-ai-suggest:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ai-suggest svg,
+.btn-ai-suggest .ai-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Small AI suggest variant */
+.btn-ai-suggest.btn-ai-sm {
+  padding: 2px 8px;
+  font-size: 11px;
+  gap: 3px;
+}
+
+.btn-ai-suggest.btn-ai-sm svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* AI Icon button (small square) */
+.btn-ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--c-ai-soft);
+  border: 1px solid var(--c-ai-border);
+  border-radius: 4px;
+  color: var(--c-ai);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ai-icon:hover {
+  background: var(--c-ai-medium);
+  border-color: var(--c-ai);
+}
+
+.btn-ai-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* AI Use button (for accepting suggestions) */
+.btn-ai-use {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  background: var(--ai-accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ai-use:hover {
+  background: var(--ai-accent-hover);
+}
+
+/* AI Review button - Enterprise blue, no glow */
+.btn-ai-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--ai-accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ai-review:hover {
+  background: var(--ai-accent-hover);
+}
+
+.btn-ai-review svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* AI Field button - Enterprise blue, no gradient/glow */
+.ai-field-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-accent);
+  background: var(--ai-bg);
+  border: 1px solid var(--ai-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ai-field-btn:hover {
+  background: var(--ai-recommended-bg);
+  border-color: var(--ai-accent);
+}
+
+.ai-field-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================
+   AI CHECK BAR (Form validation strip)
+   ============================================ */
+.ai-check-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ai-bg);
+  border: 1px solid var(--ai-border);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.ai-check-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-check-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--ai-accent);
+  border-radius: 6px;
+  color: white;
+}
+
+.ai-check-icon svg,
+.ai-check-icon .ai-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-check-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.ai-check-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Responsive ai-check-bar */
+@media (max-width: 768px) {
+  .ai-check-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .ai-check-actions {
+    justify-content: stretch;
+  }
+
+  .ai-check-actions .btn {
+    flex: 1;
+  }
+}
+
+/* ============================================
+   AI SUGGESTIONS
+   ============================================ */
+.ai-suggestions-container {
+  padding: 8px 0;
+}
+
+.ai-suggestions-intro {
+  color: #6b7280;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.ai-suggestions-intro strong {
+  color: #374151;
+}
+
+.ai-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.ai-suggestion-item:hover {
+  border-color: var(--c-ai-border);
+  background: var(--c-ai-soft);
+}
+
+.ai-suggestion-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-suggestion-text {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.ai-suggestion-desc {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* AI Suggestions loading state */
+.ai-suggestions-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.ai-suggestions-loading .spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--c-ai);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.ai-suggestions-loading p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ========================================
+   AI Title Suggestions
+   ======================================== */
+.ai-title-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-title-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-title-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.ai-title-item.ai-recommended {
+  background: #f0f9ff;
+  border: 1.5px solid #93c5fd;
+}
+
+.ai-title-item.ai-recommended:hover {
+  background: #e0f2fe;
+  border-color: #60a5fa;
+}
+
+.ai-title-item .ai-recommended-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ai-accent);
+}
+
+.ai-title-item .ai-title-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.ai-title-item .btn-ai-use {
+  align-self: flex-end;
+  padding: 4px 12px;
+  font-size: 12px;
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-600) 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ai-title-item .btn-ai-use:hover {
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-700) 100%);
+}
+
+/* ========================================
+   Field Suggestions
+   ======================================== */
+.field-suggestions-container {
+  padding: 16px;
+}
+
+.field-suggestions-intro {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.field-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-suggestion-item {
+  padding: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field-suggestion-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #111827;
+}
+
+.field-suggestion-item button {
+  align-self: flex-end;
+}
+
+/* ========================================
+   Treatment/Status/Date Lists
+   ======================================== */
+.ai-treatment-list,
+.ai-status-list,
+.ai-date-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ai-treatment-item,
+.ai-status-item,
+.ai-date-item {
+  padding: 12px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-treatment-item:hover,
+.ai-status-item:hover,
+.ai-date-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.ai-treatment-header,
+.ai-status-header,
+.ai-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.ai-treatment-desc,
+.ai-status-desc,
+.ai-date-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ============================================
+   AI THINKING STATES
+   ============================================ */
+.ai-thinking-container {
+  text-align: center;
+  padding: 8px 6px 12px;
+}
+
+.ai-thinking-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ai-thinking-header h3,
+.ai-thinking-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.ai-thinking-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ai-thinking-title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--c-ai);
+}
+
+/* AI Thinking Steps */
+.ai-thinking-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 280px;
+  margin: 10px auto 0;
+}
+
+.ai-thinking-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.ai-thinking-step.active {
+  opacity: 1;
+  border-color: var(--ai-accent);
+  background: var(--ai-recommended-bg);
+}
+
+.ai-thinking-step.complete {
+  opacity: 1;
+  border-color: var(--c-ai-success);
+  background: var(--c-ai-success-soft);
+}
+
+.ai-thinking-step-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  color: #9ca3af;
+  transition: all 0.3s ease;
+}
+
+.ai-thinking-step.active .ai-thinking-step-icon {
+  border-color: var(--ai-accent);
+  color: var(--ai-accent);
+}
+
+.ai-thinking-step.complete .ai-thinking-step-icon {
+  border-color: var(--c-ai-success);
+  color: var(--c-ai-success);
+}
+
+.ai-thinking-step-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  text-align: left;
+  transition: color 0.3s ease;
+}
+
+.ai-thinking-step.active .ai-thinking-step-text {
+  color: #111827;
+}
+
+.ai-thinking-step.complete .ai-thinking-step-text {
+  color: #059669;
+}
+
+.ai-thinking-step-status {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+
+/* AI Thinking Spinner */
+.ai-thinking-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--ai-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.ai-thinking-step.active .ai-thinking-spinner {
+  display: block;
+}
+
+.ai-thinking-step.complete .ai-thinking-spinner {
+  display: none;
+}
+
+/* AI Thinking Checkmark */
+.ai-thinking-check {
+  display: none;
+  color: var(--c-ai-success);
+}
+
+.ai-thinking-step.complete .ai-thinking-check {
+  display: block;
+}
+
+/* AI Thinking Modal wrapper */
+.ai-thinking-modal-wrapper .modal-content {
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.ai-thinking-modal {
+  padding: 20px 24px;
+}
+
+/* AI Thinking inline (for embedded states) */
+.ai-thinking-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.ai-thinking-inline p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 16px 0 0 0;
+}
+
+/* ============================================
+   AI BRAIN ANIMATION
+   ============================================ */
+.ai-brain-animation {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-brain-animation svg,
+.ai-brain-animation .ai-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--ai-accent);
+  position: relative;
+  z-index: 2;
+  /* No pulse animation per spec */
+}
+
+.ai-brain-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--ai-accent);
+  opacity: 0;
+  animation: aiRipple 2s ease-out infinite;
+}
+
+.ai-brain-circle:nth-child(1) {
+  width: 22px;
+  height: 22px;
+  animation-delay: 0s;
+}
+
+.ai-brain-circle:nth-child(2) {
+  width: 32px;
+  height: 32px;
+  animation-delay: 0.4s;
+}
+
+.ai-brain-circle:nth-child(3) {
+  width: 42px;
+  height: 42px;
+  animation-delay: 0.8s;
+}
+
+/* Brain animation states */
+.ai-brain-animation.success svg,
+.ai-brain-animation.success .ai-icon {
+  color: var(--c-ai-success);
+}
+
+.ai-brain-animation.success .ai-brain-circle {
+  border-color: var(--c-ai-success);
+}
+
+.ai-brain-animation.error svg,
+.ai-brain-animation.error .ai-icon {
+  color: var(--c-ai-error);
+}
+
+.ai-brain-animation.error .ai-brain-circle {
+  border-color: var(--c-ai-error);
+}
+
+/* ============================================
+   AI LOADING STATES
+   ============================================ */
+.ai-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.ai-loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--ai-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.ai-loading-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ============================================
+   AI FILLED ANIMATION (form field highlight)
+   ============================================ */
+.ai-filled {
+  animation: ai-fill-pulse 0.6s ease-out;
+}
+
+/* List input container AI filled */
+.list-input-container.ai-filled {
+  animation: aiFillPulse 0.5s ease-out;
+}
+
+/* ============================================
+   AI KEYFRAMES (Single definitions)
+   ============================================ */
+
+/* @keyframes spin REMOVED - canonical in core/components.css */
+
+/* AI-specific spin - alias to core spin */
+@keyframes aiSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* AI fill pulse (form field highlight) - Enterprise blue */
+@keyframes ai-fill-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+    background-color: rgba(37, 99, 235, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    background-color: transparent;
+  }
+}
+
+/* Alternative fill pulse - Enterprise blue */
+@keyframes aiFillPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+/* AI ripple effect (brain animation) */
+@keyframes aiRipple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* AI pulse effect */
+@keyframes aiPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* AI dots animation (loading indicator) */
+@keyframes aiDots {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* AI thinking pulse - REMOVED per spec (no glow/pulse) */
+
+/* AI star pulse (for badges) */
+@keyframes aiStarPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* AI stagger fade in (for lists) */
+@keyframes aiStaggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* AI spinner rotate */
+@keyframes aiSpinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sparkle pulse (title icons) */
+@keyframes sparkle-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================
+   AI UTILITY CLASSES
+   ============================================ */
+
+/* Stagger animation container */
+.ai-stagger-container .ai-stagger-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: aiStaggerFadeIn 0.4s ease-out forwards;
+}
+
+/* AI recommended styling */
+.ai-recommended {
+  background: #f0f9ff;
+  border: 1.5px solid #93c5fd !important;
+  position: relative;
+}
+
+.ai-recommended:hover {
+  background: #e0f2fe;
+  border-color: #60a5fa !important;
+}
+
+.ai-recommended-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ai-accent);
+  margin-bottom: 2px;
+}
+
+/* AI glow - REMOVED per spec (no glow effects) */
+
+/* AI icon base */
+.ai-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   AI SUGGESTION MODAL (Unified Component)
+   Per AI Interaction Design Spec:
+   - Max 3 suggestions
+   - 1 recommended (first)
+   - Enterprise blue
+   - No glow/pulse
+   ============================================ */
+.ai-suggestion-modal {
+  padding: 8px 0;
+}
+
+.ai-suggestion-context {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--ai-text-muted);
+}
+
+.ai-suggestion-context strong {
+  color: var(--ai-text-primary);
+}
+
+.ai-suggestion-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-suggestion-card {
+  position: relative;
+  padding: 16px;
+  background: var(--ai-bg);
+  border: 1px solid var(--ai-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ai-suggestion-card:hover {
+  border-color: var(--ai-accent);
+  background: white;
+}
+
+.ai-suggestion-recommended {
+  background: var(--ai-recommended-bg);
+  border-color: var(--ai-accent);
+}
+
+.ai-suggestion-recommended:hover {
+  background: #dbeafe;
+}
+
+.ai-recommendation-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ai-accent);
+  background: white;
+  border: 1px solid var(--ai-accent);
+  border-radius: 4px;
+}
+
+.ai-suggestion-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ai-text-primary);
+  margin-bottom: 8px;
+}
+
+.ai-suggestion-desc {
+  font-size: 12px;
+  color: var(--ai-text-muted);
+  margin-bottom: 12px;
+}
+
+.btn-ai-use-suggestion {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: var(--ai-accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-ai-use-suggestion:hover {
+  background: var(--ai-accent-hover);
+}
+
+.ai-suggestion-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ai-text-primary);
+  cursor: pointer;
+}
+
+.ai-suggestion-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ai-accent);
+}
+
+.ai-suggestion-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ai-border);
+  text-align: right;
+}
+
+.ai-apply-selected {
+  background: var(--ai-accent);
+}
+
+.ai-apply-selected:hover {
+  background: var(--ai-accent-hover);
+}
+
+/* AI Loading State (inline) */
+.ai-loading-wrapper {
+  padding: 16px;
+}
+
+.ai-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--ai-bg);
+  border: 1px solid var(--ai-border);
+  border-radius: 8px;
+}
+
+.ai-loading-state .ai-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ai-border);
+  border-top-color: var(--ai-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.ai-loading-state .ai-loading-text {
+  font-size: 14px;
+  color: var(--ai-text-muted);
+}
+
+/* ============================================
+   DARK MODE SUPPORT - Enterprise blue
+   Uses same variables from global.css :root
+   ============================================ */
+html.theme-dark {
+  --ai-accent: var(--blue-500);
+  --ai-accent-hover: var(--blue-600);
+  --ai-bg: rgba(59, 130, 246, 0.1);
+  --ai-border: rgba(59, 130, 246, 0.3);
+  --ai-recommended-bg: rgba(59, 130, 246, 0.15);
+}
+
+html.theme-dark .ai-suggestion-item {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+html.theme-dark .ai-suggestion-item:hover {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: var(--ai-border);
+}
+
+html.theme-dark .ai-thinking-step {
+  background: #1f2937;
+}
+
+html.theme-dark .ai-thinking-step.active {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+html.theme-dark .ai-thinking-step.complete {
+  background: rgba(22, 163, 74, 0.15);
+}
+
+html.theme-dark .ai-check-bar {
+  background: rgba(37, 99, 235, 0.1);
+}

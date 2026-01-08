@@ -475,21 +475,25 @@ ERM.riskRegister.initDetailEvents = function () {
     }
   }
 
-  // Close options menu on outside click
-  document.addEventListener("click", function (e) {
-    if (
-      optionsMenu &&
-      !e.target.closest("#register-options-btn") &&
-      !e.target.closest("#register-options-menu")
-    ) {
-      optionsMenu.classList.remove("show", "dropdown-up");
-      optionsMenu.style.position = "";
-      optionsMenu.style.top = "";
-      optionsMenu.style.bottom = "";
-      optionsMenu.style.left = "";
-      optionsMenu.style.right = "";
-    }
-  });
+  // Close options menu on outside click (guarded)
+  if (!ERM.riskRegister._detailDocClickBound) {
+    ERM.riskRegister._detailDocClickBound = true;
+    document.addEventListener("click", function (e) {
+      var optMenu = document.getElementById("register-options-menu");
+      if (
+        optMenu &&
+        !e.target.closest("#register-options-btn") &&
+        !e.target.closest("#register-options-menu")
+      ) {
+        optMenu.classList.remove("show", "dropdown-up");
+        optMenu.style.position = "";
+        optMenu.style.top = "";
+        optMenu.style.bottom = "";
+        optMenu.style.left = "";
+        optMenu.style.right = "";
+      }
+    });
+  }
 
   // Filter handlers
   this.initFilterHandlers();
@@ -778,6 +782,28 @@ ERM.riskRegister.initRiskCheckboxHandlers = function () {
     });
   }
 
+  // Select all checkbox
+  var selectAll = document.getElementById("select-all-risks");
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      var cbs = document.querySelectorAll(".risk-select-checkbox");
+      for (var s = 0; s < cbs.length; s++) {
+        cbs[s].checked = this.checked;
+        // Update card selected state
+        var riskId = cbs[s].getAttribute("data-risk-id");
+        var card = document.querySelector('.risk-card[data-risk-id="' + riskId + '"]');
+        if (card) {
+          if (this.checked) {
+            card.classList.add("selected");
+          } else {
+            card.classList.remove("selected");
+          }
+        }
+      }
+      self.updateRisksBulkActions();
+    });
+  }
+
   // Bulk action buttons
   var bulkDuplicateBtn = document.getElementById("bulk-duplicate-risks");
   if (bulkDuplicateBtn) {
@@ -905,119 +931,21 @@ ERM.riskRegister.showAIRegisterReview = function () {
 
 /**
  * Show AI thinking/analyzing modal
- * Uses the same design pattern as "Describe with AI" thinking modal
+ * Uses unified ERM.components.showThinkingModal
  */
 ERM.riskRegister.showAIThinkingModal = function (onComplete) {
-  var steps = [
-    { text: "Analyzing risk register", delay: 500 },
-    { text: "Evaluating risk coverage", delay: 600 },
-    { text: "Checking control linkages", delay: 500 },
-    { text: "Identifying gaps", delay: 400 },
-    { text: "Generating recommendations", delay: 500 },
-  ];
-
-  // Sparkles icon for header
-  var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-
-  var stepsHtml = "";
-  for (var i = 0; i < steps.length; i++) {
-    stepsHtml +=
-      '<div class="ai-step" data-step="' + i + '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-      "</div>" +
-      '<span class="ai-step-text">' + steps[i].text + "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-      "</div>";
-  }
-
-  var content =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    sparklesIcon +
-    "</div>" +
-    "<h3>AI is analyzing your register</h3>" +
-    "</div>" +
-    '<div class="ai-steps-container">' +
-    stepsHtml +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showModal({
-    title: "",
-    content: content,
-    size: "sm",
-    buttons: [],
-    onOpen: function () {
-      // Style the modal to match ai-thinking-modal pattern
-      var modal = document.querySelector(".modal");
-      var modalContent = document.querySelector(".modal-content");
-      var modalHeader = document.querySelector(".modal-header");
-      var modalBody = document.querySelector(".modal-body");
-      var modalFooter = document.querySelector(".modal-footer");
-
-      if (modal) {
-        modal.classList.add("ai-thinking-modal");
-      }
-
-      // Hide header
-      if (modalHeader) {
-        modalHeader.style.display = "none";
-      }
-
-      // Hide footer
-      if (modalFooter) {
-        modalFooter.style.display = "none";
-      }
-
-      // Fix body styling
-      if (modalBody) {
-        modalBody.style.cssText = "padding: 0 !important; max-height: none !important; overflow: visible !important;";
-      }
-
-      // Fix modal content wrapper
-      if (modalContent) {
-        modalContent.style.cssText = "max-height: none !important; overflow: visible !important;";
-      }
-
-      function animateStep(stepIndex) {
-        if (stepIndex >= steps.length) {
-          // All done, close modal and show results
-          setTimeout(function () {
-            ERM.components.closeModal();
-            setTimeout(function () {
-              if (onComplete) onComplete();
-            }, 200);
-          }, 400);
-          return;
-        }
-
-        var stepEl = document.querySelector(
-          '.ai-step[data-step="' + stepIndex + '"]'
-        );
-        if (stepEl) {
-          stepEl.classList.add("active");
-
-          setTimeout(function () {
-            stepEl.classList.remove("active");
-            stepEl.classList.add("complete");
-            animateStep(stepIndex + 1);
-          }, steps[stepIndex].delay);
-        } else {
-          animateStep(stepIndex + 1);
-        }
-      }
-
-      // Start animation after a brief delay
-      setTimeout(function () {
-        animateStep(0);
-      }, 300);
-    },
+  ERM.components.showThinkingModal({
+    input: "Risk register",
+    title: "AI is analyzing your register",
+    steps: [
+      { text: "Analyzing risk register", delay: 500 },
+      { text: "Evaluating risk coverage", delay: 600 },
+      { text: "Checking control linkages", delay: 500 },
+      { text: "Identifying gaps", delay: 400 },
+      { text: "Generating recommendations", delay: 500 },
+    ],
+    namespace: ERM.riskRegister,
+    onComplete: onComplete
   });
 };
 
@@ -1200,18 +1128,9 @@ ERM.riskRegister.displayAIRegisterReview = function () {
     title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> AI Portfolio Review',
     content: content,
     size: "lg",
+    variant: "portfolio",
     buttons: [{ label: "Close", type: "secondary", action: "close" }],
     onOpen: function () {
-      // Ensure modal and modal body are scrollable (override overflow:hidden on .modal)
-      var modal = document.querySelector("#modal-overlay .modal");
-      var modalBody = document.querySelector(".modal-body");
-      if (modal) {
-        modal.style.overflow = "visible";
-      }
-      if (modalBody) {
-        modalBody.style.overflowY = "auto";
-        modalBody.style.maxHeight = "calc(85vh - 140px)";
-      }
       self.generatePortfolioReview(registerContext);
     }
   });
@@ -1514,6 +1433,17 @@ ERM.riskRegister.updateHeatMap = function (type) {
   var likelihood = parseInt(likelihoodSelect.value, 10);
   var impact = parseInt(impactSelect.value, 10);
   var score = likelihood * impact;
+
+  // For residual risk, consider control effectiveness
+  if (type === "residual") {
+    var controlAdjustment = this.calculateControlEffectiveness();
+    if (controlAdjustment > 0 && score > 0) {
+      // Each control reduces score by up to 15%, max reduction 50%
+      var reductionPercent = Math.min(controlAdjustment * 0.15, 0.50);
+      score = Math.max(1, Math.round(score * (1 - reductionPercent)));
+    }
+  }
+
   var level = this.getRiskLevelFromScore(score);
   var levelClass = this.getRiskLevelClass(score);
 
@@ -1526,6 +1456,48 @@ ERM.riskRegister.updateHeatMap = function (type) {
   if (heatmapContainer) {
     heatmapContainer.innerHTML = this.renderHeatMap(type, likelihood, impact);
   }
+};
+
+/**
+ * Calculate effectiveness factor from linked controls
+ * Returns the number of effective controls linked
+ */
+ERM.riskRegister.calculateControlEffectiveness = function () {
+  var effectiveCount = 0;
+  var controlCheckboxes = document.querySelectorAll('input[name="linkedControl"]:checked');
+
+  if (!controlCheckboxes || controlCheckboxes.length === 0) {
+    return 0;
+  }
+
+  // Get all controls to check their effectiveness
+  var allControls = ERM.storage.get("controls") || [];
+  var controlMap = {};
+  for (var i = 0; i < allControls.length; i++) {
+    controlMap[allControls[i].id] = allControls[i];
+  }
+
+  // Count effective controls
+  for (var j = 0; j < controlCheckboxes.length; j++) {
+    var controlId = controlCheckboxes[j].getAttribute("data-control-id");
+    var control = controlMap[controlId];
+
+    if (control) {
+      // Weight by effectiveness: effective=1.0, partially-effective=0.5, ineffective/not-tested=0.25
+      if (control.effectiveness === "effective") {
+        effectiveCount += 1.0;
+      } else if (control.effectiveness === "partially-effective") {
+        effectiveCount += 0.5;
+      } else {
+        effectiveCount += 0.25;
+      }
+    } else {
+      // Control exists in checkbox but not in storage, still count it
+      effectiveCount += 0.5;
+    }
+  }
+
+  return effectiveCount;
 };
 
 /* ========================================

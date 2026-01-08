@@ -4,63 +4,48 @@
  */
 
 /* ========================================
-   SELECTION HIGHLIGHT
+   SELECTION HIGHLIGHT - BLUE BORDER STYLE
+   Shows what text will be affected by AI
    ======================================== */
 
-/* Visual highlight for selected text when using Ask AI or AI Actions.
-   Subtle, non-distracting - like native browser selection but persistent.
-   Uses a soft neutral/blue tint that doesn't compete with content.
-
-   The highlight persists even when:
-   - Clicking inside the AI panel to type
-   - Selecting an AI action from the dropdown
-   - Focus moves away from the editor */
 .ai-selection-highlight {
-  background-color: rgba(59, 130, 246, 0.4);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 -2px;
-  /* Ensure inline display for proper wrapping */
+  /* Blue BORDER highlight - NOT filled background */
+  background: transparent;
+  border-bottom: 2px solid var(--ai-accent);
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
   display: inline;
-  /* Smooth appearance */
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
 
-/* Multiple highlight spans in a row should flow naturally */
-.ai-selection-highlight + .ai-selection-highlight {
-  margin-left: 0;
+/* Pulsing animation during AI processing */
+.ai-selection-highlight.ai-processing {
+  animation: ai-pulse 1.5s ease-in-out infinite;
 }
 
-/* Ensure highlight works in lists */
+/* @keyframes ai-pulse MOVED TO features/ai-ui.css (Canonical) */
+
+/* Ensure consistent styling in all contexts */
 li .ai-selection-highlight,
 ul .ai-selection-highlight,
 ol .ai-selection-highlight {
-  display: inline;
+  background: transparent;
+  border-bottom: 2px solid var(--ai-accent);
 }
 
 /* Dark mode support */
 .dark-mode .ai-selection-highlight,
 [data-theme="dark"] .ai-selection-highlight {
-  background-color: rgba(147, 197, 253, 0.25);
+  border-bottom-color: #60a5fa;
 }
 
 /* ========================================
    AI LOADING & ERROR STATES
    ======================================== */
 
-.ai-loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #c41e3a;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* .ai-loading-spinner MOVED TO features/ai-ui.css (Canonical) */
 
 .ai-error-icon {
   font-size: 32px;
@@ -374,7 +359,7 @@ ol .ai-selection-highlight {
   margin: 12px 0;
   padding: 12px 16px;
   background: #f8fafc;
-  border-left: 3px solid #8b5cf6;
+  border-left: 3px solid var(--ai-accent);
   color: #1e293b;
   font-size: 15px; /* 11pt */
   font-weight: 400;
@@ -394,15 +379,27 @@ ol .ai-selection-highlight {
    ASK AI PANEL - Notion-like minimal design
    ======================================== */
 
+/* PAGE SCROLL LOCK - When panel is open, disable page scrolling
+   This enforces single scroll context */
+body.ask-ai-panel-open {
+  overflow: hidden !important;
+}
+
+body.ask-ai-panel-open .editor-v2-canvas {
+  overflow: hidden !important;
+}
+
+/* Panel container - viewport-aware, never extends beyond screen
+   CRITICAL: Actions must ALWAYS be visible and accessible */
 .ask-ai-panel {
   position: fixed;
   width: 380px;
   min-width: 300px;
   max-width: calc(100vw - 32px);
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
   z-index: 9999999;
   opacity: 0;
   visibility: hidden;
@@ -410,9 +407,11 @@ ol .ai-selection-highlight {
   transition: all 0.12s ease;
   display: flex;
   flex-direction: column;
+  /* Panel itself doesn't scroll - internal areas do */
   overflow: hidden;
   height: auto;
-  max-height: calc(100vh - 64px);
+  /* Max height set dynamically by JS, fallback here */
+  max-height: 70vh;
 }
 
 .ask-ai-panel.visible {
@@ -430,12 +429,13 @@ ol .ai-selection-highlight {
   transform: translateY(0);
 }
 
+/* Header - minimal, quiet presence */
 .ask-ai-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
 }
 
@@ -444,14 +444,17 @@ ol .ai-selection-highlight {
   align-items: center;
   gap: 6px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #37352f;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  letter-spacing: 0.01em;
 }
 
 .ask-ai-title svg {
-  color: #37352f;
-  opacity: 0.6;
+  color: #9ca3af;
+  opacity: 0.7;
+  width: 14px;
+  height: 14px;
 }
 
 .ask-ai-close {
@@ -474,23 +477,24 @@ ol .ai-selection-highlight {
   color: #37352f;
 }
 
+/* Context badge - demoted, whisper-quiet metadata */
 .ask-ai-context {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 6px 12px;
+  background: transparent;
+  border-bottom: none;
   flex-shrink: 0;
 }
 
 .context-label {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  color: #9b9a97;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-size: 10px;
+  font-weight: 400;
+  color: #9ca3af;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .ask-ai-context-chips {
@@ -502,43 +506,104 @@ ol .ai-selection-highlight {
 .context-chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  background: rgba(55, 53, 47, 0.06);
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: 3px;
+  border-radius: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
-  color: #37352f;
+  color: #9ca3af;
 }
 
 .context-chip-empty {
   background: transparent;
-  color: #9b9a97;
+  color: #d1d5db;
   font-style: italic;
 }
 
+/* Chart context chips */
+.context-chip-chart {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.context-chip-register {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.context-chip-data {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Block context chips */
+.context-chip-block {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.context-chip-table {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.context-chip-list {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Suggestions - 2x2 grid layout for quick access */
 .ask-ai-suggestions {
-  padding: 6px 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 10px 12px 12px 12px;
+  border-bottom: none;
   flex-shrink: 0;
 }
 
+/* Stack to single column on narrow panels */
+@media (max-width: 360px) {
+  .ask-ai-suggestions {
+    grid-template-columns: 1fr;
+  }
+}
+
 .suggestion-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 6px 8px;
-  margin-bottom: 1px;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 10px;
+  margin-bottom: 0;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #37352f;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4b5563;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .suggestion-item:last-child {
@@ -546,36 +611,41 @@ ol .ai-selection-highlight {
 }
 
 .suggestion-item:hover {
-  background: rgba(55, 53, 47, 0.08);
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #1f2937;
 }
 
+/* Input area - soft, minimal chrome */
 .ask-ai-input-area {
-  padding: 10px 12px;
+  padding: 8px 12px 10px 12px;
   flex-shrink: 0;
 }
 
 .ask-ai-input-area textarea {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 4px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
-  color: #37352f;
+  color: #374151;
   resize: none;
   transition: border-color 0.1s ease;
+  background: #fafafa;
 }
 
 .ask-ai-input-area textarea:focus {
   outline: none;
-  border-color: rgba(55, 53, 47, 0.3);
+  border-color: rgba(0, 0, 0, 0.12);
+  background: white;
   box-shadow: none;
 }
 
 .ask-ai-input-area textarea::placeholder {
-  color: #9b9a97;
+  color: #9ca3af;
 }
 
 .ask-ai-input-area .btn {
@@ -583,21 +653,34 @@ ol .ai-selection-highlight {
   width: 100%;
 }
 
+/* ============================================
+   RESPONSE AREA - MATCHES AI ACTION PANEL
+   Same structure as .ai-inline-response
+   ============================================ */
+
+/* Response container - hidden by default */
 .ask-ai-response {
   display: none;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* When response has content, show it with FLEX layout for proper scroll behavior */
+.ask-ai-response:not(:empty) {
+  display: flex !important;
+  flex-direction: column;
   flex: 1 1 auto;
-  min-height: 80px;
-  max-height: 50vh;
-  overflow-y: auto;
+  min-height: 0;
+  /* NO overflow:hidden here - let children handle their own overflow */
+  /* But DO allow vertical overflow for actions to be visible */
+  overflow: visible !important;
 }
 
-/* Hide suggestions when response is visible */
-.ask-ai-response:not(:empty) + .ask-ai-suggestions {
-  display: none;
+/* Hide suggestions and input when response is visible - give all space to result */
+.ask-ai-response:not(:empty) ~ .ask-ai-suggestions,
+.ask-ai-response:not(:empty) ~ .ask-ai-input-area {
+  display: none !important;
 }
 
+/* Loading state */
 .ask-ai-loading {
   display: flex;
   align-items: center;
@@ -610,26 +693,39 @@ ol .ai-selection-highlight {
   font-weight: 400;
 }
 
+/* ============================================
+   AI RESULT CONTAINER - MATCHES AI ACTION PANEL
+   Structure: Content (scrolls) -> Actions (fixed)
+   ============================================ */
 .ask-ai-result {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 4px;
-  padding: 10px;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   width: 100%;
   box-sizing: border-box;
+  /* Take all available space from parent */
+  flex: 1 1 auto;
+  min-height: 0;
+  /* NO overflow:hidden - only .result-text scrolls, .result-actions stays visible */
 }
 
+/* Result text - scrolls with max-height (matches .ai-inline-content) */
 .ask-ai-result .result-text {
-  /* Inherit from .result-text base styles */
-  margin-bottom: 10px;
-  max-height: 260px;
+  padding: 12px;
+  max-height: 250px;
   overflow-y: auto;
-  overflow-x: auto;
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.65;
+  box-sizing: border-box;
+  /* Flex properties to allow shrinking */
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* Ensure tables inside result-text don't break */
@@ -637,78 +733,44 @@ ol .ai-selection-highlight {
   min-width: 100%;
 }
 
-/* Notion-like action buttons - simple row layout */
-.result-actions {
-  display: flex;
-  gap: 6px;
-  padding-top: 8px;
+/* ============================================
+   ACTION BUTTONS - ALWAYS VISIBLE
+   The JS generates .ai-inline-actions (same as AI Action panel)
+   NEVER shrink, NEVER scroll
+   ============================================ */
+
+/* Override for .ai-inline-actions inside Ask AI panel */
+.ask-ai-panel .ai-inline-actions,
+.ask-ai-result .ai-inline-actions {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  margin-top: auto;
-  flex-shrink: 0;
-  width: 100%;
-}
-
-.result-actions .btn {
-  flex: 1;
-  white-space: nowrap;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 6px 10px;
-  height: auto;
-  text-align: center;
-  justify-content: center;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
   background: white;
-  color: #37352f;
-  transition: background 0.1s ease;
+  width: 100%;
+  box-sizing: border-box;
+  /* CRITICAL: Never shrink, never scroll */
+  flex-shrink: 0 !important;
+  flex-grow: 0;
+  /* Ensure it's not cut off */
+  overflow: visible;
+  min-height: 44px;
 }
 
-.result-actions .btn:hover {
-  background: rgba(55, 53, 47, 0.08);
-}
-
-.result-actions .btn.btn-primary {
-  background: #37352f;
-  color: white;
-  border-color: #37352f;
-}
-
-.result-actions .btn.btn-primary:hover {
-  background: #2f2d28;
-}
-
-.result-actions .btn.btn-danger {
-  background: #eb5757;
-  color: white;
-  border-color: #eb5757;
-}
-
-.result-actions .btn.btn-danger:hover {
-  background: #d94c4c;
-}
-
-.result-actions .ask-ai-clear-result {
-  background: transparent;
-  border: none;
-  color: #9b9a97;
-}
-
-.result-actions .ask-ai-clear-result:hover {
-  color: #37352f;
-  background: rgba(55, 53, 47, 0.08);
-}
-
+/* Disclaimer - whisper quiet */
 .ask-ai-disclaimer {
   padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.02);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  background: transparent;
+  border-top: none;
   border-radius: 0 0 6px 6px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 400;
-  color: #9b9a97;
+  color: #d1d5db;
   text-align: center;
   flex-shrink: 0;
 }
+

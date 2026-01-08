@@ -44,7 +44,7 @@ ERM.components.buildTeamDropdownContent = function () {
       if (member.status === 'pending') roleText = 'Pending';
 
       html += '<div class="team-dropdown-item">' +
-        '<div class="team-dropdown-avatar" style="background: ' + (member.color || '#6366f1') + ';">' + initials + '</div>' +
+        '<div class="team-dropdown-avatar" style="background: ' + (member.color || '#3b82f6') + ';">' + initials + '</div>' +
         '<div class="team-dropdown-info">' +
         '<span class="team-dropdown-name">' + ERM.utils.escapeHtml(member.name || member.email) + '</span>' +
         '<span class="team-dropdown-role">' + roleText + '</span>' +
@@ -1199,7 +1199,7 @@ ERM.components.buildMembersList = function () {
       var member = members[i];
       var initials = ERM.team ? ERM.team.getInitials(member.name) : member.name.charAt(0);
       html += '<div class="member-item">' +
-        '<div class="member-avatar" style="background: ' + (member.color || '#6366f1') + ';">' + initials + '</div>' +
+        '<div class="member-avatar" style="background: ' + (member.color || '#3b82f6') + ';">' + initials + '</div>' +
         '<div class="member-info">' +
         '<span class="member-name">' + ERM.utils.escapeHtml(member.name) + '</span>' +
         '<span class="member-role">Member</span>' +
@@ -1264,7 +1264,7 @@ ERM.components.initQuickInviteEvents = function () {
         }
       }
 
-      var colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#22c55e', '#14b8a6', '#0ea5e9'];
+      var colors = ['#3b82f6', '#2563eb', '#ec4899', '#f43f5e', '#f97316', '#22c55e', '#14b8a6', '#0ea5e9'];
       var randomColor = colors[Math.floor(Math.random() * colors.length)];
 
       var newMember = {
@@ -1612,11 +1612,14 @@ ERM.components.updateAIPanel = function (view) {
 };
 
 ERM.components._modalVersion = 0;
+ERM.components._currentModalOptions = null;
+ERM.components._modalHistory = []; // Stack for modal navigation (parent modals)
 
-ERM.components.showModal = function (options) {
-  // Increment version to invalidate any pending close operations
-  ERM.components._modalVersion++;
-
+/**
+ * Internal function to render and display a modal
+ * @private
+ */
+ERM.components._renderModal = function (options) {
   var modalContainer = document.getElementById("modal-container");
   if (!modalContainer) {
     modalContainer = document.createElement("div");
@@ -1624,12 +1627,28 @@ ERM.components.showModal = function (options) {
     document.body.appendChild(modalContainer);
   }
 
+  // Map size options to spec-compliant sizes
   var sizeClass = "";
-  if (options.size === "lg") sizeClass = " modal-lg";
-  if (options.size === "xl") sizeClass = " modal-xl";
-  if (options.size === "fullscreen") sizeClass = " modal-fullscreen";
-  if (options.size === "large") sizeClass = " modal-lg";
-  if (options.size === "medium") sizeClass = " modal-md";
+  var size = options.size || "md";
+  if (size === "sm" || size === "small") sizeClass = " modal-sm";
+  else if (size === "lg" || size === "large") sizeClass = " modal-lg";
+  else if (size === "xl") sizeClass = " modal-lg"; // XL maps to LG per spec (max 880px)
+  else if (size === "fullscreen") sizeClass = " modal-fullscreen";
+  else sizeClass = " modal-md"; // Default to MD
+
+  // Intent class for styling (ai, upgrade, danger, success)
+  var intentClass = "";
+  if (options.intent && options.intent !== "default") {
+    intentClass = " modal-" + options.intent;
+  }
+
+  // Variant class on modal-overlay for content-specific styling
+  // This replaces :has() CSS hacks with proper class-based patterns
+  // Variants: 'thinking', 'portfolio', 'compact', 'form-tooltips'
+  var variantClass = "";
+  if (options.variant) {
+    variantClass = " modal-" + options.variant;
+  }
 
   var footerHtml = "";
   if (options.footer !== false && options.buttons) {
@@ -1649,9 +1668,10 @@ ERM.components.showModal = function (options) {
   }
 
   var html =
-    '<div class="modal-overlay" id="modal-overlay">' +
+    '<div class="modal-overlay' + variantClass + '" id="modal-overlay">' +
     '<div class="modal' +
     sizeClass +
+    intentClass +
     '">' +
     '<div class="modal-header">' +
     '<h3 class="modal-title">' +
@@ -1669,6 +1689,9 @@ ERM.components.showModal = function (options) {
     "</div>";
 
   modalContainer.innerHTML = html;
+
+  // Add body class for modal supremacy (disable background)
+  document.body.classList.add("modal-open");
 
   var overlay = document.getElementById("modal-overlay");
   setTimeout(function () {
@@ -1709,8 +1732,42 @@ ERM.components.showModal = function (options) {
   }
 };
 
-ERM.components.closeModal = function () {
+/**
+ * Show a modal - Primary modal function
+ * Clears any modal history (fresh start)
+ *
+ * @param {Object} options
+ * @param {string} options.title - Modal title
+ * @param {string} options.content - Modal body content (HTML string)
+ * @param {string} options.size - 'sm' | 'md' | 'lg' | 'xl' | 'fullscreen'
+ * @param {string} options.intent - 'default' | 'ai' | 'upgrade' | 'danger' | 'success'
+ * @param {string} options.variant - Content variant: 'thinking' | 'portfolio' | 'compact' | 'form-tooltips'
+ * @param {Array} options.buttons - Array of {type, action, label}
+ * @param {Function} options.onAction - Callback for button actions
+ * @param {Function} options.onOpen - Callback when modal opens
+ * @param {Function} options.onClose - Callback when modal closes
+ */
+ERM.components.showModal = function (options) {
+  // Increment version to invalidate any pending close operations
+  ERM.components._modalVersion++;
+
+  // Clear modal history - this is a fresh modal, not a child
+  ERM.components._modalHistory = [];
+  ERM.components._currentModalOptions = options;
+
+  ERM.components._renderModal(options);
+};
+
+/**
+ * Close the current modal
+ * If there's a parent modal in history, it will be restored
+ *
+ * @param {Function} afterRestoreCallback - Optional callback to run AFTER parent modal is restored
+ */
+ERM.components.closeModal = function (afterRestoreCallback) {
   var overlay = document.getElementById("modal-overlay");
+  var options = ERM.components._currentModalOptions;
+
   if (overlay) {
     overlay.classList.remove("active");
     // Capture current version to check if a new modal was opened
@@ -1722,130 +1779,218 @@ ERM.components.closeModal = function () {
         if (container) {
           container.innerHTML = "";
         }
-      }
-    }, 200);
-  }
-};
+        // Remove body class
+        document.body.classList.remove("modal-open");
+        ERM.components._currentModalOptions = null;
 
-ERM.components.showSecondaryModal = function (options) {
-  var modalContainer = document.getElementById("secondary-modal-container");
-  if (!modalContainer) {
-    modalContainer = document.createElement("div");
-    modalContainer.id = "secondary-modal-container";
-    document.body.appendChild(modalContainer);
-  }
-
-  var sizeClass = options.size ? " modal-" + options.size : "";
-
-  var footerHtml = "";
-  if (options.footer !== false && options.buttons) {
-    var buttonsHtml = "";
-    for (var i = 0; i < options.buttons.length; i++) {
-      var btn = options.buttons[i];
-      buttonsHtml +=
-        '<button class="btn btn-' +
-        btn.type +
-        '" data-action="' +
-        btn.action +
-        '">' +
-        btn.label +
-        "</button>";
-    }
-    footerHtml = '<div class="modal-footer">' + buttonsHtml + "</div>";
-  }
-
-  var html =
-    '<div class="modal-overlay secondary-overlay" id="secondary-modal-overlay">' +
-    '<div class="modal' +
-    sizeClass +
-    '">' +
-    '<div class="modal-header">' +
-    '<h3 class="modal-title">' +
-    (options.title || "Modal") +
-    "</h3>" +
-    '<button class="modal-close" id="secondary-modal-close">' +
-    ERM.icons.close +
-    "</button>" +
-    "</div>" +
-    '<div class="modal-body">' +
-    (options.content || "") +
-    "</div>" +
-    footerHtml +
-    "</div>" +
-    "</div>";
-
-  modalContainer.innerHTML = html;
-
-  var overlay = document.getElementById("secondary-modal-overlay");
-  setTimeout(function () {
-    overlay.classList.add("active");
-  }, 10);
-
-  var closeBtn = document.getElementById("secondary-modal-close");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", function () {
-      ERM.components.closeSecondaryModal();
-    });
-  }
-
-  overlay.addEventListener("click", function (e) {
-    if (e.target === overlay) {
-      ERM.components.closeSecondaryModal();
-    }
-  });
-
-  if (options.buttons) {
-    var actionBtns = modalContainer.querySelectorAll("[data-action]");
-    for (var j = 0; j < actionBtns.length; j++) {
-      actionBtns[j].addEventListener("click", function () {
-        var action = this.getAttribute("data-action");
-        if (action === "close") {
-          ERM.components.closeSecondaryModal();
-        } else if (options.onAction) {
-          options.onAction(action);
+        // Call onClose callback if provided
+        if (options && options.onClose) {
+          options.onClose();
         }
-      });
-    }
-  }
 
-  if (options.onOpen) {
-    setTimeout(function () {
-      options.onOpen();
-    }, 50);
-  }
-};
+        // Check if we should restore a parent modal
+        if (ERM.components._modalHistory.length > 0) {
+          var parentModal = ERM.components._modalHistory.pop();
+          // Re-render the parent modal after a brief delay
+          setTimeout(function () {
+            ERM.components._modalVersion++;
+            ERM.components._currentModalOptions = parentModal;
+            ERM.components._renderModal(parentModal);
 
-ERM.components.closeSecondaryModal = function () {
-  var overlay = document.getElementById("secondary-modal-overlay");
-  if (overlay) {
-    overlay.classList.remove("active");
-    setTimeout(function () {
-      var container = document.getElementById("secondary-modal-container");
-      if (container) {
-        container.innerHTML = "";
+            // Run afterRestoreCallback AFTER parent modal is rendered AND onOpen completes
+            // onOpen runs at 200ms, so we wait 300ms to ensure form is fully initialized
+            if (afterRestoreCallback) {
+              setTimeout(function() {
+                afterRestoreCallback();
+              }, 300);
+            }
+          }, 50);
+        } else if (afterRestoreCallback) {
+          // No parent modal, just run callback
+          afterRestoreCallback();
+        }
       }
     }, 200);
   }
 };
 
 /**
- * Update secondary modal content without closing/reopening
+ * Close secondary modal and return to parent, then run callback
+ *
+ * @param {Function} afterRestoreCallback - Callback to run after parent modal is restored
+ */
+ERM.components.closeSecondaryModal = function (afterRestoreCallback) {
+  ERM.components.closeModal(afterRestoreCallback);
+};
+
+/**
+ * Run a callback after the secondary modal closes and the parent is restored
+ *
+ * @param {Function} fn - Callback to run after modal restore
+ */
+ERM.components.applyAfterModalClose = function (fn) {
+  ERM.components.closeSecondaryModal(function () {
+    if (fn) {
+      fn();
+    }
+  });
+};
+
+/**
+ * Modal transition helper with lifecycle hooks
+ */
+ERM.components.modalManager = {
+  open: function (options, hooks) {
+    hooks = hooks || {};
+    if (hooks.beforeOpen) {
+      hooks.beforeOpen();
+    }
+    var originalOnOpen = options.onOpen;
+    options.onOpen = function () {
+      if (originalOnOpen) {
+        originalOnOpen();
+      }
+      if (hooks.afterOpen) {
+        hooks.afterOpen();
+      }
+    };
+    ERM.components.showModal(options);
+  },
+  openSecondary: function (options, hooks) {
+    hooks = hooks || {};
+    if (hooks.beforeOpen) {
+      hooks.beforeOpen();
+    }
+    var originalOnOpen = options.onOpen;
+    options.onOpen = function () {
+      if (originalOnOpen) {
+        originalOnOpen();
+      }
+      if (hooks.afterOpen) {
+        hooks.afterOpen();
+      }
+    };
+    ERM.components.showSecondaryModal(options);
+  },
+  close: function (hooks) {
+    hooks = hooks || {};
+    if (hooks.beforeClose) {
+      hooks.beforeClose();
+    }
+    ERM.components.closeModal(function () {
+      if (hooks.afterClose) {
+        hooks.afterClose();
+      }
+      if (hooks.onRestore) {
+        hooks.onRestore();
+      }
+    });
+  },
+  closeSecondary: function (hooks) {
+    hooks = hooks || {};
+    if (hooks.beforeClose) {
+      hooks.beforeClose();
+    }
+    ERM.components.closeSecondaryModal(function () {
+      if (hooks.afterClose) {
+        hooks.afterClose();
+      }
+      if (hooks.onRestore) {
+        hooks.onRestore();
+      }
+    });
+  },
+  applyFieldUpdate: function (fieldId, value, options) {
+    var el = document.getElementById(fieldId);
+    if (!el) {
+      return false;
+    }
+    options = options || {};
+    el.value = value;
+    if (options.addClass) {
+      el.classList.add(options.addClass);
+      setTimeout(function () {
+        el.classList.remove(options.addClass);
+      }, options.removeAfterMs || 2000);
+    }
+    if (options.triggerChange) {
+      var event = new Event("change", { bubbles: true });
+      el.dispatchEvent(event);
+    }
+    if (options.toast && typeof ERM.toast !== "undefined") {
+      ERM.toast.success(options.toast);
+    }
+    return true;
+  }
+};
+
+/**
+ * Capture active form drafts before opening secondary modals
+ */
+ERM.components.captureFormDrafts = function () {
+  try {
+    if (ERM.riskRegister && ERM.riskRegister.saveRiskDraftFromForm) {
+      var riskId =
+        ERM.riskRegister.state && ERM.riskRegister.state.editingRiskId
+          ? ERM.riskRegister.state.editingRiskId
+          : null;
+      ERM.riskRegister.saveRiskDraftFromForm(riskId);
+    }
+  } catch (e) {}
+
+  try {
+    if (ERM.controls && ERM.controls.saveControlDraftFromForm) {
+      ERM.controls.saveControlDraftFromForm(ERM.controls._editingControlId || null);
+    }
+  } catch (e) {}
+};
+
+/**
+ * Show a secondary/child modal
+ *
+ * This pushes the current modal to history and shows the new one.
+ * When the secondary modal closes, it returns to the parent modal.
+ *
+ * Per the Unified Modal Interaction Spec:
+ * - Only ONE modal visible at any time (no stacking)
+ * - But we maintain navigation history for proper back-routing
+ */
+ERM.components.showSecondaryModal = function (options) {
+  // Save current modal to history (if one exists)
+  if (ERM.components._currentModalOptions) {
+    ERM.components._modalHistory.push(ERM.components._currentModalOptions);
+  }
+
+  // Increment version
+  ERM.components._modalVersion++;
+  ERM.components._currentModalOptions = options;
+
+  // Render the new modal (replaces current)
+  ERM.components._renderModal(options);
+};
+
+/* closeSecondaryModal with callback support defined above at line 1821 */
+
+/**
+ * Update current modal content without closing/reopening
  * Prevents modal "blinking" when loading then showing results
+ *
+ * Works for both the old "secondary modal" calls and regular modals
+ * since we now have a single modal system.
  */
 ERM.components.updateSecondaryModal = function (options) {
-  console.log("[updateSecondaryModal] Called with options:", options.title);
-  var container = document.getElementById("secondary-modal-container");
+  // Try to find the modal in either container (for compatibility)
+  var container = document.getElementById("modal-container");
   if (!container) {
-    console.log("[updateSecondaryModal] No container found!");
+    console.log("[updateModal] No container found!");
     return;
   }
 
   var modal = container.querySelector(".modal");
   if (!modal) {
-    console.log("[updateSecondaryModal] No modal found in container!");
+    console.log("[updateModal] No modal found in container!");
     return;
   }
-  console.log("[updateSecondaryModal] Found modal, updating content...");
 
   // Update title if provided
   if (options.title) {
@@ -1887,7 +2032,7 @@ ERM.components.updateSecondaryModal = function (options) {
         actionBtns[j].addEventListener("click", function () {
           var action = this.getAttribute("data-action");
           if (action === "close") {
-            ERM.components.closeSecondaryModal();
+            ERM.components.closeModal();
           } else if (options.onAction) {
             options.onAction(action);
           }
@@ -1903,6 +2048,11 @@ ERM.components.updateSecondaryModal = function (options) {
     }, 50);
   }
 };
+
+/**
+ * Alias for updateSecondaryModal (spec-compliant naming)
+ */
+ERM.components.updateModal = ERM.components.updateSecondaryModal;
 
 /**
  * Toggle notification dropdown
@@ -2135,5 +2285,457 @@ ERM.components.updateNotificationBadge = function () {
     }
   }
 };
+
+/* ========================================
+   UNIFIED AI THINKING MODAL
+   Consolidated from risk-register-ai-ui.js and controls-ai-ui.js
+   ======================================== */
+
+/**
+ * Show AI thinking modal with animated steps
+ * @param {Object} options - Configuration options
+ * @param {string} options.input - User input to preview
+ * @param {string} options.title - Modal title (e.g., "AI is generating your risk")
+ * @param {Array} options.steps - Array of step objects {text, icon, delay}
+ * @param {Object} options.namespace - Object to set _apiRespondedBeforeAnimation flag on
+ * @param {Function} options.onComplete - Callback when animation completes
+ * @param {Object} options.icons - Icons object with sparkles property (optional)
+ */
+ERM.components.showThinkingModal = function(options) {
+  var namespace = options.namespace || {};
+  var input = options.input || "";
+  var title = options.title || "AI is thinking";
+  var steps = options.steps || [
+    { text: "Analyzing your input", icon: "search", delay: 800 },
+    { text: "Processing request", icon: "category", delay: 1000 },
+    { text: "Generating response", icon: "chart", delay: 800 }
+  ];
+  var onComplete = options.onComplete;
+  var sparklesIcon = (options.icons && options.icons.sparkles) || ERM.icons.sparkles ||
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+
+  // Reset the API response flag
+  namespace._apiRespondedBeforeAnimation = false;
+
+  // Build steps HTML
+  var stepsHtml = "";
+  for (var i = 0; i < steps.length; i++) {
+    stepsHtml +=
+      '<div class="ai-step" data-step="' + i + '">' +
+      '<div class="ai-step-icon">' +
+      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
+      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
+      "</div>" +
+      '<span class="ai-step-text">' + steps[i].text + "</span>" +
+      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
+      "</div>";
+  }
+
+  var content =
+    '<div class="ai-thinking-container">' +
+    '<div class="ai-thinking-header">' +
+    '<div class="ai-brain-animation">' +
+    '<div class="ai-brain-circle"></div>' +
+    '<div class="ai-brain-circle"></div>' +
+    '<div class="ai-brain-circle"></div>' +
+    sparklesIcon +
+    "</div>" +
+    "<h3>" + title + "</h3>" +
+    '<p class="ai-input-preview">"' +
+    (input.length > 60 ? input.substring(0, 60) + "..." : input) +
+    '"</p>' +
+    "</div>" +
+    '<div class="ai-steps-container">' +
+    stepsHtml +
+    "</div>" +
+    "</div>";
+
+  ERM.components.showModal({
+    title: "",
+    content: content,
+    size: "sm",
+    buttons: [],
+    footer: false,
+    onOpen: function() {
+      // Remove the modal header and fix sizing
+      var modal = document.querySelector(".modal");
+      var modalContent = document.querySelector(".modal-content");
+      var modalHeader = document.querySelector(".modal-header");
+      var modalBody = document.querySelector(".modal-body");
+      var modalFooter = document.querySelector(".modal-footer");
+
+      if (modal) {
+        modal.classList.add("ai-thinking-modal");
+      }
+
+      if (modalHeader && modalHeader.parentNode) {
+        modalHeader.parentNode.removeChild(modalHeader);
+      }
+
+      if (modalFooter && modalFooter.parentNode) {
+        modalFooter.parentNode.removeChild(modalFooter);
+      }
+
+      if (modalBody) {
+        modalBody.style.cssText =
+          "padding: 0 !important; max-height: none !important; overflow: visible !important;";
+      }
+
+      if (modalContent) {
+        modalContent.style.cssText =
+          "max-height: none !important; overflow: visible !important;";
+      }
+    }
+  });
+
+  // Animate steps sequentially
+  function animateStep(stepIndex) {
+    // Check if API already responded
+    if (namespace._apiRespondedBeforeAnimation) {
+      return;
+    }
+
+    if (stepIndex >= steps.length) {
+      // All steps complete
+      if (namespace._apiRespondedBeforeAnimation) {
+        if (onComplete) onComplete();
+        return;
+      }
+
+      setTimeout(function() {
+        if (namespace._apiRespondedBeforeAnimation) {
+          if (onComplete) onComplete();
+          return;
+        }
+
+        var modal = document.querySelector('.modal.ai-thinking-modal');
+        if (!modal) {
+          if (onComplete) onComplete();
+          return;
+        }
+
+        ERM.components.closeModal();
+        setTimeout(function() {
+          if (onComplete) onComplete();
+        }, 200);
+      }, 400);
+      return;
+    }
+
+    var stepEl = document.querySelector('.ai-step[data-step="' + stepIndex + '"]');
+    if (stepEl) {
+      stepEl.classList.add("active");
+
+      setTimeout(function() {
+        if (namespace._apiRespondedBeforeAnimation) {
+          return;
+        }
+        stepEl.classList.remove("active");
+        stepEl.classList.add("complete");
+        animateStep(stepIndex + 1);
+      }, steps[stepIndex].delay);
+    } else {
+      animateStep(stepIndex + 1);
+    }
+  }
+
+  // Start animation after modal opens
+  setTimeout(function() {
+    if (namespace._apiRespondedBeforeAnimation) {
+      return;
+    }
+    animateStep(0);
+  }, 300);
+};
+
+/**
+ * Close the AI thinking modal
+ */
+ERM.components.closeThinkingModal = function() {
+  var modal = document.querySelector('.modal.ai-thinking-modal');
+  if (modal) {
+    ERM.components.closeModal();
+  }
+};
+
+/**
+ * Show field suggestions modal
+ * Consolidated from controls-ai-ui.js showFieldSuggestions
+ * @param {Object} options - Configuration options
+ * @param {string} options.fieldName - Name of the field to show suggestions for
+ * @param {Array} options.suggestions - Array of suggestion strings
+ * @param {Function} options.onSelect - Callback when suggestion is selected
+ * @param {string} options.title - Optional custom title
+ */
+ERM.components.showFieldSuggestions = function(options) {
+  var fieldName = options.fieldName || "Field";
+  var suggestions = options.suggestions || [];
+  var onSelect = options.onSelect;
+  var customTitle = options.title;
+
+  var sparklesIcon = ERM.icons.sparkles ||
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+
+  var suggestionsHtml = "";
+  for (var i = 0; i < suggestions.length; i++) {
+    var suggestionText = typeof suggestions[i] === 'object' ? suggestions[i].text : suggestions[i];
+    var isRecommended = typeof suggestions[i] === 'object' && suggestions[i].recommended;
+
+    suggestionsHtml +=
+      '<div class="field-suggestion-item' + (isRecommended ? ' recommended' : '') + '" data-index="' + i + '">' +
+      (isRecommended ? '<span class="recommendation-badge">Recommended</span>' : '') +
+      '<div class="field-suggestion-text">' +
+      ERM.utils.escapeHtml(suggestionText.length > 200 ? suggestionText.substring(0, 200) + "..." : suggestionText) +
+      "</div>" +
+      '<button type="button" class="btn btn-sm btn-primary use-suggestion-btn" data-index="' + i + '">Use This</button>' +
+      "</div>";
+  }
+
+  var content =
+    '<div class="field-suggestions-container">' +
+    '<p class="field-suggestions-intro">Select a suggestion for <strong>' +
+    ERM.utils.escapeHtml(fieldName) +
+    "</strong>:</p>" +
+    '<div class="field-suggestions-list">' +
+    suggestionsHtml +
+    "</div>" +
+    "</div>";
+
+  ERM.components.captureFormDrafts();
+  ERM.components.modalManager.openSecondary({
+    title: customTitle || (sparklesIcon + " AI Suggestions"),
+    content: content,
+    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
+    onOpen: function() {
+      var useBtns = document.querySelectorAll(".use-suggestion-btn");
+      for (var i = 0; i < useBtns.length; i++) {
+        useBtns[i].addEventListener("click", function() {
+          var index = parseInt(this.getAttribute("data-index"), 10);
+          var selected = typeof suggestions[index] === 'object' ? suggestions[index].text : suggestions[index];
+
+          ERM.components.modalManager.closeSecondary({
+            onRestore: function () {
+              if (onSelect) {
+                onSelect(selected, index);
+              }
+            }
+          });
+        });
+      }
+    }
+  });
+};
+
+/**
+ * Show AI Suggestion Modal - Unified component for all AI suggestion UIs
+ * Per AI Interaction Design Spec:
+ * - Max 3 suggestions
+ * - 1 marked as "Recommended" (first by default)
+ * - Enterprise blue styling (no purple)
+ * - No glow/pulse animations
+ * - No "generate more" patterns
+ *
+ * @param {Object} options - Configuration options
+ * @param {string} options.title - Modal title (e.g., "AI Suggestions for Risk Title")
+ * @param {Array} options.suggestions - Array of suggestions (max 3)
+ *   Each suggestion: { text: string, description?: string, recommended?: boolean }
+ *   If strings provided, first is auto-marked recommended
+ * @param {Function} options.onSelect - Callback(selectedText, index) when suggestion chosen
+ * @param {boolean} options.multiSelect - Allow selecting multiple (default: false)
+ * @param {Function} options.onMultiSelect - Callback(selectedTexts[]) for multi-select mode
+ * @param {string} options.fieldName - Optional field name for context
+ */
+ERM.components.showAISuggestionModal = function(options) {
+  var title = options.title || "AI Suggestions";
+  var suggestions = options.suggestions || [];
+  var onSelect = options.onSelect;
+  var onMultiSelect = options.onMultiSelect;
+  var multiSelect = options.multiSelect || false;
+  var fieldName = options.fieldName || "";
+
+  // Enforce max 3 suggestions per spec
+  if (suggestions.length > 3) {
+    suggestions = suggestions.slice(0, 3);
+  }
+
+  // Normalize suggestions to objects and ensure first is recommended
+  var normalized = [];
+  var hasRecommended = false;
+  for (var i = 0; i < suggestions.length; i++) {
+    var s = suggestions[i];
+    var item = typeof s === "string" ? { text: s } : s;
+    if (item.recommended) hasRecommended = true;
+    normalized.push(item);
+  }
+  // If no recommended set, mark first as recommended
+  if (!hasRecommended && normalized.length > 0) {
+    normalized[0].recommended = true;
+  }
+
+  var sparklesIcon = ERM.icons.sparkles ||
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
+
+  var cardsHtml = "";
+  for (var j = 0; j < normalized.length; j++) {
+    var suggestion = normalized[j];
+    var isRec = suggestion.recommended;
+    var cardClass = "ai-suggestion-card" + (isRec ? " ai-suggestion-recommended" : "");
+
+    cardsHtml +=
+      '<div class="' + cardClass + '" data-index="' + j + '">' +
+      (isRec ? '<span class="ai-recommendation-badge">Recommended</span>' : "") +
+      '<div class="ai-suggestion-text">' + ERM.utils.escapeHtml(suggestion.text) + "</div>" +
+      (suggestion.description ? '<div class="ai-suggestion-desc">' + ERM.utils.escapeHtml(suggestion.description) + "</div>" : "") +
+      (multiSelect ?
+        '<label class="ai-suggestion-checkbox"><input type="checkbox" data-index="' + j + '"> Select</label>' :
+        '<button type="button" class="btn-ai-use-suggestion" data-index="' + j + '">Use This</button>') +
+      "</div>";
+  }
+
+  var content =
+    '<div class="ai-suggestion-modal">' +
+    (fieldName ? '<p class="ai-suggestion-context">Suggestions for <strong>' + ERM.utils.escapeHtml(fieldName) + "</strong></p>" : "") +
+    '<div class="ai-suggestion-cards">' +
+    cardsHtml +
+    "</div>" +
+    (multiSelect ? '<div class="ai-suggestion-actions"><button type="button" class="btn btn-primary ai-apply-selected">Apply Selected</button></div>' : "") +
+    "</div>";
+
+  ERM.components.captureFormDrafts();
+  ERM.components.modalManager.openSecondary({
+    title: sparklesIcon + " " + title,
+    content: content,
+    size: "md",
+    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
+    onOpen: function() {
+      // Single select mode
+      var useBtns = document.querySelectorAll(".btn-ai-use-suggestion");
+      for (var k = 0; k < useBtns.length; k++) {
+        useBtns[k].addEventListener("click", function() {
+          var idx = parseInt(this.getAttribute("data-index"), 10);
+          var selectedText = normalized[idx].text;
+
+          ERM.components.modalManager.closeSecondary({
+            onRestore: function () {
+              if (onSelect) {
+                onSelect(selectedText, idx);
+              }
+            }
+          });
+        });
+      }
+
+      // Multi-select mode
+      var applyBtn = document.querySelector(".ai-apply-selected");
+      if (applyBtn && onMultiSelect) {
+        applyBtn.addEventListener("click", function() {
+          var checkboxes = document.querySelectorAll(".ai-suggestion-checkbox input:checked");
+          var selected = [];
+          for (var m = 0; m < checkboxes.length; m++) {
+            var idx = parseInt(checkboxes[m].getAttribute("data-index"), 10);
+            selected.push(normalized[idx].text);
+          }
+
+          ERM.components.modalManager.closeSecondary({
+            onRestore: function () {
+              onMultiSelect(selected);
+            }
+          });
+        });
+      }
+
+      // Card click to select (for single mode)
+      if (!multiSelect) {
+        var cards = document.querySelectorAll(".ai-suggestion-card");
+        for (var n = 0; n < cards.length; n++) {
+          cards[n].addEventListener("click", function(e) {
+            if (e.target.tagName === "BUTTON") return; // Let button handle it
+            var idx = parseInt(this.getAttribute("data-index"), 10);
+            var selectedText = normalized[idx].text;
+
+            ERM.components.modalManager.closeSecondary({
+              onRestore: function () {
+                if (onSelect) {
+                  onSelect(selectedText, idx);
+                }
+              }
+            });
+          });
+        }
+      }
+    }
+  });
+};
+
+/**
+ * Show AI Loading State - Simple spinner, no glow per spec
+ * @param {HTMLElement} container - Container element to show loading in
+ * @param {string} message - Loading message (default: "Generating suggestions...")
+ * @returns {Function} cleanup - Call to remove loading state
+ */
+ERM.components.showAILoading = function(container, message) {
+  message = message || "Generating suggestions...";
+
+  var loadingHtml =
+    '<div class="ai-loading-state">' +
+    '<div class="ai-loading-spinner"></div>' +
+    '<span class="ai-loading-text">' + ERM.utils.escapeHtml(message) + '</span>' +
+    '</div>';
+
+  var loadingEl = document.createElement("div");
+  loadingEl.className = "ai-loading-wrapper";
+  loadingEl.innerHTML = loadingHtml;
+
+  if (container) {
+    container.appendChild(loadingEl);
+  }
+
+  // Return cleanup function
+  return function() {
+    if (loadingEl && loadingEl.parentNode) {
+      loadingEl.parentNode.removeChild(loadingEl);
+    }
+  };
+};
+
+/**
+ * Global ESC Key Handler
+ *
+ * Per the Unified Modal Interaction Spec:
+ * - ESC closes the topmost UI layer only
+ * - Layer hierarchy: Modal (9000) > Popover (8000) > Toast (7000) > Tooltip (6000)
+ * - Never closes more than one layer per ESC press
+ */
+(function() {
+  document.addEventListener("keydown", function(e) {
+    if (e.key !== "Escape") return;
+
+    // Check for open modal (highest priority z-index: 9000)
+    var modalOverlay = document.getElementById("modal-overlay");
+    if (modalOverlay && modalOverlay.classList.contains("active")) {
+      e.preventDefault();
+      ERM.components.closeModal();
+      return;
+    }
+
+    // Check for open notification dropdown (popover level)
+    var notificationDropdown = document.getElementById("notification-dropdown");
+    if (notificationDropdown) {
+      e.preventDefault();
+      notificationDropdown.remove();
+      return;
+    }
+
+    // Check for open team dropdown (popover level)
+    var teamDropdown = document.getElementById("team-dropdown");
+    if (teamDropdown) {
+      e.preventDefault();
+      teamDropdown.remove();
+      return;
+    }
+
+    // Note: Toasts auto-dismiss, don't close with ESC per spec
+  });
+})();
 
 console.log("components.js loaded successfully");

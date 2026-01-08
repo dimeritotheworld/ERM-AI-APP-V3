@@ -86,9 +86,20 @@
     var self = this;
     options = options || {};
 
+    // Debug: check content
+    console.log('[PDFEngine] Starting generation, content length:', htmlContent ? htmlContent.length : 0);
+
+    if (!htmlContent || htmlContent.length < 100) {
+      console.error('[PDFEngine] Content is empty or too short');
+      if (callback) callback(new Error('Content is empty'));
+      return;
+    }
+
     this.ensureLoaded(function () {
       // Create container for PDF rendering with proper A4 sizing
+      // Use visibility hidden instead of position off-screen for better html2canvas compatibility
       var container = document.createElement('div');
+      container.id = 'pdf-render-container';
       container.style.cssText = [
         'font-family: "Segoe UI", Arial, sans-serif',
         'font-size: 12px',
@@ -98,37 +109,56 @@
         'width: 210mm', // A4 width
         'max-width: 210mm',
         'box-sizing: border-box',
-        'position: absolute',
-        'left: -9999px', // Hide off-screen during rendering
-        'top: 0'
+        'position: fixed',
+        'left: 0',
+        'top: 0',
+        'z-index: -9999',
+        'opacity: 0.01', // Nearly invisible but still renderable
+        'pointer-events: none'
       ].join('; ');
       container.innerHTML = htmlContent;
       document.body.appendChild(container);
 
-      // Merge options with defaults
-      var pdfOptions = {};
-      for (var key in self.defaultOptions) {
-        pdfOptions[key] = self.defaultOptions[key];
-      }
-      for (var optKey in options) {
-        pdfOptions[optKey] = options[optKey];
-      }
-      pdfOptions.filename = options.filename || self.defaultOptions.filename;
+      // Debug: verify container
+      console.log('[PDFEngine] Container created, children:', container.children.length);
+      console.log('[PDFEngine] Container offsetHeight:', container.offsetHeight);
 
-      // Generate PDF
-      html2pdf()
-        .set(pdfOptions)
-        .from(container)
-        .save()
-        .then(function () {
-          document.body.removeChild(container);
-          if (callback) callback(null);
-        })
-        .catch(function (err) {
-          console.error('[PDFEngine] PDF generation error:', err);
-          document.body.removeChild(container);
-          if (callback) callback(err);
-        });
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(function() {
+        // Merge options with defaults
+        var pdfOptions = {};
+        for (var key in self.defaultOptions) {
+          pdfOptions[key] = self.defaultOptions[key];
+        }
+        for (var optKey in options) {
+          pdfOptions[optKey] = options[optKey];
+        }
+        pdfOptions.filename = options.filename || self.defaultOptions.filename;
+
+        // Override html2canvas options for better rendering
+        pdfOptions.html2canvas = pdfOptions.html2canvas || {};
+        pdfOptions.html2canvas.windowWidth = container.scrollWidth;
+        pdfOptions.html2canvas.windowHeight = container.scrollHeight;
+        pdfOptions.html2canvas.logging = true; // Enable logging for debug
+
+        console.log('[PDFEngine] Starting html2pdf with options:', pdfOptions.filename);
+
+        // Generate PDF
+        html2pdf()
+          .set(pdfOptions)
+          .from(container)
+          .save()
+          .then(function () {
+            console.log('[PDFEngine] PDF generation successful');
+            document.body.removeChild(container);
+            if (callback) callback(null);
+          })
+          .catch(function (err) {
+            console.error('[PDFEngine] PDF generation error:', err);
+            document.body.removeChild(container);
+            if (callback) callback(err);
+          });
+      }, 100);
     });
   };
 

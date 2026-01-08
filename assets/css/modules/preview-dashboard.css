@@ -13,8 +13,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.5);
-  z-index: 9998;
+  background: var(--overlay-bg, rgba(15, 23, 42, 0.5));
+  z-index: var(--z-modal, 9000); /* Use unified z-index from base-modal.css */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -35,11 +35,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
-  z-index: 9999;
+  z-index: var(--z-modal, 9000); /* Use unified z-index from base-modal.css */
   background: white;
-  border-radius: 16px;
+  border-radius: var(--modal-radius, 16px);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  max-width: 480px;
+  max-width: var(--modal-sm, 480px); /* Use modal size variable */
   width: 90%;
   opacity: 0;
   visibility: hidden;

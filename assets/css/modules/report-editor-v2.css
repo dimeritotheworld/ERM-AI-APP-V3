@@ -45,6 +45,36 @@
 }
 
 /* ========================================
+   SELECTION LOCK - Persistent highlight during AI workflow
+   Survives focus changes when user interacts with AI panels
+   ======================================== */
+
+.selection-lock {
+  background-color: rgba(147, 197, 253, 0.45);
+  border-radius: 2px;
+  /* Subtle box shadow to distinguish from native selection */
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+  /* Smooth transition for visual polish */
+  transition: background-color 0.15s ease;
+}
+
+/* Pulsing animation during AI processing */
+.selection-lock.ai-processing {
+  animation: selectionLockPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selectionLockPulse {
+  0%, 100% {
+    background-color: rgba(147, 197, 253, 0.45);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    background-color: rgba(147, 197, 253, 0.65);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* ========================================
    EDITOR LAYOUT
    ======================================== */
 
@@ -140,21 +170,25 @@
   color: #f59e0b;
 }
 
-/* Slash command hint banner */
+/* Slash command hint banner - ambient help, not instruction
+   Should feel like a whisper, not a feature callout */
 .editor-v2-hint {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border-bottom: 1px solid #e9d5ff;
-  animation: hintSlideIn 0.3s ease-out;
+  padding: 8px 20px;
+  /* Neutral background with subtle purple accent only */
+  background: #fafafa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  /* Thin purple accent line at top - earned emphasis */
+  box-shadow: inset 0 2px 0 0 rgba(139, 92, 246, 0.3);
+  animation: hintSlideIn 0.2s ease-out;
 }
 
 @keyframes hintSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -164,50 +198,55 @@
 
 .editor-v2-hint.hiding {
   opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
+  transform: translateY(-6px);
+  transition: all 0.15s ease;
 }
 
 .hint-icon {
-  font-size: 16px;
+  font-size: 14px;
+  opacity: 0.5;
 }
 
 .hint-text {
   flex: 1;
-  font-size: 13px;
-  color: #6b21a8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  /* Neutral grey, not purple - let content speak */
+  color: #6b7280;
+  line-height: 1.4;
 }
 
 .hint-text kbd {
   display: inline-block;
   padding: 2px 6px;
   background: white;
-  border: 1px solid #d8b4fe;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  color: #7c3aed;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 11px;
+  font-weight: 500;
+  /* Purple only for key hints - accent use */
+  color: var(--ai-accent);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .hint-dismiss {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: transparent;
   border-radius: 4px;
-  color: #a855f7;
+  color: #9ca3af;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .hint-dismiss:hover {
-  background: #e9d5ff;
-  color: #7c3aed;
+  background: rgba(0, 0, 0, 0.05);
+  color: #6b7280;
 }
 
 .editor-v2-btn {
@@ -319,20 +358,30 @@
   pointer-events: none;
 }
 
-/* Page indicator */
+/* Page indicator - positioned in document margin, not over UI controls
+   This is document metadata, should feel integrated not floating */
 .editor-v2-page-indicator {
   position: fixed;
-  top: 80px;
-  right: 32px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 6px 12px;
+  /* Move to left margin to avoid competing with dismiss controls */
+  top: 120px;
+  left: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 4px 10px;
   border-radius: 4px;
   z-index: 50;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
+  /* Subtle presence - metadata not action */
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.editor-v2-page-indicator:hover {
+  opacity: 1;
 }
 
 /* ===========================================
@@ -518,7 +567,7 @@
 }
 .editor-v2-table th[contenteditable="true"]:focus,
 .editor-v2-table td[contenteditable="true"]:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--ai-accent);
   outline-offset: -2px;
   background: #fff;
 }
@@ -587,11 +636,11 @@
    ======================================== */
 .block-controls {
   position: absolute;
-  left: 4px; /* Position within the padding-left area */
+  left: 0; /* Position within the padding-left area */
   top: 0;
   display: flex;
   align-items: flex-start; /* Align to top of first line */
-  gap: 2px;
+  gap: 1px;
   padding-top: 3px; /* Fine-tune vertical alignment with text */
   opacity: 0;
   visibility: hidden;
@@ -625,11 +674,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 3px;
   color: #9ca3af;
   cursor: pointer;
   transition: all 0.1s ease;
@@ -642,12 +691,12 @@
 }
 
 .block-control svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 .block-add:hover {
-  color: #7c3aed;
+  color: var(--ai-accent);
   background: #f3e8ff;
 }
 
@@ -657,6 +706,97 @@
 
 .block-drag:active {
   cursor: grabbing;
+}
+
+/* ========================================
+   BLOCK SELECT - Checkbox for multi-select
+   ======================================== */
+.block-select {
+  color: #9ca3af;
+  position: relative;
+}
+
+.block-select:hover {
+  color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Show empty checkbox by default, hide checked */
+.block-select .checkbox-empty {
+  display: block;
+}
+
+.block-select .checkbox-checked {
+  display: none;
+}
+
+/* When block is selected, swap icons */
+.editor-v2-block.block-selected .block-select .checkbox-empty {
+  display: none;
+}
+
+.editor-v2-block.block-selected .block-select .checkbox-checked {
+  display: block;
+}
+
+/* When block is selected, show filled checkbox */
+.editor-v2-block.block-selected .block-select {
+  color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* ========================================
+   BLOCK SELECTION (Notion-style multi-select)
+   Blue highlight when blocks are selected
+   ======================================== */
+.editor-v2-block.block-selected {
+  position: relative;
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-radius: 4px;
+}
+
+.editor-v2-block.block-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ai-accent);
+  border-radius: 3px 0 0 3px;
+}
+
+.editor-v2-block.block-selected .block-element,
+.editor-v2-block.block-selected .block-content,
+.editor-v2-block.block-selected h1,
+.editor-v2-block.block-selected h2,
+.editor-v2-block.block-selected h3,
+.editor-v2-block.block-selected li {
+  background: transparent;
+}
+
+/* Show controls on selected blocks */
+.editor-v2-block.block-selected > .block-controls {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Prevent text selection cursor when in block selection mode */
+.editor-v2-block.block-selected [contenteditable] {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Dark mode support */
+.dark-mode .editor-v2-block.block-selected,
+[data-theme="dark"] .editor-v2-block.block-selected {
+  background: rgba(96, 165, 250, 0.15) !important;
+}
+
+.dark-mode .editor-v2-block.block-selected::before,
+[data-theme="dark"] .editor-v2-block.block-selected::before {
+  background: #60a5fa;
 }
 
 /* ========================================
@@ -787,7 +927,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: #7c3aed;
+  background: var(--ai-accent);
   border-radius: 2px;
 }
 
@@ -798,7 +938,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: #7c3aed;
+  background: var(--ai-accent);
   border-radius: 2px;
 }
 
@@ -1133,78 +1273,1138 @@ ol.editor-v2-number-list,
   outline: none;
 }
 
-/* Embed */
+/* ========================================
+   EMBED BLOCKS - Notion-style Minimal
+   Clean, quiet, content-focused
+   ======================================== */
+
 .editor-v2-embed {
   position: relative;
-  margin: 16px 0;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s ease;
+  margin: 4px 0;
+  border-radius: 3px;
+  background: transparent;
 }
 
 .editor-v2-embed:hover {
-  border-color: #e5e7eb;
+  background: rgba(55, 53, 47, 0.03);
 }
 
-.editor-v2-embed-content {
-  padding: 16px;
-  background: #f9fafb;
-  border-radius: 8px;
-  min-height: 100px;
+.editor-v2-embed .block-element {
+  position: relative;
 }
 
-.editor-v2-embed-loading {
+/* Hover toolbar - Notion style floating toolbar */
+.embed-hover-toolbar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100px;
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-.editor-v2-embed-toolbar {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
+  gap: 1px;
+  padding: 2px 4px;
+  background: white;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  visibility: hidden;
+  transition: opacity 0.1s ease;
+  z-index: 10;
 }
 
-.editor-v2-embed:hover .editor-v2-embed-toolbar {
+.editor-v2-embed:hover .embed-hover-toolbar,
+.editor-v2-embed .embed-hover-toolbar:has(.embed-register-dropdown.open) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Register dropdown - minimal */
+.embed-register-dropdown {
+  position: relative;
+}
+
+.embed-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.embed-dropdown-trigger:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.embed-dropdown-value {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.embed-dropdown-arrow {
+  display: flex;
+  color: #9ca3af;
+}
+
+.embed-register-dropdown.open .embed-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.embed-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  min-width: 140px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid rgba(55, 53, 47, 0.09);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+
+.embed-register-dropdown.open .embed-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.embed-dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.embed-dropdown-option:hover {
+  background: rgba(55, 53, 47, 0.04);
+}
+
+.embed-dropdown-option.selected {
+  background: rgba(35, 131, 226, 0.08);
+  color: #0369a1;
+}
+
+.embed-option-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.embed-option-check {
+  display: flex;
+  opacity: 0;
+  color: #0369a1;
+}
+
+.embed-dropdown-option.selected .embed-option-check {
   opacity: 1;
 }
 
+/* Toolbar buttons - minimal icons */
 .embed-toolbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border: none;
-  background: white;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 3px;
   cursor: pointer;
-  color: #6b7280;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.15s ease;
+  color: #9ca3af;
 }
 
 .embed-toolbar-btn:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: rgba(55, 53, 47, 0.08);
+  color: #374151;
 }
 
+.embed-toolbar-btn.embed-btn-delete:hover {
+  background: rgba(235, 87, 87, 0.1);
+  color: #dc2626;
+}
+
+/* Delete confirmation inline */
+.embed-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.embed-delete-confirm span {
+  color: #dc2626;
+}
+
+.embed-confirm-yes,
+.embed-confirm-no {
+  padding: 2px 6px;
+  font-size: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.embed-confirm-yes {
+  background: #dc2626;
+  color: white;
+}
+
+.embed-confirm-no {
+  background: rgba(55, 53, 47, 0.08);
+  color: #374151;
+}
+
+/* Embed content - clean, minimal padding */
+.editor-v2-embed-content {
+  padding: 8px 0;
+  background: transparent;
+}
+
+/* Loading state - minimal */
+.editor-v2-embed-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Loading overlay */
+.editor-v2-embed-content.embed-loading {
+  position: relative;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Placeholder - subtle */
 .embed-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100px;
+  height: 80px;
   color: #9ca3af;
-  font-size: 14px;
-  border: 2px dashed #e5e7eb;
-  border-radius: 8px;
+  font-size: 12px;
+  background: rgba(55, 53, 47, 0.02);
+  border-radius: 3px;
+}
+
+/* ========================================
+   EMBEDDED CHART CONTENT - Compact Density for Reports
+   Uses density tokens approach - same component, compact mode
+   ======================================== */
+
+/* Embed density tokens - compact sizing for report embeds */
+.editor-v2-embed-content {
+  --embed-cell: 28px;
+  --embed-gap: 2px;
+  --embed-font-title: 11px;
+  --embed-font-label: 8px;
+  --embed-font-body: 10px;
+  --embed-pad: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.editor-v2-embed-content .dashboard-embed-container {
+  font-size: var(--embed-font-body);
+  max-width: 100%;
+}
+
+/* Force side-by-side in dashboard-embed-container */
+.editor-v2-embed-content .dashboard-embed-container.layout-side-by-side .heatmaps-section,
+.editor-v2-embed-content .dashboard-embed-container.layout-side-by-side .heatmaps-embedded,
+.editor-v2-embed-content .dashboard-embed-container .heatmaps-section,
+.editor-v2-embed-content .dashboard-embed-container .heatmaps-embedded {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 16px !important;
+  justify-content: flex-start !important;
+}
+
+/* Dashboard section in embed - no margin/padding */
+.editor-v2-embed-content .dashboard-section {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Hide section subtitle (descriptive text) */
+.editor-v2-embed-content .section-subtitle {
+  display: none !important;
+}
+
+/* Heatmaps row container - FORCE side by side layout, centered */
+.editor-v2-embed-content .heatmaps-row,
+.editor-v2-embed-content .dashboard-section.heatmaps-section,
+.editor-v2-embed-content .heatmaps-section,
+.editor-v2-embed-content .heatmaps-embedded {
+  display: flex !important;
+  flex-direction: row !important;
+  grid-template-columns: unset !important;
+  gap: 32px !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 8px 0 !important;
+}
+
+/* Heatmap cards - clean, slightly larger for readability */
+.editor-v2-embed-content .heatmap-card {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.editor-v2-embed-content .heatmap-card-header {
+  padding: 0 0 4px 0 !important;
+  margin-bottom: 4px !important;
+  border-bottom: none !important;
+}
+
+.editor-v2-embed-content .heatmap-card-title {
+  font-size: var(--embed-font-title) !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.editor-v2-embed-content .heatmap-card-subtitle {
+  font-size: var(--embed-font-label) !important;
+  color: #9ca3af !important;
+  display: none !important; /* Hide subtitle in embed */
+}
+
+/* Heatmap wrapper/grid - compact */
+.editor-v2-embed-content .heatmap-wrapper {
+  width: auto !important;
+  overflow: visible !important;
+}
+
+.editor-v2-embed-content .heatmap-grid-container {
+  gap: 2px !important;
+}
+
+.editor-v2-embed-content .heatmap-y-label {
+  font-size: 7px !important;
+  letter-spacing: 0.5px !important;
+  padding: 0 2px !important;
+}
+
+.editor-v2-embed-content .heatmap-main {
+  gap: var(--embed-gap) !important;
+}
+
+.editor-v2-embed-content .heatmap-row {
+  gap: var(--embed-gap) !important;
+}
+
+.editor-v2-embed-content .heatmap-row-label {
+  width: 12px !important;
+  font-size: var(--embed-font-label) !important;
+}
+
+/* Heatmap cells - slightly larger for readability (32px) */
+.editor-v2-embed-content .heatmap-cell {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  border-radius: 4px !important;
+  border-width: 1px !important;
+  flex-shrink: 0 !important;
+}
+
+.editor-v2-embed-content .heatmap-cell:hover {
+  transform: scale(1.05);
+}
+
+/* Risk dots - compact in embed */
+.editor-v2-embed-content .risk-dots {
+  gap: 1px !important;
+  padding: 2px !important;
+  max-width: 28px !important;
+}
+
+.editor-v2-embed-content .risk-dot {
+  width: 5px !important;
+  height: 5px !important;
+}
+
+.editor-v2-embed-content .risk-dot-more {
+  font-size: 8px !important;
+}
+
+.editor-v2-embed-content .cell-count {
+  font-size: 8px !important;
+  margin-top: 1px !important;
+}
+
+/* X-axis labels */
+.editor-v2-embed-content .heatmap-x-row {
+  gap: var(--embed-gap) !important;
+}
+
+.editor-v2-embed-content .heatmap-x-label {
+  width: 32px !important;
+  font-size: 8px !important;
+}
+
+.editor-v2-embed-content .heatmap-x-axis-title {
+  font-size: 8px !important;
+  letter-spacing: 0.5px !important;
+  margin-top: 6px !important;
+  margin-left: 16px !important;
+}
+
+.editor-v2-embed-content .heatmap-spacer {
+  width: 14px !important;
+}
+
+/* Heatmap legend - SMALL, centered under heatmaps */
+.editor-v2-embed-content .heatmap-legend {
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+}
+
+/* Legend items container */
+.editor-v2-embed-content .legend-items {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  justify-content: center !important;
+}
+
+/* Legend item base - small, inline */
+.editor-v2-embed-content .legend-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  font-size: 9px !important;
+  font-weight: 500 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+}
+
+.editor-v2-embed-content .legend-color {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 2px !important;
+}
+
+/* Legend item colors - SMALL, centered, MUST MATCH heatmap cell colors */
+.editor-v2-embed-content .legend-item.risk-low {
+  background: #bef264 !important;
+  color: #3f6212 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 9px !important;
+}
+
+.editor-v2-embed-content .legend-item.risk-medium {
+  background: #fde047 !important;
+  color: #713f12 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 9px !important;
+}
+
+.editor-v2-embed-content .legend-item.risk-high {
+  background: #fb923c !important;
+  color: #7c2d12 !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 9px !important;
+}
+
+.editor-v2-embed-content .legend-item.risk-critical {
+  background: #f87171 !important;
+  color: #7f1d1d !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-size: 9px !important;
+}
+
+/* ========================================
+   TOP RISKS TABLE - Notion-style data table
+   Following principles: muted headers, intentional widths,
+   calm status pills, readable width cap
+   ======================================== */
+
+/* Table wrapper - cap readable width, no chrome */
+.editor-v2-embed-content .top-risks-table-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  max-width: 100% !important;
+}
+
+/* Base table - clean, no borders */
+.editor-v2-embed-content .top-risks-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  font-size: 13px !important;
+  border: none !important;
+  table-layout: fixed !important;
+}
+
+/* Header row - muted, never bold (Notion rule) */
+.editor-v2-embed-content .top-risks-table thead {
+  background: transparent !important;
+}
+
+.editor-v2-embed-content .top-risks-table th {
+  padding: 10px 12px !important;
+  text-align: left !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09) !important;
+  background: transparent !important;
+  white-space: nowrap !important;
+}
+
+/* Body cells - compact rhythm, smaller text */
+.editor-v2-embed-content .top-risks-table td {
+  padding: 10px 8px !important;
+  font-size: 11px !important;
+  color: #374151 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.04) !important;
+  vertical-align: top !important;
+}
+
+/* Row hover - subtle affordance, not borders */
+.editor-v2-embed-content .top-risks-table tbody tr,
+.editor-v2-embed-content .top-risks-row {
+  cursor: default !important;
+  transition: background 120ms ease !important;
+}
+
+.editor-v2-embed-content .top-risks-table tbody tr:hover,
+.editor-v2-embed-content .top-risks-row:hover {
+  background: rgba(15, 23, 42, 0.02) !important;
+}
+
+.editor-v2-embed-content .top-risks-table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* ========================================
+   Column widths - intentional, not content-driven
+   Risk = flex, Category = 140px, Score = 64px,
+   Level = 88px, Control = 100px, Owner = 140px max
+   ======================================== */
+
+/* Risk column - primary content, flex */
+.editor-v2-embed-content .top-risks-table th:nth-child(1),
+.editor-v2-embed-content .top-risks-table td:nth-child(1),
+.editor-v2-embed-content .top-risks-table .col-title {
+  width: auto !important;
+  min-width: 140px !important;
+  max-width: none !important;
+}
+
+/* Category column - scanable taxonomy */
+.editor-v2-embed-content .top-risks-table th:nth-child(2),
+.editor-v2-embed-content .top-risks-table td:nth-child(2),
+.editor-v2-embed-content .top-risks-table .col-category {
+  width: 120px !important;
+  min-width: 100px !important;
+}
+
+/* Score column - numeric = tight */
+.editor-v2-embed-content .top-risks-table th:nth-child(3),
+.editor-v2-embed-content .top-risks-table td:nth-child(3),
+.editor-v2-embed-content .top-risks-table .col-score {
+  width: 56px !important;
+  text-align: center !important;
+}
+
+/* Level column - pill needs room */
+.editor-v2-embed-content .top-risks-table th:nth-child(4),
+.editor-v2-embed-content .top-risks-table td:nth-child(4),
+.editor-v2-embed-content .top-risks-table .col-level {
+  width: 80px !important;
+}
+
+/* Control column - short label */
+.editor-v2-embed-content .top-risks-table th:nth-child(5),
+.editor-v2-embed-content .top-risks-table td:nth-child(5),
+.editor-v2-embed-content .top-risks-table .col-controls {
+  width: 100px !important;
+}
+
+/* Owner column - prevent dominance, allow wrap */
+.editor-v2-embed-content .top-risks-table th:nth-child(6),
+.editor-v2-embed-content .top-risks-table td:nth-child(6),
+.editor-v2-embed-content .top-risks-table .col-owner {
+  width: 100px !important;
+  max-width: 120px !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  font-size: 11px !important;
+}
+
+/* Risk title - primary content, WRAPS for readability */
+.editor-v2-embed-content .risk-title-text {
+  font-weight: 500 !important;
+  color: #111827 !important;
+  font-size: 12px !important;
+  display: block !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  line-height: 1.4 !important;
+}
+
+/* Score styling */
+.editor-v2-embed-content .top-risks-table .score-critical {
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+}
+
+.editor-v2-embed-content .top-risks-table .score-high {
+  color: #ea580c !important;
+  font-weight: 600 !important;
+}
+
+.editor-v2-embed-content .top-risks-table .score-medium {
+  color: #d97706 !important;
+  font-weight: 600 !important;
+}
+
+/* ========================================
+   Status pills - calm, small, no screaming
+   ======================================== */
+
+.editor-v2-embed-content .risk-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+}
+
+/* Low - calm green */
+.editor-v2-embed-content .risk-badge-low {
+  background: #ecfdf3 !important;
+  color: #027a48 !important;
+}
+
+/* Medium - soft amber */
+.editor-v2-embed-content .risk-badge-medium {
+  background: #fffaeb !important;
+  color: #b54708 !important;
+}
+
+/* High - warm orange, not red */
+.editor-v2-embed-content .risk-badge-high {
+  background: #fff7ed !important;
+  color: #c2410c !important;
+}
+
+/* Critical - only this gets red treatment */
+.editor-v2-embed-content .risk-badge-critical {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+}
+
+/* Empty state - calm, explanatory, non-blocking */
+.editor-v2-embed-content .top-risks-note {
+  margin: 16px 0 !important;
+  padding: 14px 18px !important;
+  background: #f8fafc !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+  text-align: center !important;
+  border: none !important;
+}
+
+/* ========================================
+   KPI CARDS - Notion-style inline stats with better sizing
+   ======================================== */
+
+.editor-v2-embed-content .kpi-cards {
+  display: flex !important;
+  grid-template-columns: unset !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  flex-wrap: wrap !important;
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .kpi-card {
+  flex: 1 1 auto !important;
+  min-width: 90px !important;
+  max-width: 140px !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 8px 16px 8px 0 !important;
+  border: none !important;
+  border-right: 1px solid rgba(55, 53, 47, 0.08) !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  gap: 4px !important;
+}
+
+.editor-v2-embed-content .kpi-card:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+}
+
+.editor-v2-embed-content .kpi-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.editor-v2-embed-content .kpi-icon {
+  display: none !important;
+}
+
+.editor-v2-embed-content .kpi-content {
+  min-width: 0 !important;
+}
+
+.editor-v2-embed-content .kpi-value {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+}
+
+.editor-v2-embed-content .kpi-label {
+  font-size: 11px !important;
+  color: #6b7280 !important;
+  margin-top: 2px !important;
+  line-height: 1.3 !important;
+}
+
+.editor-v2-embed-content .kpi-subtle {
+  display: none !important;
+}
+
+/* ========================================
+   RISK CONCENTRATION CHART - Clean bar chart
+   ======================================== */
+
+.editor-v2-embed-content .risk-concentration-chart {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .category-bar-row {
+  display: grid !important;
+  grid-template-columns: 140px 1fr 60px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 6px 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: default !important;
+  transition: background 120ms ease !important;
+}
+
+.editor-v2-embed-content .category-bar-row:hover {
+  background: rgba(15, 23, 42, 0.02) !important;
+}
+
+.editor-v2-embed-content .category-bar-label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #374151 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.editor-v2-embed-content .category-bar-track {
+  width: 100% !important;
+  height: 10px !important;
+  background: rgba(55, 53, 47, 0.06) !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+}
+
+.editor-v2-embed-content .category-bar {
+  height: 100% !important;
+  background: #94a3b8 !important;
+  border-radius: 5px !important;
+  transition: width 300ms ease !important;
+}
+
+.editor-v2-embed-content .category-bar-value {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  text-align: right !important;
+}
+
+/* ========================================
+   CONTROL COVERAGE - Notion-style inline stats
+   Clean, compact, scannable metrics
+   ======================================== */
+
+.editor-v2-embed-content .control-coverage {
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .control-coverage.simple {
+  display: flex !important;
+  gap: 0 !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+}
+
+.editor-v2-embed-content .coverage-item {
+  background: transparent !important;
+  border: none !important;
+  border-right: 1px solid rgba(55, 53, 47, 0.09) !important;
+  border-radius: 0 !important;
+  padding: 6px 16px 6px 0 !important;
+  margin-right: 16px !important;
+  min-width: 80px !important;
+}
+
+.editor-v2-embed-content .coverage-item:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Coverage label - muted, acts as descriptor */
+.editor-v2-embed-content .coverage-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  margin-bottom: 2px !important;
+}
+
+/* Coverage value - prominent but calm */
+.editor-v2-embed-content .coverage-value {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+}
+
+/* Control cards in embed - Notion-style inline layout */
+.editor-v2-embed-content .control-cards {
+  display: flex !important;
+  grid-template-columns: unset !important;
+  gap: 0 !important;
+  flex-wrap: wrap !important;
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .control-card {
+  flex: 0 0 auto !important;
+  background: transparent !important;
+  border: none !important;
+  border-right: 1px solid rgba(55, 53, 47, 0.09) !important;
+  border-radius: 0 !important;
+  padding: 6px 16px 6px 0 !important;
+  margin-right: 16px !important;
+  text-align: left !important;
+  min-width: 80px !important;
+}
+
+.editor-v2-embed-content .control-card:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+.editor-v2-embed-content .control-card:hover {
+  background: transparent !important;
+  border-color: rgba(55, 53, 47, 0.09) !important;
+}
+
+.editor-v2-embed-content .control-card::after {
+  display: none !important;
+}
+
+/* Control card value - prominent number */
+.editor-v2-embed-content .control-card-value {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  margin-bottom: 2px !important;
+  line-height: 1.2 !important;
+}
+
+/* Control card label - muted descriptor */
+.editor-v2-embed-content .control-card-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
+  line-height: 1.3 !important;
+  text-transform: none !important;
+}
+
+/* ========================================
+   GENERAL EMBED CLEANUP
+   ======================================== */
+
+/* Hide unnecessary headers in embeds - keep section-title visible for labeling */
+.editor-v2-embed-content .dashboard-section-header,
+.editor-v2-embed-content .section-header,
+.editor-v2-embed-content .section-header-row,
+.editor-v2-embed-content .widget-title {
+  display: none !important;
+}
+
+/* Section titles - SHOW for ALL content embeds (they serve as headers)
+   Except for heatmaps which have their own card headers */
+.editor-v2-embed-content .section-title,
+.editor-v2-embed-content h2.section-title,
+.editor-v2-embed-content .dashboard-section > .section-title,
+.editor-v2-embed-content .dashboard-section > h2.section-title {
+  display: block !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  margin: 0 0 10px 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Hide section titles specifically for heatmaps (they have card headers) */
+.editor-v2-embed-content .heatmaps-section .section-title,
+.editor-v2-embed-content .heatmaps-embedded .section-title,
+.editor-v2-embed-content .dashboard-section.heatmaps-section .section-title {
+  display: none !important;
+}
+
+/* Dashboard widgets - remove chrome */
+.editor-v2-embed-content .dashboard-widget {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Activity widget if embedded */
+.editor-v2-embed-content .activity-widget {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.editor-v2-embed-content .activity-list-compact {
+  gap: 2px !important;
+}
+
+.editor-v2-embed-content .activity-row {
+  padding: 4px 0 !important;
+  gap: 6px !important;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.04) !important;
+}
+
+.editor-v2-embed-content .activity-dot {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.editor-v2-embed-content .activity-text {
+  font-size: 10px !important;
+}
+
+.editor-v2-embed-content .activity-time-ago {
+  font-size: 9px !important;
+}
+
+/* ========================================
+   DASHBOARD-EMBED-CONTAINER - Global overrides
+   ======================================== */
+
+/* Base container - no chrome */
+.editor-v2-embed-content .dashboard-embed-container {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Heatmap in container */
+.editor-v2-embed-content .dashboard-embed-container .heatmap-card {
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .heatmap-grid {
+  display: grid !important;
+  gap: 1px !important;
+  margin-top: 6px !important;
+}
+
+/* Top risks table in container */
+.editor-v2-embed-content .dashboard-embed-container .top-risks-table-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .top-risks-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border: none !important;
+}
+
+/* KPI in container - Notion-style inline stats */
+.editor-v2-embed-content .dashboard-embed-container .kpi-grid,
+.editor-v2-embed-content .dashboard-embed-container .kpi-cards {
+  display: flex !important;
+  gap: 0 !important;
+  flex-wrap: wrap !important;
+  grid-template-columns: unset !important;
+  margin: 0 !important;
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .kpi-card {
+  flex: 1 1 auto !important;
+  min-width: 80px !important;
+  max-width: 140px !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 8px 16px 8px 0 !important;
+  border: none !important;
+  border-right: 1px solid rgba(55, 53, 47, 0.09) !important;
+  box-shadow: none !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .kpi-card:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .kpi-value {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .kpi-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
+  margin-top: 2px !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .kpi-icon {
+  display: none !important;
+}
+
+/* Risk concentration in container */
+.editor-v2-embed-content .dashboard-embed-container .risk-concentration-chart {
+  gap: 4px !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .category-bar-row {
+  padding: 3px 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Control coverage in container - Notion-style consistent */
+.editor-v2-embed-content .dashboard-embed-container .control-cards,
+.editor-v2-embed-content .dashboard-embed-container .control-coverage {
+  display: flex !important;
+  gap: 0 !important;
+  grid-template-columns: unset !important;
+  padding: 8px 0 !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .control-card,
+.editor-v2-embed-content .dashboard-embed-container .coverage-item {
+  background: transparent !important;
+  border: none !important;
+  border-right: 1px solid rgba(55, 53, 47, 0.09) !important;
+  border-radius: 0 !important;
+  padding: 6px 16px 6px 0 !important;
+  margin-right: 16px !important;
+  min-width: 80px !important;
+}
+
+.editor-v2-embed-content .dashboard-embed-container .control-card:last-child,
+.editor-v2-embed-content .dashboard-embed-container .coverage-item:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Control card values in container - prominent */
+.editor-v2-embed-content .dashboard-embed-container .control-card-value,
+.editor-v2-embed-content .dashboard-embed-container .coverage-value {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+}
+
+/* Control card labels in container - muted */
+.editor-v2-embed-content .dashboard-embed-container .control-card-label,
+.editor-v2-embed-content .dashboard-embed-container .coverage-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
 }
 
 /* Comment indicator */
@@ -2081,7 +3281,7 @@ html.theme-dark .floating-helper-dismiss:hover {
 
 .toolbar-btn.toolbar-ai:hover {
   background: #f5f3ff;
-  color: #7c3aed;
+  color: var(--ai-accent);
 }
 
 /* More menu button */
@@ -2094,10 +3294,7 @@ html.theme-dark .floating-helper-dismiss:hover {
   color: #64748b;
 }
 
-/* Legacy support - old pill classes */
-.selection-pills {
-  display: none !important;
-}
+/* Legacy support - old pill classes - REMOVED (dead code) */
 
 /* ========================================
    AI DROPDOWN - Light clean design
@@ -2231,7 +3428,21 @@ html.theme-dark .floating-helper-dismiss:hover {
 /* ========================================
    AI INLINE RESPONSE - Notion-style panel
    Matches the Ask AI panel design
+
+   SINGLE SCROLL CONTEXT:
+   - Page scroll locked when panel is open
+   - Only .ai-inline-content scrolls
+   - Header and actions always visible
    ======================================== */
+
+/* PAGE SCROLL LOCK - When AI Action panel is open */
+body.ai-action-panel-open {
+  overflow: hidden !important;
+}
+
+body.ai-action-panel-open .editor-v2-canvas {
+  overflow: hidden !important;
+}
 
 .ai-inline-response {
   position: fixed;
@@ -2249,7 +3460,10 @@ html.theme-dark .floating-helper-dismiss:hover {
   transition: all 0.12s ease;
   display: flex;
   flex-direction: column;
+  /* Panel container doesn't scroll - internal content does */
   overflow: hidden;
+  /* Viewport-aware max height - ensures actions always visible */
+  max-height: 70vh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
@@ -2259,6 +3473,7 @@ html.theme-dark .floating-helper-dismiss:hover {
   transform: translateY(0);
 }
 
+/* Header - NEVER scrolls, always visible */
 .ai-inline-header {
   display: flex;
   align-items: center;
@@ -2270,7 +3485,10 @@ html.theme-dark .floating-helper-dismiss:hover {
   font-size: 13px;
   font-weight: 500;
   color: #37352f;
+  /* CRITICAL: Never shrink, never scroll */
   flex-shrink: 0;
+  flex-grow: 0;
+  background: white;
 }
 
 .ai-inline-icon {
@@ -2280,11 +3498,29 @@ html.theme-dark .floating-helper-dismiss:hover {
   opacity: 0.6;
 }
 
+/* Content area - this is the ONLY scrolling element in the panel */
 .ai-inline-content {
-  padding: 12px;
-  max-height: 280px;
+  padding: 0;
+  /* Content takes remaining space and scrolls */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  flex: 1;
+  max-height: 250px;
+}
+
+/* Text wrapper inside content */
+.ai-inline-text-wrap {
+  padding: 12px;
+}
+
+/* Response text inside wrapper */
+.ai-inline-text-wrap .ai-response-text {
+  padding: 0;
+}
+
+/* Loading spinner inside text wrap */
+.ai-inline-text-wrap .ai-loading {
+  padding: 0;
 }
 
 /* AI Response - MUST match editor exactly
@@ -2434,26 +3670,7 @@ html.theme-dark .floating-helper-dismiss:hover {
   margin: 16px 0;
 }
 
-.ai-loading {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-.ai-loading-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #e5e7eb;
-  border-top-color: #7c3aed;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* .ai-loading, .ai-loading-spinner MOVED TO features/ai-ui.css (Canonical) */
 
 .ai-error {
   color: #dc2626;
@@ -2496,15 +3713,21 @@ html.theme-dark .floating-helper-dismiss:hover {
   color: #37352f;
 }
 
-/* AI Action buttons - Notion-style minimal design */
+/* ============================================
+   ACTION BUTTONS - ALWAYS VISIBLE
+   These are OUTSIDE the scrolling area
+   NEVER shrink, NEVER scroll, ALWAYS at bottom
+   ============================================ */
 .ai-inline-actions {
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.02);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 10px 12px;
+  background: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  /* CRITICAL: Never shrink, never scroll */
   flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .ai-inline-btn {
@@ -2786,7 +4009,8 @@ html.theme-dark .floating-helper-dismiss:hover {
 }
 
 /* ========================================
-   FIRST-TIME TOOLTIP
+   FIRST-TIME TOOLTIP - Suggestion, not CTA
+   Should feel like helpful guidance that can be ignored
    ======================================== */
 
 .editor-tooltip {
@@ -2795,13 +4019,13 @@ html.theme-dark .floating-helper-dismiss:hover {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.2s ease;
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(20px);
+    transform: translateX(-50%) translateY(10px);
   }
   to {
     opacity: 1;
@@ -2812,51 +4036,61 @@ html.theme-dark .floating-helper-dismiss:hover {
 .editor-tooltip-content {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: #111827;
-  color: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  gap: 10px;
+  padding: 10px 16px;
+  /* Softer, less dominant */
+  background: rgba(55, 65, 81, 0.9);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  /* Reduced shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(4px);
 }
 
 .editor-tooltip-icon {
-  font-size: 20px;
+  font-size: 16px;
+  opacity: 0.7;
 }
 
 .editor-tooltip-text {
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
   line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .editor-tooltip-text strong {
   color: #fbbf24;
+  font-weight: 500;
 }
 
 .editor-tooltip-text kbd {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
   border-radius: 4px;
-  font-family: monospace;
-  font-size: 13px;
+  font-family: inherit;
+  font-size: 12px;
   margin: 0 2px;
 }
 
 .editor-tooltip-dismiss {
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .editor-tooltip-dismiss:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
 }
 
 /* ========================================
@@ -2963,22 +4197,128 @@ html.theme-dark .editor-v2-callout .callout-content {
   color: #fbbf24;
 }
 
-html.theme-dark .editor-v2-embed-content {
-  background: #1e293b;
+/* Dark theme embed - minimal styling */
+html.theme-dark .editor-v2-embed {
+  background: transparent;
 }
 
 html.theme-dark .editor-v2-embed:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+html.theme-dark .embed-hover-toolbar {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.theme-dark .embed-dropdown-trigger {
+  color: #94a3b8;
+}
+
+html.theme-dark .embed-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html.theme-dark .embed-dropdown-arrow {
+  color: #64748b;
+}
+
+html.theme-dark .embed-dropdown-menu {
+  background: #1e293b;
   border-color: #334155;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+html.theme-dark .embed-dropdown-option {
+  color: #f1f5f9;
+}
+
+html.theme-dark .embed-dropdown-option:hover {
+  background: #334155;
+}
+
+html.theme-dark .embed-dropdown-option.selected {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+html.theme-dark .embed-option-check {
+  color: #818cf8;
+}
+
+html.theme-dark .embed-toolbar-divider {
+  background: #334155;
+}
+
+html.theme-dark .editor-v2-embed-toolbar {
+  border-left-color: #334155;
 }
 
 html.theme-dark .embed-toolbar-btn {
-  background: #1e293b;
   color: #94a3b8;
 }
 
 html.theme-dark .embed-toolbar-btn:hover {
   background: #334155;
   color: #f1f5f9;
+}
+
+html.theme-dark .embed-toolbar-btn.embed-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+html.theme-dark .editor-v2-embed-content {
+  background: transparent;
+}
+
+html.theme-dark .embed-delete-confirm {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+html.theme-dark .embed-delete-confirm span {
+  color: #f87171;
+}
+
+html.theme-dark .embed-confirm-no {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+html.theme-dark .embed-confirm-no:hover {
+  background: #475569;
+}
+
+/* Embedded content dark mode - minimal */
+html.theme-dark .editor-v2-embed-content .heatmap-card,
+html.theme-dark .editor-v2-embed-content .kpi-card,
+html.theme-dark .editor-v2-embed-content .stat-card {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html.theme-dark .editor-v2-embed-content .heatmap-card-title {
+  color: #e2e8f0;
+}
+
+html.theme-dark .editor-v2-embed-content .top-risks-table th {
+  background: transparent;
+  color: #64748b;
+}
+
+html.theme-dark .editor-v2-embed-content .top-risks-table td {
+  border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+html.theme-dark .editor-v2-embed-content .kpi-value,
+html.theme-dark .editor-v2-embed-content .stat-value {
+  color: #f1f5f9;
+}
+
+html.theme-dark .editor-v2-embed-content .kpi-label,
+html.theme-dark .editor-v2-embed-content .stat-label {
+  color: #64748b;
 }
 
 html.theme-dark .slash-menu,
@@ -3122,7 +4462,7 @@ html.theme-dark .turn-into-item:hover .turn-into-label {
 
 html.theme-dark .toolbar-btn.toolbar-ai:hover {
   background: #4c1d95;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 /* Dark theme for custom tooltips */
@@ -3156,7 +4496,7 @@ html.theme-dark .block-control:hover {
 
 html.theme-dark .block-add:hover {
   background: #4c1d95;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 /* Dark theme for floating block handle */
@@ -3171,7 +4511,7 @@ html.theme-dark .block-handle-btn:hover {
 
 html.theme-dark .block-handle-add:hover {
   background: #4c1d95;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .block-handle-drag:hover {
@@ -3185,7 +4525,7 @@ html.theme-dark .editor-v2-divider-wrapper:hover {
 
 html.theme-dark .ai-inline-header {
   background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%);
-  border-color: #6d28d9;
+  border-color: var(--ai-accent-hover);
 }
 
 html.theme-dark .ai-response-text {
@@ -3596,7 +4936,7 @@ html.theme-dark .mention-email {
 
 .preview-content .preview-classification-audit {
   background: #f3e8ff;
-  color: #7c3aed;
+  color: var(--ai-accent);
 }
 
 .preview-content .preview-classification-public {
@@ -3851,7 +5191,7 @@ html.theme-dark .preview-content .preview-classification-board {
 
 html.theme-dark .preview-content .preview-classification-audit {
   background: #2e1065;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .preview-content .preview-classification-public {
@@ -3977,11 +5317,11 @@ html.theme-dark .hint-text {
 html.theme-dark .hint-text kbd {
   background: #1e293b;
   border-color: #4c1d95;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .hint-dismiss {
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .hint-dismiss:hover {
@@ -4047,7 +5387,7 @@ html.theme-dark .hint-dismiss:hover {
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: var(--ai-accent);
   color: #ffffff;
 }
 
@@ -4090,7 +5430,7 @@ html.theme-dark .hint-dismiss:hover {
 }
 
 .ai-prompt-input:focus {
-  border-color: #7c3aed;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
@@ -4129,7 +5469,7 @@ html.theme-dark .hint-dismiss:hover {
 }
 
 .ai-prompt-submit {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: var(--ai-accent);
   color: #ffffff;
 }
 
@@ -4170,9 +5510,9 @@ html.theme-dark .hint-dismiss:hover {
 }
 
 .draft-section-btn:hover {
-  border-color: #7c3aed;
+  border-color: var(--ai-accent);
   background: #f5f3ff;
-  color: #7c3aed;
+  color: var(--ai-accent);
 }
 
 .draft-custom-input {
@@ -4191,7 +5531,7 @@ html.theme-dark .ai-prompt-input {
 }
 
 html.theme-dark .ai-prompt-input:focus {
-  border-color: #7c3aed;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .ai-prompt-footer {
@@ -4222,8 +5562,8 @@ html.theme-dark .draft-section-btn {
 
 html.theme-dark .draft-section-btn:hover {
   background: #1e293b;
-  border-color: #7c3aed;
-  color: #a78bfa;
+  border-color: var(--ai-accent);
+  color: var(--blue-400);
 }
 
 /* Floating AI Button */
@@ -4234,7 +5574,7 @@ html.theme-dark .draft-section-btn:hover {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: var(--ai-accent);
   border: none;
   color: white;
   cursor: pointer;
@@ -4268,7 +5608,8 @@ html.theme-dark .editor-floating-ai:hover {
   box-shadow: 0 6px 24px rgba(168, 85, 247, 0.4);
 }
 
-/* Unsaved Changes Modal */
+/* Unsaved Changes Modal - Decision interruption, not editor tool
+   Primary color usage is intentional here - this is consequential */
 .unsaved-modal {
   position: fixed;
   top: 0;
@@ -4277,11 +5618,13 @@ html.theme-dark .editor-floating-ai:hover {
   bottom: 0;
   z-index: 10001;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  /* Slightly above center (~10% from top) - editorial positioning */
+  padding-top: 12vh;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition: opacity 0.16s ease, visibility 0.16s ease;
 }
 
 .unsaved-modal.visible {
@@ -4295,85 +5638,109 @@ html.theme-dark .editor-floating-ai:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  /* Softer dimming - preserve document context */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(3px);
 }
 
 .unsaved-modal-content {
   position: relative;
   background: white;
-  border-radius: 16px;
-  padding: 32px;
-  max-width: 400px;
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 440px;  /* Wider to fit 3 buttons comfortably */
   width: calc(100% - 32px);
+  margin: 0 auto;  /* Ensure horizontal centering */
   text-align: center;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.2s ease;
+  /* Softer shadow */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  /* Fade + gentle translate only, no scale pop */
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
 .unsaved-modal.visible .unsaved-modal-content {
-  transform: scale(1) translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
+/* Icon - visible warning indicator */
 .unsaved-modal-icon {
-  width: 64px;
-  height: 64px;
-  background: #fef3c7;
+  width: 56px;
+  height: 56px;
+  background: #fbbf24;  /* Stronger amber/yellow for visibility */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  margin: 0 auto 16px;
+}
+
+.unsaved-modal-icon svg {
+  width: 28px;
+  height: 28px;
+  color: #ffffff;  /* White icon on amber background for contrast */
 }
 
 .unsaved-modal-title {
-  font-size: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
   font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px;
+  color: #1f2937;
+  margin: 0 0 6px;
 }
 
 .unsaved-modal-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  color: #64748b;
-  margin: 0 0 24px;
+  color: #6b7280;
+  margin: 0 0 20px;
+  line-height: 1.5;
 }
 
 .unsaved-modal-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
 }
 
 .unsaved-btn {
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  white-space: nowrap;  /* Prevent button text wrapping */
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   border: none;
 }
 
+/* Discard - ghost/outline style, demoted but accessible */
 .unsaved-btn-discard {
-  background: #fee2e2;
-  color: #dc2626;
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .unsaved-btn-discard:hover {
-  background: #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.2);
 }
 
+/* Keep Editing - quiet default, safe option */
 .unsaved-btn-cancel {
-  background: #f1f5f9;
-  color: #475569;
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .unsaved-btn-cancel:hover {
-  background: #e2e8f0;
+  background: #e5e7eb;
 }
 
+/* Save & Exit - primary action, your brand red */
 .unsaved-btn-save {
   background: #c41e3a;
   color: white;
@@ -4384,8 +5751,13 @@ html.theme-dark .editor-floating-ai:hover {
 }
 
 /* Dark theme */
+html.theme-dark .unsaved-modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 html.theme-dark .unsaved-modal-content {
   background: #1e293b;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 html.theme-dark .unsaved-modal-title {
@@ -4400,14 +5772,37 @@ html.theme-dark .unsaved-modal-icon {
   background: #422006;
 }
 
+/* Dark theme - Discard ghost style */
 html.theme-dark .unsaved-btn-discard {
-  background: #450a0a;
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html.theme-dark .unsaved-btn-discard:hover {
+  background: rgba(220, 38, 38, 0.15);
   color: #fca5a5;
+  border-color: rgba(220, 38, 38, 0.3);
 }
 
 html.theme-dark .unsaved-btn-cancel {
   background: #334155;
   color: #e2e8f0;
+}
+
+html.theme-dark .unsaved-btn-cancel:hover {
+  background: #475569;
+}
+
+/* Responsive - stack buttons on small screens */
+@media (max-width: 480px) {
+  .unsaved-modal-actions {
+    flex-direction: column;
+  }
+
+  .unsaved-btn {
+    width: 100%;
+  }
 }
 
 /* ========================================
@@ -4529,11 +5924,11 @@ html.theme-dark .editor-more-divider {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-bg, rgba(0, 0, 0, 0.5));
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: var(--z-modal, 9000); /* Use unified z-index from base-modal.css */
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
@@ -5418,7 +6813,7 @@ html.theme-dark .helper-dismiss:hover {
 
 .cover-classification-audit {
   background: #f3e8ff;
-  color: #7c3aed;
+  color: var(--ai-accent);
 }
 
 .cover-classification-public {
@@ -5618,7 +7013,7 @@ html.theme-dark .cover-classification-board {
 
 html.theme-dark .cover-classification-audit {
   background: #2e1065;
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .cover-classification-public {
@@ -6026,7 +7421,9 @@ html.theme-dark .chart-caption-input::placeholder {
 
 .helper-popup {
   position: fixed;
-  bottom: 24px;
+  /* Position ABOVE the editor-tooltip (which is at bottom: 24px with ~52px height) */
+  /* This ensures the tip text remains visible below the quick-start popup */
+  bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10000;
@@ -6115,24 +7512,11 @@ html.theme-dark .chart-caption-input::placeholder {
    Visual indicators for A4 page limits
    ======================================== */
 
-/* Page boundary line - shows where A4 page ends */
+/* Page boundary line - REMOVED per user request (Issue D)
+   Previously showed a dashed line at page boundaries - no longer needed
+*/
 .page-boundary-indicator {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* Soft boundary line at ~85% of page */
-.page-boundary-indicator::before {
-  content: '';
-  position: absolute;
-  left: 56px;
-  right: 56px;
-  top: 0;
-  border-top: 1px dashed rgba(156, 163, 175, 0.4);
+  display: none;
 }
 
 /* Gradient fade zone - subtle warning area */
@@ -6253,24 +7637,9 @@ html.theme-dark .chart-caption-input::placeholder {
   opacity: 1;
 }
 
-/* Page bottom boundary line - shows where content ends */
-.editor-v2-page::after {
-  content: '';
-  position: absolute;
-  left: 56px;
-  right: 56px;
-  bottom: 100px; /* Matches bottom padding */
-  height: 1px;
-  background: repeating-linear-gradient(
-    to right,
-    #e5e7eb 0px,
-    #e5e7eb 4px,
-    transparent 4px,
-    transparent 8px
-  );
-  opacity: 0.6;
-  pointer-events: none;
-}
+/* Page bottom boundary line - REMOVED per user request (Issue D)
+   Previously showed a dashed line at page bottom - no longer needed
+*/
 
 .page-fill-indicator-bar {
   position: absolute;

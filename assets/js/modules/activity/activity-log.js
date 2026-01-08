@@ -338,9 +338,12 @@ ERM.activityLog = {
   },
 
   /**
-   * Bind event handlers
+   * Bind event handlers (guarded - runs once per session)
    */
   bindEvents: function() {
+    if (ERM.activityLog._eventsBound) return;
+    ERM.activityLog._eventsBound = true;
+
     var self = this;
 
     setTimeout(function() {

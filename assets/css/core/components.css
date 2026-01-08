@@ -96,6 +96,35 @@
   color: var(--primary-color);
 }
 
+.btn-icon-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger, #ef4444);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #374151);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--bg-tertiary, #e5e7eb);
+}
+
+.btn-ghost svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* ========================================
    CARDS
    ======================================== */
@@ -148,7 +177,7 @@
 
 .badge-medium {
   background: rgba(59, 130, 246, 0.15);
-  color: #1e40af;
+  color: var(--blue-800);
 }
 
 .badge-low {
@@ -304,128 +333,57 @@
   gap: 24px;
 }
 
-/* ========================================
-   MODALS
-   ======================================== */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-}
-
-.modal-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modal-overlay.secondary-overlay {
-  z-index: 2100;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.modal {
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 90vh;
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  transform: scale(0.95) translateY(20px);
-  transition: transform 0.2s ease;
-}
-
-.modal-overlay.active .modal {
-  transform: scale(1) translateY(0);
-}
-
-.modal-lg {
-  max-width: 800px;
-}
-
-.modal-xl {
-  max-width: 1100px;
-  width: 95vw;
-}
-
-.modal-fullscreen {
-  max-width: 98vw;
-  width: 98vw;
-  height: 95vh;
-  max-height: 95vh;
-  margin: 2.5vh auto;
-}
-
-.modal-fullscreen .modal-body {
-  max-height: calc(95vh - 160px);
-  overflow-y: auto;
-}
-
-.modal-header {
+/* Form label row (label + action button side by side) */
+.form-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 6px;
+  min-height: 24px;
 }
 
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 700;
+.form-label-row .form-label {
+  margin-bottom: 0;
+}
+
+.form-label-row .form-section-title {
+  margin-bottom: 0;
+}
+
+/* Form field with action button (input + AI/action button side by side) */
+.form-field-action {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-2, 8px);
 }
 
-.modal-title .ai-icon {
-  width: 20px;
-  height: 20px;
-  color: #8b5cf6;
+.form-field-action .form-input,
+.form-field-action .form-select,
+.form-field-action .form-textarea,
+.form-field-action .field {
+  flex: 1;
+  min-width: 0; /* prevents overflow */
 }
 
-.modal-close {
-  width: 36px;
-  height: 36px;
-  display: flex;
+.form-field-action .field-action {
+  flex: 0 0 auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
 }
 
-.modal-close:hover {
-  background: var(--bg-tertiary);
-}
+/* ========================================
+   MODALS
+   ========================================
+   MOVED TO: base-modal.css (Single Source of Truth)
 
-.modal-body {
-  padding: 32px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: calc(90vh - 140px);
-}
-
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 24px 32px;
-  border-top: 1px solid var(--border-color);
-}
+   All modal styles are now centralized in base-modal.css
+   which enforces the Unified Pop-Up / Modal Interaction Spec:
+   - Single modal rule (no stacking)
+   - Spec-compliant sizes: SM (480px), MD (640px), LG (880px)
+   - Z-index hierarchy: Modal (9000) > Popover (8000) > Toast (7000)
+   - Intent variants: modal-ai, modal-upgrade, modal-danger, modal-success
+   ======================================== */
 
 /* ========================================
    DROPDOWNS
@@ -888,7 +846,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 3000;
+  z-index: var(--z-toast, 7000);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1007,33 +965,7 @@
   color: var(--text-secondary);
 }
 
-/* Template Card */
-.template-card {
-  background: var(--bg-secondary);
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.template-card:hover {
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.template-card-icon {
-  font-size: 2.5rem;
-  margin-bottom: 8px;
-}
-
-.template-card-title {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+/* Template Card - See reports.css for actual styles */
 
 /* Register Card */
 .register-card {
@@ -1073,78 +1005,172 @@
 }
 
 /* ========================================
-   DISMISSIBLE BANNER
+   INFO BANNER (Canonical - used by all modules)
+   Single source of truth for Risk Register, Controls, Reports
    ======================================== */
 .info-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
   padding: 12px 16px;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, var(--blue-50) 0%, #f0f9ff 100%);
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px; /* Single source spacing - containers should NOT add margin-top */
 }
 
 .info-banner-content {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
 }
 
-.info-banner-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--info);
-  flex-shrink: 0;
-}
-
-.info-banner-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
-.info-banner-text {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.info-banner-text a {
-  color: var(--primary-color);
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.info-banner-text a:hover {
-  color: var(--primary-dark);
-}
-
-.info-banner-close {
-  width: 28px;
-  height: 28px;
+.info-banner-icon-circle {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--ai-accent);
+  color: white;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 14px;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.info-banner-icon-circle svg {
+  stroke: white;
+  width: 14px;
+  height: 14px;
+}
+
+.info-banner-text {
+  font-size: 14px;
+  color: var(--blue-800);
+}
+
+.info-banner-text a {
+  color: var(--ai-accent-dark);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.info-banner-text a:hover {
+  color: var(--blue-900);
+}
+
+.info-banner-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: var(--text-muted);
+  color: #6b7280;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .info-banner-close:hover {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--text-secondary);
+  background: var(--blue-100);
+  color: var(--blue-800);
 }
 
 .info-banner-close svg {
   width: 16px;
   height: 16px;
+}
+
+/* ========================================
+   MODULE EMPTY STATE (Canonical)
+   Single source for Risk Register, Controls empty states
+   ======================================== */
+.module-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  min-height: 400px;
+}
+
+.module-empty-state .empty-illustration {
+  margin-bottom: 24px;
+}
+
+.module-empty-state .empty-illustration svg {
+  width: 120px;
+  height: 120px;
+}
+
+.module-empty-state .empty-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.module-empty-state .empty-description {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 28px 0;
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+.module-empty-state .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #c41e3a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.module-empty-state .btn-primary:hover {
+  background: #a91830;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
+}
+
+.module-empty-state .btn-primary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark mode */
+html.theme-dark .module-empty-state {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.theme-dark .module-empty-state .empty-title {
+  color: #f1f5f9;
+}
+
+html.theme-dark .module-empty-state .empty-description {
+  color: #94a3b8;
+}
+
+/* Module list wrapper - no margin needed, info-banner provides spacing */
+.module-list-wrapper {
+  /* margin-top removed: info-banner margin-bottom (16px) is single source */
 }
 
 /* ========================================
@@ -1383,7 +1409,7 @@
 .feature-icon svg {
   width: 20px;
   height: 20px;
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .feature-text {
@@ -1514,33 +1540,30 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.1),
-    rgba(236, 72, 153, 0.1)
-  );
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: var(--c-ai-soft);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 8px;
   font-size: 0.8125rem;
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
 }
 
 .welcome-tip svg {
   width: 16px;
   height: 16px;
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
-.modal-overlay:has(.welcome-modal) .modal-header {
+/* Welcome modal styling - apply when modal content has .welcome-modal class */
+.welcome-modal .modal-header {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.modal-overlay:has(.welcome-modal) .modal-title {
+.welcome-modal .modal-title {
   display: none;
 }
 
-.modal-overlay:has(.welcome-modal) .modal-close {
+.welcome-modal .modal-close {
   position: absolute;
   right: 16px;
   top: 16px;
@@ -1784,21 +1807,31 @@ div.list-input-container .list-input-add-btn {
   justify-content: center !important;
 }
 
+/* AI filled animation - canonical source is features/ai-ui.css */
 .list-input-container.ai-filled {
   animation: aiFillPulse 0.5s ease;
 }
 
-@keyframes aiFillPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(138, 79, 255, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(138, 79, 255, 0.1);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(138, 79, 255, 0);
-  }
+/* Canonical spin animation - used by loading spinners across modules */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
+
+/* Canonical fadeIn animation - used across modals, panels, transitions */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Canonical fadeOut animation */
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* AI keyframes MOVED TO features/ai-ui.css (Canonical)
+   Removed duplicates: aiFillPulse, aiRipple, aiPulse, aiSpin, aiDots
+   Use ai-ui.css as the single source for AI animations */
 
 /* ========================================
    QUICK INVITE MODAL

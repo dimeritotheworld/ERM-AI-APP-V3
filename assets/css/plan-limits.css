@@ -1,6 +1,7 @@
 /**
  * Dimeri ERM - Plan Limits & Upgrade Modal Styles
  * Polished, professional design
+ * Enterprise blue color scheme (no purple)
  */
 
 /* Upgrade Modal */
@@ -79,8 +80,8 @@
 .ai-limit-icon svg {
   position: relative;
   z-index: 2;
-  color: #6366f1;
-  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+  color: var(--ai-accent);
+  filter: drop-shadow(0 4px 12px var(--ai-shadow));
 }
 
 .ai-limit-pulse {
@@ -90,7 +91,7 @@
   transform: translate(-50%, -50%);
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  background: var(--c-ai-soft);
   border-radius: 50%;
   animation: pulse-ai 2s ease-in-out infinite;
 }
@@ -122,7 +123,7 @@
 }
 
 .ai-limit-message strong {
-  color: #6366f1;
+  color: var(--ai-accent);
   font-weight: 600;
 }
 
@@ -139,19 +140,19 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--c-ai-soft);
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .ai-feature-item:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--ai-bg-hover);
   transform: translateX(4px);
 }
 
 .ai-feature-item svg {
   flex-shrink: 0;
-  color: #6366f1;
+  color: var(--ai-accent);
 }
 
 .ai-feature-item span {
@@ -163,7 +164,7 @@
 .btn-upgrade-primary {
   width: 100%;
   padding: 14px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: var(--ai-accent);
   color: white;
   border: none;
   border-radius: 10px;
@@ -175,13 +176,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 16px var(--ai-shadow);
   margin-bottom: 10px;
 }
 
 .btn-upgrade-primary:hover {
+  background: var(--ai-accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 24px var(--ai-shadow-hover);
 }
 
 .btn-upgrade-primary:active {
@@ -641,9 +643,9 @@
 }
 
 .plan-limit-banner.limit-info {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #bfdbfe;
-  color: #1e40af;
+  background: linear-gradient(135deg, var(--blue-50) 0%, var(--blue-100) 100%);
+  border-color: var(--blue-200);
+  color: var(--blue-800);
 }
 
 .banner-icon {
@@ -770,13 +772,13 @@
 }
 
 .plan-badge-ui.pro {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  background: linear-gradient(135deg, var(--blue-500), var(--blue-600));
+  box-shadow: 0 2px 8px var(--ai-shadow);
 }
 
 .plan-badge-ui.enterprise {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+  background: linear-gradient(135deg, var(--blue-800), var(--blue-900));
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
 }
 
 /* Responsive */
@@ -1024,7 +1026,7 @@
 
 .seat-usage-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, var(--blue-500) 0%, var(--blue-600) 100%);
   transition: width 0.3s ease;
   border-radius: 6px;
 }
@@ -1173,7 +1175,7 @@
 }
 
 .team-member-you {
-  color: #6366f1;
+  color: var(--ai-accent);
   font-weight: 600;
   font-size: 12px;
 }
@@ -1218,7 +1220,7 @@
 
 .usage-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(90deg, var(--blue-500) 0%, var(--blue-600) 100%);
   transition: width 0.3s ease;
   border-radius: 4px;
 }
@@ -1260,7 +1262,7 @@
 .plan-price {
   font-size: 18px;
   font-weight: 600;
-  color: #6366f1;
+  color: var(--ai-accent);
 }
 
 .plan-meta {

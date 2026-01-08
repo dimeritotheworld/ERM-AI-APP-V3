@@ -237,200 +237,28 @@
 
 /* ========================================
    BUTTONS
+   MOVED TO core/components.css (Canonical)
+   Removed: .btn, .btn-primary, .btn-secondary, .btn-danger,
+            .btn-ghost, .btn-sm, .btn-icon, .btn-icon-sm
+   ~115 lines removed - use components.css as single source
    ======================================== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
-  text-decoration: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%);
-  color: white;
-  box-shadow: 0 2px 4px rgba(196, 30, 58, 0.2);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #a01830 0%, #8b1528 100%);
-  box-shadow: 0 4px 8px rgba(196, 30, 58, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.btn-danger {
-  background: #dc2626;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #b91c1c;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: #6b7280;
-}
-
-.btn-ghost:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 13px;
-}
-
-.btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  color: #374151;
-}
-
-.btn-icon-sm {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #9ca3af;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-icon-sm:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-icon-sm.danger:hover {
-  background: #fef2f2;
-  color: #dc2626;
-}
 
 /* ========================================
    FORM ELEMENTS
+   Base .form-group, .form-label, .form-input, .form-select, .form-textarea,
+   .form-row, .form-hint MOVED TO core/components.css (Canonical)
+   ~75 lines removed - use components.css as single source
    ======================================== */
-.form-group {
-  margin-bottom: 16px;
-}
 
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
+/* .form-label-row MOVED TO core/components.css (Canonical) */
 
-.form-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-}
-
-.form-label .required {
-  color: #dc2626;
-}
-
-.form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #111827;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: #c41e3a;
-  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-}
-
-.form-input::placeholder,
-.form-textarea::placeholder {
-  color: #9ca3af;
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-select {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
-  cursor: pointer;
-}
-
-.form-hint {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 4px;
+/* Inline label hint - whisper quiet, not competing with label */
+.form-label .label-hint,
+.form-label-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #9ca3af;  /* 60-70% contrast - whispers, doesn't explain */
+  margin-left: 4px;
 }
 
 /* Form Section */
@@ -464,40 +292,12 @@
   margin: 0;
 }
 
-.btn-ai-suggest-evidence {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #7c3aed;
-  background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
-  border: 1px solid #ddd6fe;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+/* .btn-ai-suggest-evidence REMOVED - use .btn-ai-suggest.btn-ai-sm from ai-ui.css */
 
-.btn-ai-suggest-evidence:hover {
-  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-  border-color: #c4b5fd;
-}
-
-.btn-ai-suggest-evidence:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-ai-suggest-evidence svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* AI Evidence Suggestion Box */
+/* AI Evidence Suggestion Box - Enterprise blue */
 .ai-evidence-suggestion {
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
+  background: #f0f9ff;
+  border: 1px solid var(--blue-200);
   border-radius: 8px;
   margin-bottom: 16px;
   overflow: hidden;
@@ -508,11 +308,11 @@
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
-  border-bottom: 1px solid #e9d5ff;
+  background: var(--blue-50);
+  border-bottom: 1px solid var(--blue-200);
   font-size: 13px;
   font-weight: 600;
-  color: #6b21a8;
+  color: var(--blue-800);
 }
 
 .ai-evidence-icon {
@@ -537,13 +337,13 @@
   border: none;
   border-radius: 4px;
   font-size: 18px;
-  color: #9333ea;
+  color: var(--ai-accent);
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .ai-evidence-close:hover {
-  background: rgba(147, 51, 234, 0.1);
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .ai-evidence-list {
@@ -557,7 +357,7 @@
 
 .ai-evidence-list li {
   font-size: 13px;
-  color: #4c1d95;
+  color: #1e3a8a;
   line-height: 1.6;
   margin-bottom: 4px;
 }
@@ -569,15 +369,15 @@
 .ai-evidence-footer {
   padding: 8px 14px;
   font-size: 11px;
-  color: #7c3aed;
-  background: rgba(167, 139, 250, 0.1);
-  border-top: 1px solid #e9d5ff;
+  color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.05);
+  border-top: 1px solid var(--blue-200);
 }
 
 .ai-evidence-suggestion .ai-loading {
   padding: 16px;
   text-align: center;
-  color: #7c3aed;
+  color: var(--ai-accent);
   font-size: 13px;
 }
 
@@ -587,20 +387,18 @@
   font-size: 13px;
 }
 
-/* Small spinner for button */
+/* Small spinner for button - Enterprise blue */
 .spinner-small {
   display: inline-block;
   width: 12px;
   height: 12px;
-  border: 2px solid rgba(124, 58, 237, 0.2);
-  border-top-color: #7c3aed;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-top-color: var(--ai-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin moved to core/components.css */
 
 /* ========================================
    LIST INPUT (Causes, Consequences)
@@ -817,38 +615,25 @@
   margin-top: 6px;
 }
 
+/* AI badge - Enterprise blue, demoted visual prominence (no glow, no pill) */
 .ai-badge-border {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 4px 10px;
+  gap: 4px;
   font-size: 11px;
-  font-weight: 600;
-  color: #7c3aed;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-  border: 1.5px solid #a78bfa;
-  border-radius: 20px;
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+  font-weight: 500;
+  color: #6b7280;
+  /* No background, no border, no glow - subtle hint only */
 }
 
 .ai-badge-border .ai-star {
   width: 12px;
   height: 12px;
-  color: #8b5cf6;
-  animation: aiStarPulse 2s ease-in-out infinite;
+  color: #9ca3af;
+  /* No animation - advisory, not magical */
 }
 
-@keyframes aiStarPulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
-  }
-}
+/* @keyframes aiStarPulse MOVED TO features/ai-ui.css (Canonical) */
 
 /* ========================================
    UPGRADE MODAL
@@ -941,7 +726,7 @@
   color: var(--primary);
 }
 
-/* PRO badge on option cards */
+/* PRO badge on option cards - neutral gray (enterprise) */
 .option-card-pro-badge {
   position: absolute;
   top: 8px;
@@ -949,8 +734,9 @@
   padding: 3px 8px;
   font-size: 10px;
   font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -985,13 +771,15 @@
   line-height: 1.2;
 }
 
+/* PRO badge inline - neutral gray (enterprise) */
 .pro-badge-inline {
   display: inline-block;
   padding: 2px 6px;
   font-size: 8.5px;
   font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
   border-radius: 3px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -1058,14 +846,15 @@
   height: 14px;
 }
 
+/* Import template download - enterprise blue */
 .import-template-download {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   padding: 8px;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-  border: 1px dashed #a78bfa;
+  background: #f0f9ff;
+  border: 1px dashed var(--blue-300);
   border-radius: 6px;
 }
 
@@ -1073,14 +862,14 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: #7c3aed;
+  color: var(--ai-accent);
   font-weight: 600;
   font-size: 11.5px;
   padding: 4px 9px;
 }
 
 .import-template-download .btn-ghost:hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .template-hint {
@@ -1089,54 +878,7 @@
   line-height: 1.25;
 }
 
-/* ========================================
-   TEMPLATE CARDS
-   ======================================== */
-.template-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.template-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.template-card:hover {
-  border-color: #c41e3a;
-  background: #fef7f8;
-}
-
-.template-card-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-}
-
-.template-card-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.template-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 2px;
-}
-
-.template-card-desc {
-  font-size: 12px;
-  color: #6b7280;
-}
+/* Template cards section removed - templates no longer used */
 
 /* ========================================
    TEXT UTILITIES
@@ -1255,13 +997,13 @@
 }
 
 .attachment-upload-area:hover {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
+  border-color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .attachment-upload-area.drag-over {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--ai-accent);
+  background: rgba(59, 130, 246, 0.1);
   transform: scale(1.01);
 }
 
@@ -1288,14 +1030,14 @@
 }
 
 .attachment-browse-link {
-  color: #8b5cf6;
+  color: var(--ai-accent);
   font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
 }
 
 .attachment-browse-link:hover {
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
 }
 
 .attachment-upload-hint {
@@ -1444,77 +1186,8 @@
   color: #374151;
 }
 
-/* ========================================
-   BTN-AI-ICON (Small AI button)
-   ======================================== */
-.btn-ai-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 4px;
-  color: #8b5cf6;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-ai-icon:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.4);
-}
-
-.btn-ai-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* ========================================
-   BTN-AI-SM (Small AI button for scoring)
-   ======================================== */
-.btn-ai-suggest.btn-ai-sm {
-  padding: 2px 8px;
-  font-size: 11px;
-  gap: 3px;
-}
-
-.btn-ai-suggest.btn-ai-sm svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* ========================================
-   BTN-AI-REVIEW (Review Risk button)
-   ======================================== */
-.btn-ai-review {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-}
-
-.btn-ai-review:hover {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-}
-
-.btn-ai-review svg {
-  width: 16px;
-  height: 16px;
-}
+/* .btn-ai-icon, .btn-ai-suggest.btn-ai-sm, .btn-ai-review
+   MOVED TO features/ai-ui.css (Canonical) */
 
 /* ========================================
    INLINE CONTROL SELECTOR
@@ -1550,8 +1223,8 @@
 }
 
 .inline-control-item.selected {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: #8b5cf6;
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--ai-accent);
 }
 
 /* AI Recommended controls */
@@ -1575,7 +1248,7 @@
 .inline-control-item input[type="checkbox"] {
   width: 14px;
   height: 14px;
-  accent-color: #8b5cf6;
+  accent-color: var(--ai-accent);
 }
 
 /* AI Match Badge (shows score %) */
@@ -1620,7 +1293,7 @@
 
 .inline-control-type.control-type-detective {
   background: rgba(59, 130, 246, 0.15);
-  color: #2563eb;
+  color: var(--ai-accent-hover);
 }
 
 .inline-control-type.control-type-corrective {
@@ -1680,36 +1353,55 @@
   margin-bottom: 12px;
 }
 
+/* Newly added control highlight animation */
+.inline-control-item.newly-added {
+  animation: newControlPulse 0.6s ease-out;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+}
+
+@keyframes newControlPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3);
+  }
+}
+
 /* ========================================
    BTN-ADD-INLINE-CONTROL
    ======================================== */
+/* Enterprise blue - no glow, no gradient */
 .btn-add-inline-control {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  border: 2px solid #8b5cf6;
+  background: var(--ai-accent);
+  border: none;
   border-radius: 8px;
   color: white;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.2);
+  transition: background 0.2s ease;
   margin-top: 8px;
 }
 
 .btn-add-inline-control:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  border-color: #7c3aed;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  background: var(--ai-accent-hover);
 }
 
 .btn-add-inline-control:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.2);
+  background: var(--ai-accent-dark);
 }
 
 .btn-add-inline-control svg {
@@ -1748,8 +1440,8 @@
 }
 
 .choice-card:hover {
-  border-color: #8b5cf6;
-  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15);
+  border-color: var(--ai-accent);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .choice-card-ai {
@@ -1763,12 +1455,12 @@
 }
 
 .choice-card-manual {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border-color: #3b82f6;
+  background: linear-gradient(135deg, var(--blue-100) 0%, var(--blue-200) 100%);
+  border-color: var(--ai-accent);
 }
 
 .choice-card-manual:hover {
-  border-color: #2563eb;
+  border-color: var(--ai-accent-hover);
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
 }
 
@@ -1794,7 +1486,7 @@
 }
 
 .choice-card-manual .choice-card-icon svg {
-  fill: #3b82f6;
+  fill: var(--ai-accent);
 }
 
 .choice-card-title {
@@ -1919,8 +1611,9 @@
   padding: 2px 6px;
   font-size: 9px;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1977,8 +1670,8 @@
   gap: 6px;
   padding: 10px 12px;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border: 1px solid #e9d5ff;
+  background: #f0f9ff;
+  border: 1px solid var(--blue-200);
   border-radius: 6px;
 }
 
@@ -1989,7 +1682,7 @@
 .upgrade-note p {
   margin: 0;
   font-size: 12px;
-  color: #7c3aed;
+  color: var(--ai-accent);
 }
 
 .upgrade-note strong {
@@ -2020,7 +1713,7 @@
   align-items: center;
   padding: 12px 8px;
   background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #eeeff1;  /* Softer border - 15% less contrast */
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2053,13 +1746,20 @@
   color: #c41e3a;
 }
 
-/* Create register form spacing */
+/* Create register form spacing - tighter vertical rhythm */
 .create-register-form .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 14px;  /* Reduced from 20px for compact confidence */
 }
 
 .create-register-form .form-group:last-child {
   margin-bottom: 0;
+}
+
+/* Industry dropdown - show more options to reduce nested scroll feel */
+.create-register-form .form-select[name="industry"],
+.create-register-form #register-industry {
+  /* Native select styling improvements */
+  padding: 10px 36px 10px 12px;
 }
 
 @media (max-width: 500px) {
@@ -2079,29 +1779,25 @@
   animation: aiStaggerFadeIn 0.4s ease-out forwards;
 }
 
-@keyframes aiStaggerFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* @keyframes aiStaggerFadeIn MOVED TO features/ai-ui.css (Canonical) */
 
 /* Recommended item styling */
 .ai-recommended {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #f59e0b !important;
+  background: #f0f9ff;
+  border: 1.5px solid var(--blue-300) !important;
   position: relative;
+}
+
+.ai-recommended:hover {
+  background: #e0f2fe;
+  border-color: var(--blue-400) !important;
 }
 
 .ai-recommended-badge {
   display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  color: #92400e;
+  color: var(--ai-accent);
   margin-bottom: 2px;
 }
 
@@ -2111,32 +1807,15 @@
   flex: 1;
 }
 
-/* AI Discover More button */
-.btn-ai-discover {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-ai-discover:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-}
-
 /* Category item with recommended */
 .ai-category-item.ai-recommended {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #f59e0b;
+  background: #f0f9ff;
+  border: 1.5px solid var(--blue-300);
+}
+
+.ai-category-item.ai-recommended:hover {
+  background: #e0f2fe;
+  border-color: var(--blue-400);
 }
 
 .ai-category-item .ai-recommended-badge {
@@ -2152,26 +1831,20 @@
   animation: aiStaggerFadeIn 0.35s ease-out forwards;
 }
 
-/* Pulse effect on recommended items */
+/* Subtle glow effect on recommended items - blue, not pulsing */
 .ai-recommended::before {
   content: "";
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, var(--blue-400) 100%);
   z-index: -1;
-  animation: aiPulseGlow 2s ease-in-out infinite;
   opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-@keyframes aiPulseGlow {
-  0%,
-  100% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 0.3;
-  }
+.ai-recommended:hover::before {
+  opacity: 0.08;
 }
 
 /* ========================================
@@ -2188,23 +1861,17 @@
   font-size: 14px;
 }
 
-.ai-thinking-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #e5e7eb;
-  border-top-color: #8b5cf6;
-  border-radius: 50%;
-  animation: aiSpinnerRotate 0.8s linear infinite;
-}
-
-@keyframes aiSpinnerRotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* .ai-thinking-spinner, @keyframes aiSpinnerRotate MOVED TO features/ai-ui.css (Canonical) */
 
 /* ========================================
    AI STARTER RISKS PROMPT
+   Lightweight workflow suggestion, not a blocking decision
+   ======================================== */
+
+/* ========================================
+   COMPACT AI PROMPT MODAL
+   Use variant: 'compact' in showModal() options
+   See base-modal.css .modal-overlay.modal-compact
    ======================================== */
 
 .ai-starter-prompt {
@@ -2212,20 +1879,41 @@
   padding: 20px 0;
 }
 
+/* Compact version - less vertical drama, more flow continuity */
+.ai-starter-prompt.compact {
+  padding: 4px 0 0;
+}
+
 .ai-starter-icon {
   font-size: 48px;
   margin-bottom: 16px;
+}
+
+/* Hide standalone icon when using compact mode (icon in title instead) */
+.ai-starter-prompt.compact .ai-starter-icon {
+  display: none;
 }
 
 .ai-starter-text {
   font-size: 16px;
   color: #1f2937;
   margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.ai-starter-prompt.compact .ai-starter-text {
+  font-size: 15px;
+  margin-bottom: 6px;
 }
 
 .ai-starter-subtext {
   font-size: 14px;
   color: #6b7280;
+}
+
+.ai-starter-prompt.compact .ai-starter-subtext {
+  font-size: 13px;
+  color: #9ca3af;
 }
 
 /* Thinking Animation */
@@ -2279,19 +1967,53 @@
   padding: 10px 0;
 }
 
+/* Primary title - decision is hero, not AI */
 .ai-starter-templates-intro {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   text-align: center;
 }
 
+/* Secondary context - subtle, informational */
 .ai-starter-templates-subtext {
   font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 16px;
+  color: #9ca3af;
+  margin-bottom: 12px;
   text-align: center;
+}
+
+/* Batch selection controls */
+.ai-starter-controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ai-starter-controls button {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.ai-starter-controls button:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+/* Trust signal at bottom */
+.ai-starter-trust {
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 16px;
   font-style: italic;
 }
 
@@ -2306,8 +2028,8 @@
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  background: white;
+  border: 1.5px solid #e5e7eb;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2315,12 +2037,13 @@
 
 .ai-starter-card:hover {
   border-color: #d1d5db;
-  background: #f3f4f6;
+  background: #fafafa;
 }
 
+/* Selected state: subtle brand tint, not yellow warning */
 .ai-starter-card.selected {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-color: #f59e0b;
+  background: #fef2f2;
+  border-color: #c41e3a;
 }
 
 .ai-starter-card-check {
@@ -2438,22 +2161,12 @@
 
 /* ========================================
    MODAL OVERFLOW FIX FOR TOOLTIPS
+   Use variant: 'form-tooltips' in showModal() options
+   See base-modal.css .modal-overlay.modal-form-tooltips
    ======================================== */
-/* Remove overflow restrictions only from form sections containing linked risks */
-.form-section:has(.inline-control-selector) {
-  overflow: visible !important;
-}
-
-/* Ensure form groups containing linked risks allow overflow */
-.form-group:has(.inline-control-selector) {
-  overflow: visible !important;
-  position: relative !important;
-  z-index: auto !important;
-  background: transparent !important;
-}
 
 /* Ensure linked risk items themselves can show tooltips */
 .inline-control-selector {
-  overflow: visible !important;
-  background: transparent !important;
+  overflow: visible;
+  background: transparent;
 }

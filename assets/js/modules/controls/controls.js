@@ -240,11 +240,14 @@ ERM.controls.getNextControlNumber = function () {
  * Initialize controls view
  */
 ERM.controls.init = function () {
-  // Migrate any controls with old random IDs to sequential format
-  this.migrateControlIds();
-
-  // Repair bidirectional links between controls and risks
-  this.repairBidirectionalLinks();
+  // One-time setup (migrations, repairs) - run only once per session
+  if (!ERM.controls._initialized) {
+    ERM.controls._initialized = true;
+    // Migrate any controls with old random IDs to sequential format
+    this.migrateControlIds();
+    // Repair bidirectional links between controls and risks
+    this.repairBidirectionalLinks();
+  }
 
   var viewContainer = document.getElementById("view-controls");
   if (!viewContainer) return;
@@ -413,14 +416,19 @@ ERM.controls.render = function () {
       "</div>";
   }
 
-  // Only show filter bar if there are controls
+  // Only show filter bar and header if there are controls
   var filterBarHtml = controls.length > 0 ? this.renderFilterBar(filteredControls.length, controls.length) : '';
 
-  // Only show header action buttons if there are controls
-  var headerActionsHtml = '';
+  // Build header HTML - only show if there are controls (matches Risk Register pattern)
+  var headerHtml = '';
   if (controls.length > 0) {
-    headerActionsHtml =
-      '<div class="page-header-actions">' +
+    headerHtml =
+      '<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">' +
+      '<div>' +
+      '<h1 class="page-title" style="margin-bottom: 4px;">Controls</h1>' +
+      '<p class="page-subtitle" style="margin-bottom: 0;">Manage your control library</p>' +
+      "</div>" +
+      '<div class="page-header-actions" style="display: flex; gap: 8px;">' +
       '<button class="btn btn-primary" id="add-control-btn">' +
       ERM.icons.plus +
       " Add Control" +
@@ -429,23 +437,22 @@ ERM.controls.render = function () {
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
       " Control Review" +
       "</button>" +
+      "</div>" +
       "</div>";
   }
 
   var html =
     bannerHtml +
-    '<div class="page-header">' +
-    '<div class="page-header-content">' +
-    '<h1 class="page-title">Control Library</h1>' +
-    '<p class="page-subtitle">Manage and monitor your risk controls</p>' +
-    "</div>" +
-    headerActionsHtml +
-    "</div>" +
+    headerHtml +
     filterBarHtml +
-    this.renderContent(filteredControls);
+    '<div class="module-list-wrapper">' +
+    this.renderContent(filteredControls) +
+    '</div>';
 
   viewContainer.innerHTML = html;
   this.bindEvents();
+  // Always rebind item-level events after render (cards, rows, buttons)
+  this.bindItemEvents();
 };
 
 /**
@@ -566,7 +573,7 @@ ERM.controls.renderContent = function (controls) {
     var allControls = this.getAll();
     if (allControls.length === 0) {
       return (
-        '<div class="controls-empty-state">' +
+        '<div class="module-empty-state">' +
         '<div class="empty-illustration">' +
         '<svg width="120" height="120" viewBox="0 0 120 120" fill="none">' +
         '<circle cx="60" cy="60" r="45" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="2"/>' +
@@ -575,20 +582,17 @@ ERM.controls.renderContent = function (controls) {
         '<path d="M50 55 L57 65 L72 48" stroke="#c41e3a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
         '</svg>' +
         '</div>' +
-        '<h3 class="empty-title">No controls yet</h3>' +
-        '<p class="empty-description">Build your control library to mitigate risks through preventive, detective, or directive measures.</p>' +
+        '<h3 class="empty-title">No Controls Yet</h3>' +
+        '<p class="empty-description">Create your first control to start building your control library and mitigating risks effectively.</p>' +
         '<button class="btn btn-primary" onclick="ERM.controls.showAddModal()">' +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">' +
-        '<line x1="12" y1="5" x2="12" y2="19"></line>' +
-        '<line x1="5" y1="12" x2="19" y2="12"></line>' +
-        '</svg>' +
-        'Add Control' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>' +
+        ' Add Control' +
         '</button>' +
         '</div>'
       );
     } else {
       return (
-        '<div class="controls-empty-state">' +
+        '<div class="module-empty-state">' +
         '<div class="empty-illustration">' +
         '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">' +
         '<circle cx="11" cy="11" r="8"></circle>' +
@@ -946,9 +950,12 @@ ERM.controls.sortControls = function (sortBy) {
 };
 
 /**
- * Bind event handlers
+ * Bind event handlers (guarded - runs once per session)
  */
 ERM.controls.bindEvents = function () {
+  if (ERM.controls._eventsBound) return;
+  ERM.controls._eventsBound = true;
+
   var self = this;
 
   // Add control buttons
@@ -1114,6 +1121,37 @@ ERM.controls.bindEvents = function () {
     });
   }
 
+  // Bind item-level events (runs every render)
+  this.bindItemEvents();
+};
+
+/**
+ * Bind item-level events (runs every render)
+ * Separated from bindEvents so these can be rebound when list re-renders
+ */
+ERM.controls.bindItemEvents = function () {
+  var self = this;
+
+  // Add control button (re-rendered each time)
+  var addBtn = document.getElementById("add-control-btn");
+  if (addBtn) {
+    addBtn.addEventListener("click", function () {
+      self.showAddModal();
+    });
+  }
+
+  // AI Review button
+  var aiReviewBtn = document.getElementById("ai-review-controls-btn");
+  if (aiReviewBtn) {
+    aiReviewBtn.addEventListener("click", function () {
+      if (typeof ERM.controlsAI !== "undefined") {
+        self.showAIControlsReview();
+      } else {
+        ERM.toast.error("Controls AI not available");
+      }
+    });
+  }
+
   // Row click to edit (table view)
   var rows = document.querySelectorAll(".control-row");
   for (var i = 0; i < rows.length; i++) {
@@ -1181,6 +1219,28 @@ ERM.controls.initControlCheckboxHandlers = function () {
           card.classList.add("selected");
         } else {
           card.classList.remove("selected");
+        }
+      }
+      self.updateControlsBulkActions();
+    });
+  }
+
+  // Select all checkbox
+  var selectAll = document.getElementById("select-all-controls");
+  if (selectAll) {
+    selectAll.addEventListener("change", function () {
+      var cbs = document.querySelectorAll(".control-select-checkbox");
+      for (var s = 0; s < cbs.length; s++) {
+        cbs[s].checked = this.checked;
+        // Update card selected state
+        var controlId = cbs[s].getAttribute("data-control-id");
+        var card = document.querySelector('.control-card[data-control-id="' + controlId + '"]');
+        if (card) {
+          if (this.checked) {
+            card.classList.add("selected");
+          } else {
+            card.classList.remove("selected");
+          }
         }
       }
       self.updateControlsBulkActions();
@@ -1349,15 +1409,6 @@ ERM.controls.showAddModal = function () {
     }
   }
 
-  // Check if AI templates are available
-  var hasAI = typeof ERM.controlsAI !== "undefined" && ERM.controlsAI.hasTemplates && ERM.controlsAI.hasTemplates();
-
-  // If no AI available, go straight to manual entry
-  if (!hasAI) {
-    this.showManualEntryForm();
-    return;
-  }
-
   // Check if ERM.components is available
   if (typeof ERM.components === "undefined" || !ERM.components.showModal) {
     console.error("ERM.components not available");
@@ -1449,6 +1500,7 @@ ERM.controls.showManualEntryForm = function () {
     reference: this.getNextControlNumber(),
     name: "",
     description: [],  // Changed to array for list-input structure
+    describeRisk: "",
     type: "",
     category: "",
     owner: "",
@@ -1501,6 +1553,7 @@ ERM.controls.showForm = function () {
     reference: "",
     name: "",
     description: "",
+    describeRisk: "",
     type: "",
     category: "",
     owner: "",
@@ -1516,8 +1569,202 @@ ERM.controls.showForm = function () {
   this.showControlForm(newControl, false);
 };
 
+/* ========================================
+   CONTROL FORM DRAFTS (LOCAL STORAGE)
+   ======================================== */
+ERM.controls.getControlDraftKey = function (controlId) {
+  var registerId =
+    ERM.riskRegister && ERM.riskRegister.state && ERM.riskRegister.state.currentRegister
+      ? ERM.riskRegister.state.currentRegister.id
+      : "all";
+  var id = controlId || "new";
+  return "erm:controlDraft:" + registerId + ":" + id;
+};
+
+ERM.controls.getControlDraft = function (controlId) {
+  var key = this.getControlDraftKey(controlId);
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+};
+
+ERM.controls.shouldRestoreControlDraft = function (draft, control) {
+  if (!draft) return false;
+  if (!control || !control.id) return true;
+  var draftTime = Date.parse(draft.updatedAt || "") || 0;
+  var savedTime = Date.parse(control.updatedAt || control.createdAt || "") || 0;
+  return draftTime > savedTime;
+};
+
+ERM.controls.applyControlDraft = function (control, draft) {
+  if (!draft) return control;
+  if (draft.hasOwnProperty("name")) control.name = draft.name;
+  if (draft.hasOwnProperty("description")) control.description = draft.description;
+  if (draft.hasOwnProperty("describeRisk")) control.describeRisk = draft.describeRisk;
+  if (draft.hasOwnProperty("type")) control.type = draft.type;
+  if (draft.hasOwnProperty("category")) control.category = draft.category;
+  if (draft.hasOwnProperty("owner")) control.owner = draft.owner;
+  if (draft.hasOwnProperty("frequency")) control.frequency = draft.frequency;
+  if (draft.hasOwnProperty("effectiveness")) control.effectiveness = draft.effectiveness;
+  if (draft.hasOwnProperty("status")) control.status = draft.status;
+  if (draft.hasOwnProperty("lastReviewDate")) control.lastReviewDate = draft.lastReviewDate;
+  if (draft.hasOwnProperty("nextReviewDate")) control.nextReviewDate = draft.nextReviewDate;
+  if (draft.hasOwnProperty("linkedRisks")) control.linkedRisks = draft.linkedRisks;
+  return control;
+};
+
+ERM.controls.saveControlDraftFromForm = function (controlId) {
+  var form = document.getElementById("control-form");
+  if (!form) return;
+
+  var getValue = function (id) {
+    var el = document.getElementById(id);
+    return el ? el.value : "";
+  };
+
+  var descriptions = [];
+  var descriptionItems = document.querySelectorAll("#descriptions-list .list-input-item");
+  for (var d = 0; d < descriptionItems.length; d++) {
+    var text = descriptionItems[d].querySelector(".list-input-text");
+    if (text && text.textContent.trim()) {
+      descriptions.push(text.textContent.trim());
+    }
+  }
+
+  var linkedRisks = [];
+  var checkboxes = document.querySelectorAll('input[name="linkedRisks"]:checked');
+  for (var i = 0; i < checkboxes.length; i++) {
+    linkedRisks.push(checkboxes[i].value);
+  }
+
+  var draft = {
+    updatedAt: new Date().toISOString(),
+    name: getValue("control-name"),
+    description: descriptions,
+    describeRisk: getValue("control-describe-risk"),
+    type: getValue("control-type"),
+    category: getValue("control-category"),
+    owner: getValue("control-owner"),
+    frequency: getValue("control-frequency"),
+    effectiveness: getValue("control-effectiveness"),
+    status: getValue("control-status"),
+    lastReviewDate: getValue("control-last-review"),
+    nextReviewDate: getValue("control-next-review"),
+    linkedRisks: linkedRisks
+  };
+
+  try {
+    localStorage.setItem(this.getControlDraftKey(controlId), JSON.stringify(draft));
+  } catch (e) {}
+};
+
+ERM.controls.scheduleControlDraftSave = function (controlId) {
+  var self = this;
+  if (this._controlDraftTimer) {
+    clearTimeout(this._controlDraftTimer);
+  }
+  this._controlDraftTimer = setTimeout(function () {
+    self.saveControlDraftFromForm(controlId);
+  }, 150);
+};
+
+ERM.controls.clearControlDraft = function (controlId) {
+  try {
+    localStorage.removeItem(this.getControlDraftKey(controlId));
+  } catch (e) {}
+};
+
+ERM.controls.setDescriptionItemsFromDraft = function (items) {
+  var container = document.getElementById("descriptions-list");
+  if (!container) return;
+  items = items || [];
+
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    html +=
+      '<div class="list-input-item" data-index="' +
+      i +
+      '">' +
+      '<span class="list-input-text">' +
+      ERM.utils.escapeHtml(items[i]) +
+      "</span>" +
+      '<button type="button" class="list-input-remove" data-list="descriptions" data-index="' +
+      i +
+      '">' +
+      ERM.icons.close +
+      "</button>" +
+      "</div>";
+  }
+
+  container.innerHTML = html;
+  this.initRemoveListItemHandlers();
+};
+
+ERM.controls.applyControlDraftToForm = function (controlId) {
+  var draft = this.getControlDraft(controlId);
+  if (!draft) return;
+
+  var control = null;
+  if (controlId) {
+    control = this.getById(controlId);
+  }
+
+  if (!this.shouldRestoreControlDraft(draft, control)) {
+    return;
+  }
+
+  var setValue = function (id, value) {
+    var el = document.getElementById(id);
+    if (!el || value === undefined || value === null) return false;
+    el.value = value;
+    return true;
+  };
+
+  setValue("control-name", draft.name);
+  setValue("control-describe-risk", draft.describeRisk);
+  setValue("control-type", draft.type);
+  setValue("control-category", draft.category);
+  setValue("control-owner", draft.owner);
+  setValue("control-frequency", draft.frequency);
+  setValue("control-effectiveness", draft.effectiveness);
+  setValue("control-status", draft.status);
+  setValue("control-last-review", draft.lastReviewDate);
+  setValue("control-next-review", draft.nextReviewDate);
+
+  if (draft.description !== undefined) {
+    this.setDescriptionItemsFromDraft(draft.description);
+  }
+
+  if (draft.linkedRisks && draft.linkedRisks.length > 0) {
+    var checkboxes = document.querySelectorAll('input[name="linkedRisks"]');
+    for (var i = 0; i < checkboxes.length; i++) {
+      var isChecked = draft.linkedRisks.indexOf(checkboxes[i].value) !== -1;
+      checkboxes[i].checked = isChecked;
+      var label = checkboxes[i].closest(".inline-control-item");
+      if (label) {
+        if (isChecked) {
+          label.classList.add("selected");
+        } else {
+          label.classList.remove("selected");
+        }
+      }
+    }
+  }
+};
+
 ERM.controls.showControlForm = function (control, isEdit, useSecondaryModal) {
   var self = this;
+  this._editingControlId = control && control.id ? control.id : null;
+
+  var draft = this.getControlDraft(this._editingControlId);
+  if (draft && this.shouldRestoreControlDraft(draft, control)) {
+    control = this.applyControlDraft(control, draft);
+  }
+
   var title = isEdit ? "Edit Control" : "Add New Control";
   var content = this.buildFormContent(control);
 
@@ -1550,6 +1797,8 @@ ERM.controls.showControlForm = function (control, isEdit, useSecondaryModal) {
           self.pendingRiskLink = null;
         }
       }
+
+      self.applyControlDraftToForm(self._editingControlId);
     },
     onAction: function (action) {
       if (action === "save") {
@@ -1847,7 +2096,7 @@ ERM.controls.buildFormContent = function (control) {
     "</div>" +
     '<div class="form-group">' +
     '<div class="form-label-row">' +
-    '<label class="form-label">Control Description (Add one sentence at a time)</label>' +
+    '<label class="form-label">Control Description</label>' +
     '<button type="button" class="btn-ai-suggest" data-field="description">' +
     ERM.icons.sparkles +
     " Suggest</button>" +
@@ -1856,7 +2105,7 @@ ERM.controls.buildFormContent = function (control) {
     descriptionHtml +
     "</div>" +
     '<div class="list-input-add">' +
-    '<input type="text" class="form-input" id="description-input" placeholder="Add a description sentence and press Enter...">' +
+    '<input type="text" class="form-input" id="description-input" placeholder="Add description and press Enter...">' +
     '<button type="button" class="btn btn-primary btn-icon add-list-item" data-list="descriptions">' +
     ERM.icons.plus +
     "</button>" +
@@ -2089,6 +2338,9 @@ ERM.controls.handleSave = function (existingId) {
     reference: document.getElementById("control-reference").value,
     name: name,
     description: descriptions,
+    describeRisk: document.getElementById("control-describe-risk")
+      ? document.getElementById("control-describe-risk").value.trim()
+      : "",
     type: type,
     category: category,
     owner: document.getElementById("control-owner").value.trim(),
@@ -2130,6 +2382,12 @@ ERM.controls.handleSave = function (existingId) {
 
   if (risksUpdated) {
     ERM.storage.set("risks", risks);
+  }
+
+  // Clear drafts on successful save
+  this.clearControlDraft(existingId || null);
+  if (!existingId && savedControl && savedControl.id) {
+    this.clearControlDraft(savedControl.id);
   }
 
   // Show success message
@@ -2423,6 +2681,16 @@ ERM.controls.bindFormAIEvents = function () {
       }
     });
   }
+
+  // Draft persistence (input/change)
+  var form = document.getElementById("control-form");
+  if (form) {
+    var scheduleSave = function () {
+      self.scheduleControlDraftSave(self._editingControlId);
+    };
+    form.addEventListener("input", scheduleSave);
+    form.addEventListener("change", scheduleSave);
+  }
 };
 
 /**
@@ -2455,6 +2723,7 @@ ERM.controls.addListItem = function (listType, value) {
 
   // Re-init remove handlers
   this.initRemoveListItemHandlers();
+  this.scheduleControlDraftSave(this._editingControlId);
 };
 
 /**
@@ -2471,6 +2740,7 @@ ERM.controls.initRemoveListItemHandlers = function () {
       if (item) {
         item.remove();
       }
+      self.scheduleControlDraftSave(self._editingControlId);
     });
   }
 };
@@ -2535,15 +2805,16 @@ ERM.controls.aiSuggestName = function () {
           var value = this.closest(".ai-suggestion-item").getAttribute(
             "data-value"
           );
-          document.getElementById("control-name").value = value;
-          document.getElementById("control-name").classList.add("ai-filled");
-          setTimeout(function () {
-            document
-              .getElementById("control-name")
-              .classList.remove("ai-filled");
-          }, 500);
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Name applied");
+          ERM.components.closeSecondaryModal(function() {
+            document.getElementById("control-name").value = value;
+            document.getElementById("control-name").classList.add("ai-filled");
+            setTimeout(function () {
+              document
+                .getElementById("control-name")
+                .classList.remove("ai-filled");
+            }, 500);
+            ERM.toast.success("Name applied");
+          });
         });
       }
     },
@@ -2709,17 +2980,18 @@ ERM.controls.aiSuggestDescription = function () {
           var value = this.closest(".ai-suggestion-item").getAttribute(
             "data-value"
           );
-          document.getElementById("control-description").value = value;
-          document
-            .getElementById("control-description")
-            .classList.add("ai-filled");
-          setTimeout(function () {
+          ERM.components.closeSecondaryModal(function() {
+            document.getElementById("control-description").value = value;
             document
               .getElementById("control-description")
-              .classList.remove("ai-filled");
-          }, 500);
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Description applied");
+              .classList.add("ai-filled");
+            setTimeout(function () {
+              document
+                .getElementById("control-description")
+                .classList.remove("ai-filled");
+            }, 500);
+            ERM.toast.success("Description applied");
+          });
         });
       }
     },
@@ -2856,13 +3128,16 @@ ERM.controls.aiSuggestType = function () {
     ],
     onAction: function (action) {
       if (action === "apply") {
-        document.getElementById("control-type").value = analysis.type;
-        document.getElementById("control-type").classList.add("ai-filled");
-        setTimeout(function () {
-          document.getElementById("control-type").classList.remove("ai-filled");
-        }, 500);
-        ERM.components.closeSecondaryModal();
-        ERM.toast.success("Control type set to " + analysis.label);
+        var typeValue = analysis.type;
+        var typeLabel = analysis.label;
+        ERM.components.closeSecondaryModal(function() {
+          document.getElementById("control-type").value = typeValue;
+          document.getElementById("control-type").classList.add("ai-filled");
+          setTimeout(function () {
+            document.getElementById("control-type").classList.remove("ai-filled");
+          }, 500);
+          ERM.toast.success("Control type set to " + typeLabel);
+        });
       }
     },
   });
@@ -3998,119 +4273,21 @@ ERM.controls.showUpgradeModal = function (reason) {
 
 /**
  * Show AI thinking/analyzing modal
- * Uses the same design pattern as "Describe with AI" thinking modal
+ * Uses unified ERM.components.showThinkingModal
  */
 ERM.controls.showAIThinkingModal = function (onComplete) {
-  var steps = [
-    { text: "Analyzing control library", delay: 500 },
-    { text: "Evaluating control effectiveness", delay: 600 },
-    { text: "Checking risk linkages", delay: 500 },
-    { text: "Identifying coverage gaps", delay: 400 },
-    { text: "Generating recommendations", delay: 500 },
-  ];
-
-  // Sparkles icon for header
-  var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-
-  var stepsHtml = "";
-  for (var i = 0; i < steps.length; i++) {
-    stepsHtml +=
-      '<div class="ai-step" data-step="' + i + '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-      "</div>" +
-      '<span class="ai-step-text">' + steps[i].text + "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-      "</div>";
-  }
-
-  var content =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    sparklesIcon +
-    "</div>" +
-    "<h3>AI is analyzing your controls</h3>" +
-    "</div>" +
-    '<div class="ai-steps-container">' +
-    stepsHtml +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showModal({
-    title: "",
-    content: content,
-    size: "sm",
-    buttons: [],
-    onOpen: function () {
-      // Style the modal to match ai-thinking-modal pattern
-      var modal = document.querySelector(".modal");
-      var modalContent = document.querySelector(".modal-content");
-      var modalHeader = document.querySelector(".modal-header");
-      var modalBody = document.querySelector(".modal-body");
-      var modalFooter = document.querySelector(".modal-footer");
-
-      if (modal) {
-        modal.classList.add("ai-thinking-modal");
-      }
-
-      // Hide header
-      if (modalHeader) {
-        modalHeader.style.display = "none";
-      }
-
-      // Hide footer
-      if (modalFooter) {
-        modalFooter.style.display = "none";
-      }
-
-      // Fix body styling
-      if (modalBody) {
-        modalBody.style.cssText = "padding: 0 !important; max-height: none !important; overflow: visible !important;";
-      }
-
-      // Fix modal content wrapper
-      if (modalContent) {
-        modalContent.style.cssText = "max-height: none !important; overflow: visible !important;";
-      }
-
-      function animateStep(stepIndex) {
-        if (stepIndex >= steps.length) {
-          // All done, close modal and show results
-          setTimeout(function () {
-            ERM.components.closeModal();
-            setTimeout(function () {
-              if (onComplete) onComplete();
-            }, 200);
-          }, 400);
-          return;
-        }
-
-        var stepEl = document.querySelector(
-          '.ai-step[data-step="' + stepIndex + '"]'
-        );
-        if (stepEl) {
-          stepEl.classList.add("active");
-
-          setTimeout(function () {
-            stepEl.classList.remove("active");
-            stepEl.classList.add("complete");
-            animateStep(stepIndex + 1);
-          }, steps[stepIndex].delay);
-        } else {
-          animateStep(stepIndex + 1);
-        }
-      }
-
-      // Start animation after a brief delay
-      setTimeout(function () {
-        animateStep(0);
-      }, 300);
-    },
+  ERM.components.showThinkingModal({
+    input: "Control portfolio",
+    title: "AI is analyzing your controls",
+    steps: [
+      { text: "Analyzing control library", delay: 500 },
+      { text: "Evaluating control effectiveness", delay: 600 },
+      { text: "Checking risk linkages", delay: 500 },
+      { text: "Identifying coverage gaps", delay: 400 },
+      { text: "Generating recommendations", delay: 500 },
+    ],
+    namespace: ERM.controls,
+    onComplete: onComplete
   });
 };
 
@@ -4332,18 +4509,9 @@ ERM.controls.displayAIControlsReview = function () {
     title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 8px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> AI Control Portfolio Review',
     content: content,
     size: "lg",
+    variant: "portfolio",
     buttons: [{ label: "Close", type: "secondary", action: "close" }],
     onOpen: function () {
-      // Ensure modal and modal body are scrollable (override overflow:hidden on .modal)
-      var modal = document.querySelector("#modal-overlay .modal");
-      var modalBody = document.querySelector(".modal-body");
-      if (modal) {
-        modal.style.overflow = "visible";
-      }
-      if (modalBody) {
-        modalBody.style.overflowY = "auto";
-        modalBody.style.maxHeight = "calc(85vh - 140px)";
-      }
       self.generateControlPortfolioReview(ctx);
     }
   });

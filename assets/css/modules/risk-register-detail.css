@@ -1020,9 +1020,9 @@ select.filter-select {
 }
 
 .orientation-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #3b82f6;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
+  color: var(--ai-accent);
 }
 
 .orientation-btn span {
@@ -1042,7 +1042,7 @@ select.filter-select {
 }
 
 .logo-upload-area:hover {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   background: #f8fafc;
 }
 
@@ -1084,9 +1084,9 @@ select.filter-select {
 }
 
 .position-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #3b82f6;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
+  color: var(--ai-accent);
 }
 
 /* Toggle Switch */
@@ -1128,7 +1128,7 @@ select.filter-select {
 }
 
 .toggle-switch input:checked + .toggle-slider {
-  background-color: #3b82f6;
+  background-color: var(--ai-accent);
 }
 
 .toggle-switch input:checked + .toggle-slider:before {
@@ -1183,9 +1183,9 @@ select.filter-select {
 }
 
 .sig-pos-btn.active {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #3b82f6;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
+  color: var(--ai-accent);
 }
 
 /* PDF Preview Panel */
@@ -1255,7 +1255,7 @@ select.filter-select {
   font-weight: 700;
   color: #0f172a;
   margin-bottom: 4px;
-  border-bottom: 2px solid #3b82f6;
+  border-bottom: 2px solid var(--ai-accent);
   padding-bottom: 4px;
 }
 
@@ -1489,7 +1489,7 @@ select.filter-select {
 }
 
 .btn-toggle.active {
-  background: #3b82f6;
+  background: var(--ai-accent);
   color: white;
 }
 
@@ -1513,7 +1513,7 @@ select.filter-select {
 }
 
 .logo-upload-box:hover {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   background: #f8fafc;
 }
 
@@ -1571,8 +1571,8 @@ select.filter-select {
 }
 
 .logo-pos-btn.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -1630,7 +1630,7 @@ select.filter-select {
 .btn-link {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--ai-accent);
   font-size: 12px;
   cursor: pointer;
   padding: 0;
@@ -1684,7 +1684,7 @@ select.filter-select {
 .field-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
   cursor: pointer;
 }
 
@@ -1697,20 +1697,9 @@ select.filter-select {
   color: #0f172a;
 }
 
-/* Modal XL size for components.css override */
-.modal-xl {
-  max-width: 900px !important;
-  width: 95% !important;
-}
-
-.modal-md {
-  max-width: 600px !important;
-}
-
-.modal-lg {
-  max-width: 750px !important;
-  width: 95% !important;
-}
+/* Modal sizes - REMOVED (now in base-modal.css)
+   Use CSS variables: --modal-sm (480px), --modal-md (640px), --modal-lg (880px)
+   See base-modal.css for single source of truth */
 
 /* Button xs size */
 .btn-xs {
@@ -1790,7 +1779,7 @@ select.filter-select {
 
 /* Title bar */
 .preview-title-bar {
-  border-bottom: 3px solid #3b82f6;
+  border-bottom: 3px solid var(--ai-accent);
   padding-bottom: 16px;
   margin-bottom: 16px;
   text-align: center;
@@ -2153,7 +2142,7 @@ select.filter-select {
 }
 
 .export-icon-circle svg {
-  color: #3b82f6;
+  color: var(--ai-accent);
   transition: transform 0.3s ease;
 }
 
@@ -2195,7 +2184,7 @@ select.filter-select {
 .export-progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #3b82f6 100%);
+  background: linear-gradient(90deg, var(--ai-accent) 0%, var(--blue-400) 50%, var(--ai-accent) 100%);
   background-size: 200% 100%;
   border-radius: 4px;
   transition: width 0.5s ease;

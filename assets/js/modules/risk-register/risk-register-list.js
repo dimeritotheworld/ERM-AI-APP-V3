@@ -103,7 +103,7 @@ ERM.riskRegister.renderRegisterList = function () {
   var registersHtml = "";
   if (registers.length === 0) {
     registersHtml =
-      '<div class="risk-register-empty-state">' +
+      '<div class="module-empty-state">' +
       '<div class="empty-illustration">' +
       '<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">' +
       '<rect x="20" y="25" width="80" height="70" rx="8" fill="#fef2f2" stroke="#c41e3a" stroke-width="2"/>' +
@@ -459,9 +459,11 @@ ERM.riskRegister.initListEvents = function () {
     });
   }
 
-  // Close menus on outside click
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest(".dropdown")) {
+  // Close menus on outside click (guarded to prevent duplicate listeners)
+  if (!ERM.riskRegister._documentClickBound) {
+    ERM.riskRegister._documentClickBound = true;
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".dropdown")) {
       var menus = document.querySelectorAll(".dropdown-menu.show");
       var cardsActive = document.querySelectorAll(
         ".register-card.dropdown-active"
@@ -478,7 +480,8 @@ ERM.riskRegister.initListEvents = function () {
         cardsActive[oc].classList.remove("dropdown-active");
       }
     }
-  });
+    });
+  }
 
   // Search registers
   var searchInput = document.getElementById("registers-search");
@@ -951,15 +954,6 @@ ERM.riskRegister.openRegister = function (registerId) {
   this.state.currentRegister = register;
   this.state.viewMode = "detail";
   this.renderRegisterDetail();
-};
-
-/* ========================================
-   TEMPLATE RISK GENERATION (stub - templates removed, use AI instead)
-   ======================================== */
-ERM.riskRegister.generateTemplateRisks = function (registerId, templateId) {
-  // Templates removed - this function is no longer used
-  // AI-generated risks are now the primary way to populate registers
-  console.log('[RiskRegister] generateTemplateRisks called but templates are removed');
 };
 
 /* ========================================

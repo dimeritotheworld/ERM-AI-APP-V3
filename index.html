@@ -21,10 +21,13 @@
     <!-- Core Styles -->
     <link rel="stylesheet" href="assets/css/core/global.css" />
     <link rel="stylesheet" href="assets/css/core/components.css?v=2.5.0" />
+    <link rel="stylesheet" href="assets/css/core/base-modal.css?v=1.0.0" />
     <link rel="stylesheet" href="assets/css/core/layout.css?v=2.3.0" />
     <link rel="stylesheet" href="assets/css/core/theme-dark.css" />
     <link rel="stylesheet" href="assets/css/core/responsive.css" />
     <link rel="stylesheet" href="assets/css/utils/pixelated-avatar.css" />
+    <!-- AI UI System (Canonical - must load before module CSS) -->
+    <link rel="stylesheet" href="assets/css/features/ai-ui.css?v=1.0.0" />
     <!-- Module Styles -->
     <link rel="stylesheet" href="assets/css/modules/dashboard.css?v=2.5.4" />
     <link rel="stylesheet" href="assets/css/modules/risk-register-core.css?v=2.1.9" />
@@ -92,7 +95,7 @@
 
           <!-- Risk Register View -->
           <section class="view" id="view-risk-register">
-            <!-- Content rendered by risk-register.js -->
+            <!-- Content rendered by risk-register-core.js + modules -->
           </section>
 
           <!-- Controls View -->
@@ -229,6 +232,7 @@
     <script src="assets/js/utils/avatar-generator.js"></script>
     <script src="assets/js/core/permissions.js"></script>
     <script src="assets/js/core/components.js?v=2.3.2"></script>
+    <script src="assets/js/core/ai-suggestions.js?v=1.0.0"></script>
     <script src="assets/js/core/layout.js"></script>
     <script src="assets/js/core/team-sync-manager.js"></script>
     <script src="assets/js/team.js"></script>
@@ -263,7 +267,7 @@
     <script src="assets/js/modules/reports/report-components.js?v=1.0.0"></script>
     <script src="assets/js/modules/reports/pdf-engine.js?v=1.0.0"></script>
     <script src="assets/js/modules/reports/report-data-service.js?v=1.0.0"></script>
-    <script src="assets/js/modules/reports/report-sections.js?v=1.0.0"></script>
+    <!-- report-sections.js REMOVED - was orphaned (ERM.ReportSections never called) -->
     <script src="assets/js/modules/reports/report-builder.js?v=3.4.1"></script>
     <script src="assets/js/modules/reports/reports.js?v=3.6.0"></script>
     <script src="assets/js/modules/reports/ai-service.js?v=1.0.0"></script>

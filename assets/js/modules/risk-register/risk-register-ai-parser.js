@@ -25,11 +25,8 @@ ERM.riskAI.parseNaturalLanguage = function (input, industry) {
   var inputLower = input.toLowerCase();
   var result;
 
-  // Step 1: Try to find matching template from NEW template system (ERM_TEMPLATES)
+  // Templates removed - skip to keyword-based parsing
   var template = null;
-  if (typeof ERM.riskAI.findMatchingTemplate === "function") {
-    template = ERM.riskAI.findMatchingTemplate(input, null);
-  }
 
   if (template) {
     // Found a match in the new template system

@@ -41,8 +41,236 @@
     undoStack: [],
     redoStack: [],
     isUndoing: false, // Flag to prevent saving state during undo/redo
-    saveStateTimeout: null // For debouncing text input
+    saveStateTimeout: null, // For debouncing text input
+    // Block-level multi-selection (like Notion)
+    selectedBlocks: [], // Array of block IDs that are selected
+    blockSelectionMode: false, // True when in block selection mode (vs text selection)
+    blockSelectionAnchor: null, // Starting block ID for shift-click range selection
+    isBlockDragging: false, // True during block gutter drag
+    blockDragStartY: null // Y position where block drag started
   };
+
+  // ========================================
+  // SELECTION LOCK SYSTEM
+  // Persists selection through focus changes during AI workflow
+  // ========================================
+  var selectionLock = {
+    isLocked: false,
+    blockId: null,
+    blockElement: null,
+    startOffset: 0,
+    endOffset: 0,
+    text: '',
+    highlightSpans: [] // Array of highlight spans for cleanup
+  };
+
+  /**
+   * Capture and lock the current selection
+   * Creates visual highlight that persists even when focus changes
+   */
+  function captureSelectionLock() {
+    var selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+
+    var range = selection.getRangeAt(0);
+    var selectedText = range.toString().trim();
+    if (!selectedText) return false;
+
+    // Find containing block
+    var node = range.commonAncestorContainer;
+    if (node.nodeType === 3) node = node.parentNode;
+    var block = node.closest ? node.closest('.editor-v2-block') : null;
+
+    // Store lock info
+    selectionLock.isLocked = true;
+    selectionLock.blockId = block ? block.getAttribute('data-block-id') : null;
+    selectionLock.blockElement = block;
+    selectionLock.startOffset = range.startOffset;
+    selectionLock.endOffset = range.endOffset;
+    selectionLock.text = selectedText;
+    selectionLock.originalRange = range.cloneRange();
+
+    // Apply visual highlight
+    applySelectionLockHighlight(range);
+
+    console.log('[SelectionLock] Captured:', selectedText.substring(0, 50) + '...');
+    return true;
+  }
+
+  /**
+   * Apply visual highlight spans to the locked selection
+   * This persists even when browser selection is lost
+   */
+  function applySelectionLockHighlight(range) {
+    // Clear any existing highlights first
+    clearSelectionLockHighlight();
+
+    try {
+      var startContainer = range.startContainer;
+      var endContainer = range.endContainer;
+      var startOffset = range.startOffset;
+      var endOffset = range.endOffset;
+
+      // Helper to check if node is text
+      function isTextNode(n) { return n && n.nodeType === 3; }
+
+      // Simple case: single text node
+      if (startContainer === endContainer && isTextNode(startContainer)) {
+        var text = startContainer.nodeValue;
+        var parent = startContainer.parentNode;
+
+        // Skip if already inside a lock highlight
+        if (parent.classList && parent.classList.contains('selection-lock')) return;
+
+        var beforeText = text.substring(0, startOffset);
+        var selectedText = text.substring(startOffset, endOffset);
+        var afterText = text.substring(endOffset);
+
+        var frag = document.createDocumentFragment();
+        if (beforeText) frag.appendChild(document.createTextNode(beforeText));
+
+        var highlightSpan = document.createElement('span');
+        highlightSpan.className = 'selection-lock';
+        highlightSpan.setAttribute('data-selection-lock', 'true');
+        highlightSpan.textContent = selectedText;
+        frag.appendChild(highlightSpan);
+        selectionLock.highlightSpans.push(highlightSpan);
+
+        if (afterText) frag.appendChild(document.createTextNode(afterText));
+
+        parent.replaceChild(frag, startContainer);
+        return;
+      }
+
+      // Complex case: multiple nodes - use tree walker
+      var commonAncestor = range.commonAncestorContainer;
+      if (commonAncestor.nodeType === 3) commonAncestor = commonAncestor.parentNode;
+
+      // Collect text nodes in range
+      var textNodes = [];
+      var walker = document.createTreeWalker(commonAncestor, NodeFilter.SHOW_TEXT, null, false);
+      var node, foundStart = false;
+      while ((node = walker.nextNode())) {
+        if (node === startContainer) foundStart = true;
+        if (foundStart) textNodes.push(node);
+        if (node === endContainer) break;
+      }
+
+      // Wrap each text node portion
+      for (var i = 0; i < textNodes.length; i++) {
+        var textNode = textNodes[i];
+        var parent = textNode.parentNode;
+        if (!parent) continue;
+        if (parent.classList && parent.classList.contains('selection-lock')) continue;
+        if (parent.closest && parent.closest('.block-controls')) continue;
+
+        var nodeText = textNode.nodeValue || '';
+        var hlStart = 0;
+        var hlEnd = nodeText.length;
+
+        if (textNode === startContainer) hlStart = startOffset;
+        if (textNode === endContainer) hlEnd = endOffset;
+        if (hlEnd <= hlStart) continue;
+
+        var before = nodeText.substring(0, hlStart);
+        var selected = nodeText.substring(hlStart, hlEnd);
+        var after = nodeText.substring(hlEnd);
+
+        var frag = document.createDocumentFragment();
+        if (before) frag.appendChild(document.createTextNode(before));
+
+        var span = document.createElement('span');
+        span.className = 'selection-lock';
+        span.setAttribute('data-selection-lock', 'true');
+        span.textContent = selected;
+        frag.appendChild(span);
+        selectionLock.highlightSpans.push(span);
+
+        if (after) frag.appendChild(document.createTextNode(after));
+
+        parent.replaceChild(frag, textNode);
+      }
+    } catch (e) {
+      console.log('[SelectionLock] Highlight error:', e.message);
+    }
+  }
+
+  /**
+   * Clear selection lock highlight spans
+   * Restores original text structure
+   */
+  function clearSelectionLockHighlight() {
+    var highlights = document.querySelectorAll('.selection-lock[data-selection-lock]');
+    var parentsToNormalize = [];
+
+    for (var i = 0; i < highlights.length; i++) {
+      var highlight = highlights[i];
+      var parent = highlight.parentNode;
+      if (!parent) continue;
+
+      if (parentsToNormalize.indexOf(parent) === -1) {
+        parentsToNormalize.push(parent);
+      }
+
+      // Move children out and remove span
+      while (highlight.firstChild) {
+        parent.insertBefore(highlight.firstChild, highlight);
+      }
+      parent.removeChild(highlight);
+    }
+
+    // Normalize to merge adjacent text nodes
+    for (var j = 0; j < parentsToNormalize.length; j++) {
+      if (parentsToNormalize[j] && parentsToNormalize[j].normalize) {
+        parentsToNormalize[j].normalize();
+      }
+    }
+
+    selectionLock.highlightSpans = [];
+  }
+
+  /**
+   * Clear the selection lock entirely
+   */
+  function clearSelectionLock() {
+    if (!selectionLock.isLocked) return;
+
+    clearSelectionLockHighlight();
+
+    selectionLock.isLocked = false;
+    selectionLock.blockId = null;
+    selectionLock.blockElement = null;
+    selectionLock.startOffset = 0;
+    selectionLock.endOffset = 0;
+    selectionLock.text = '';
+    selectionLock.originalRange = null;
+
+    console.log('[SelectionLock] Cleared');
+  }
+
+  /**
+   * Get the locked selection text
+   */
+  function getSelectionLockText() {
+    return selectionLock.text;
+  }
+
+  /**
+   * Check if selection is locked
+   */
+  function isSelectionLocked() {
+    return selectionLock.isLocked;
+  }
+
+  /**
+   * Get locked selection info
+   */
+  function getSelectionLock() {
+    return selectionLock;
+  }
+
+  // Expose selection lock API on ERM.reportEditorV2
+  // Will be attached after the module is fully defined
 
   // ========================================
   // PAGE LAYOUT CONSTANTS & AUTO-PAGINATION
@@ -290,6 +518,371 @@
     { id: 'custom', label: 'Custom Prompt...', icon: aiIcons.custom, description: 'Ask AI anything' }
   ];
 
+  // ========================================
+  // BLOCK SELECTION SYSTEM (Notion-style)
+  // ========================================
+
+  /**
+   * Select a single block (clears previous selection)
+   */
+  function selectBlock(blockId, addToSelection) {
+    console.log('[BlockSelect] selectBlock called with blockId:', blockId, 'addToSelection:', addToSelection);
+    if (!blockId) return;
+
+    var block = document.querySelector('[data-block-id="' + blockId + '"]');
+    console.log('[BlockSelect] Found block element:', !!block);
+    if (!block) return;
+
+    if (addToSelection) {
+      // Add to existing selection (Cmd/Ctrl+Click)
+      if (state.selectedBlocks.indexOf(blockId) === -1) {
+        state.selectedBlocks.push(blockId);
+        block.classList.add('block-selected');
+      } else {
+        // Toggle off if already selected
+        var idx = state.selectedBlocks.indexOf(blockId);
+        state.selectedBlocks.splice(idx, 1);
+        block.classList.remove('block-selected');
+      }
+    } else {
+      // Clear previous selection and select just this one
+      clearBlockSelection();
+      state.selectedBlocks = [blockId];
+      block.classList.add('block-selected');
+    }
+
+    state.blockSelectionMode = state.selectedBlocks.length > 0;
+    state.blockSelectionAnchor = blockId;
+    state.activeBlock = block; // Set active block for AI operations
+
+    // Clear any text selection when entering block selection mode
+    if (state.blockSelectionMode) {
+      window.getSelection().removeAllRanges();
+    }
+
+    console.log('[BlockSelect] Selected blocks:', state.selectedBlocks);
+    console.log('[BlockSelect] blockSelectionMode:', state.blockSelectionMode);
+    console.log('[BlockSelect] Calling updateBlockSelectionUI...');
+    updateBlockSelectionUI();
+  }
+
+  /**
+   * Select a range of blocks (Shift+Click)
+   */
+  function selectBlockRange(toBlockId) {
+    if (!state.blockSelectionAnchor || !toBlockId) return;
+
+    var editorContent = document.querySelector('.editor-v2-content');
+    if (!editorContent) return;
+
+    var allBlocks = Array.prototype.slice.call(editorContent.querySelectorAll('.editor-v2-block'));
+    var anchorIndex = -1;
+    var toIndex = -1;
+
+    for (var i = 0; i < allBlocks.length; i++) {
+      var id = allBlocks[i].getAttribute('data-block-id');
+      if (id === state.blockSelectionAnchor) anchorIndex = i;
+      if (id === toBlockId) toIndex = i;
+    }
+
+    if (anchorIndex === -1 || toIndex === -1) return;
+
+    // Determine range
+    var startIdx = Math.min(anchorIndex, toIndex);
+    var endIdx = Math.max(anchorIndex, toIndex);
+
+    // Clear current selection
+    clearBlockSelection();
+
+    // Select all blocks in range
+    for (var j = startIdx; j <= endIdx; j++) {
+      var blockId = allBlocks[j].getAttribute('data-block-id');
+      state.selectedBlocks.push(blockId);
+      allBlocks[j].classList.add('block-selected');
+    }
+
+    state.blockSelectionMode = true;
+    state.activeBlock = allBlocks[startIdx]; // Set first block as active for AI operations
+    window.getSelection().removeAllRanges();
+
+    console.log('[BlockSelect] Range selected:', state.selectedBlocks.length, 'blocks');
+    updateBlockSelectionUI();
+  }
+
+  /**
+   * Clear all block selections
+   */
+  function clearBlockSelection() {
+    var selectedBlocks = document.querySelectorAll('.block-selected');
+    for (var i = 0; i < selectedBlocks.length; i++) {
+      selectedBlocks[i].classList.remove('block-selected');
+    }
+    state.selectedBlocks = [];
+    state.blockSelectionMode = false;
+    updateBlockSelectionUI();
+  }
+
+  /**
+   * Get all selected block elements
+   */
+  function getSelectedBlockElements() {
+    var elements = [];
+    for (var i = 0; i < state.selectedBlocks.length; i++) {
+      var block = document.querySelector('[data-block-id="' + state.selectedBlocks[i] + '"]');
+      if (block) elements.push(block);
+    }
+    return elements;
+  }
+
+  /**
+   * Get text content from selected blocks
+   */
+  function getSelectedBlocksText() {
+    var texts = [];
+    var elements = getSelectedBlockElements();
+    for (var i = 0; i < elements.length; i++) {
+      var content = elements[i].querySelector('.block-element, .block-content, h1, h2, h3, li, p');
+      if (content) {
+        texts.push(content.textContent || '');
+      }
+    }
+    return texts.join('\n\n');
+  }
+
+  /**
+   * Update UI based on block selection state
+   */
+  function updateBlockSelectionUI() {
+    console.log('[BlockSelect] updateBlockSelectionUI called, selectedBlocks:', state.selectedBlocks.length);
+    if (state.selectedBlocks.length > 0) {
+      // Update AI module state with selected blocks text
+      if (ERM.reportEditorAI) {
+        var text = getSelectedBlocksText();
+        console.log('[BlockSelect] Setting AI state - text length:', text.length);
+        ERM.reportEditorAI.setState('selection', text);
+        ERM.reportEditorAI.setState('selectedBlocks', state.selectedBlocks.slice());
+      }
+      // Show floating toolbar for block selection
+      console.log('[BlockSelect] Calling showBlockSelectionToolbar...');
+      showBlockSelectionToolbar();
+    } else {
+      // Hide toolbar when no blocks selected
+      console.log('[BlockSelect] No blocks selected, hiding toolbar');
+      hideFloatingToolbar();
+    }
+  }
+
+  /**
+   * Show floating toolbar for block selection (positioned over selected blocks)
+   */
+  function showBlockSelectionToolbar() {
+    console.log('[BlockSelect] showBlockSelectionToolbar called');
+    var elements = getSelectedBlockElements();
+    console.log('[BlockSelect] Selected elements count:', elements.length);
+    if (elements.length === 0) return;
+
+    var toolbar = document.getElementById('report-floating-toolbar');
+    console.log('[BlockSelect] Existing toolbar:', !!toolbar);
+    if (!toolbar) {
+      console.log('[BlockSelect] Creating new toolbar');
+      toolbar = createFloatingToolbar();
+      document.body.appendChild(toolbar);
+    }
+
+    // Calculate bounding box of all selected blocks
+    var firstRect = elements[0].getBoundingClientRect();
+    var lastRect = elements[elements.length - 1].getBoundingClientRect();
+
+    var boundingRect = {
+      top: firstRect.top,
+      bottom: lastRect.bottom,
+      left: Math.min(firstRect.left, lastRect.left),
+      right: Math.max(firstRect.right, lastRect.right)
+    };
+    boundingRect.width = boundingRect.right - boundingRect.left;
+
+    // Position toolbar above the selection
+    var toolbarWidth = 400;
+    var left = boundingRect.left + (boundingRect.width / 2) - (toolbarWidth / 2);
+    var top = boundingRect.top - 50;
+
+    // Ensure toolbar stays in viewport
+    if (left < 10) left = 10;
+    if (left + toolbarWidth > window.innerWidth - 10) {
+      left = window.innerWidth - toolbarWidth - 10;
+    }
+
+    // Flip below if too close to top
+    if (top < 10) {
+      top = boundingRect.bottom + 10;
+      toolbar.classList.add('toolbar-below');
+    } else {
+      toolbar.classList.remove('toolbar-below');
+    }
+
+    toolbar.style.left = left + 'px';
+    toolbar.style.top = top + 'px';
+    toolbar.classList.add('visible');
+    state.selectionPillsVisible = true;
+
+    console.log('[V2] Showing block selection toolbar for', elements.length, 'blocks');
+  }
+
+  /**
+   * Delete all selected blocks
+   */
+  function deleteSelectedBlocks() {
+    if (state.selectedBlocks.length === 0) return;
+
+    saveState(); // Save for undo
+
+    var elements = getSelectedBlockElements();
+    var nextBlock = null;
+
+    // Find the block after the last selected one
+    if (elements.length > 0) {
+      nextBlock = elements[elements.length - 1].nextElementSibling;
+      if (!nextBlock || !nextBlock.classList.contains('editor-v2-block')) {
+        nextBlock = elements[0].previousElementSibling;
+      }
+    }
+
+    // Remove all selected blocks
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].parentNode) {
+        elements[i].parentNode.removeChild(elements[i]);
+      }
+    }
+
+    clearBlockSelection();
+
+    // Focus next block
+    if (nextBlock && nextBlock.classList.contains('editor-v2-block')) {
+      state.activeBlock = nextBlock;
+      var editable = nextBlock.querySelector('[contenteditable="true"]');
+      if (editable) editable.focus();
+    }
+
+    markDirty();
+    ERM.toast.success(elements.length + ' block(s) deleted');
+  }
+
+  /**
+   * Initialize block selection event handlers
+   */
+  function initBlockSelection(editorContent) {
+    console.log('[BlockSelect] initBlockSelection called');
+
+    // Click on block select button (checkbox icon) to select block
+    editorContent.addEventListener('mousedown', function(e) {
+      var selectBtn = e.target.closest('.block-select');
+      if (selectBtn) {
+        console.log('[BlockSelect] Checkbox clicked');
+        e.preventDefault();
+        e.stopPropagation();
+
+        var blockId = selectBtn.getAttribute('data-block-id');
+        console.log('[BlockSelect] Block ID:', blockId);
+
+        if (e.shiftKey && state.blockSelectionAnchor) {
+          // Shift+Click: range selection
+          console.log('[BlockSelect] Shift+Click range selection');
+          selectBlockRange(blockId);
+        } else if (e.ctrlKey || e.metaKey) {
+          // Ctrl/Cmd+Click: add to selection
+          console.log('[BlockSelect] Ctrl+Click add to selection');
+          selectBlock(blockId, true);
+        } else {
+          // Regular click: select single block
+          console.log('[BlockSelect] Regular click single select');
+          selectBlock(blockId, false);
+        }
+        return;
+      }
+
+      // Click on drag handle also selects block
+      var dragHandle = e.target.closest('.block-drag');
+      if (dragHandle) {
+        var blockId = dragHandle.getAttribute('data-block-id');
+        if (!state.selectedBlocks.length || state.selectedBlocks.indexOf(blockId) === -1) {
+          if (e.shiftKey && state.blockSelectionAnchor) {
+            selectBlockRange(blockId);
+          } else {
+            selectBlock(blockId, e.ctrlKey || e.metaKey);
+          }
+        }
+        return;
+      }
+
+      // Click elsewhere in editor clears block selection (if not clicking in selected block)
+      if (state.blockSelectionMode) {
+        var clickedBlock = e.target.closest('.editor-v2-block');
+        if (clickedBlock) {
+          var clickedId = clickedBlock.getAttribute('data-block-id');
+          if (state.selectedBlocks.indexOf(clickedId) === -1) {
+            clearBlockSelection();
+          }
+        } else {
+          clearBlockSelection();
+        }
+      }
+    });
+
+    // Keyboard shortcuts for block selection
+    document.addEventListener('keydown', function(e) {
+      // Check both blockSelectionMode flag and actual selected blocks
+      var hasBlockSelection = state.blockSelectionMode || state.selectedBlocks.length > 0;
+      console.log('[BlockSelect] Keydown:', e.key, 'hasBlockSelection:', hasBlockSelection, 'selectedBlocks:', state.selectedBlocks.length);
+      if (!hasBlockSelection) return;
+
+      // Delete/Backspace deletes selected blocks
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        console.log('[BlockSelect] Delete/Backspace pressed, selectedBlocks:', state.selectedBlocks.length);
+        if (state.selectedBlocks.length > 0) {
+          e.preventDefault();
+          console.log('[BlockSelect] Calling deleteSelectedBlocks...');
+          deleteSelectedBlocks();
+          return;
+        }
+      }
+
+      // Escape clears selection
+      if (e.key === 'Escape') {
+        clearBlockSelection();
+        return;
+      }
+
+      // Ctrl/Cmd+A selects all blocks when in block selection mode
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        var editorContent = document.querySelector('.editor-v2-content');
+        if (editorContent) {
+          var allBlocks = editorContent.querySelectorAll('.editor-v2-block');
+          clearBlockSelection();
+          for (var i = 0; i < allBlocks.length; i++) {
+            var blockId = allBlocks[i].getAttribute('data-block-id');
+            state.selectedBlocks.push(blockId);
+            allBlocks[i].classList.add('block-selected');
+          }
+          state.blockSelectionMode = true;
+          state.activeBlock = allBlocks[0]; // Set first block as active
+          window.getSelection().removeAllRanges();
+          updateBlockSelectionUI();
+        }
+        return;
+      }
+    });
+  }
+
+  // Expose block selection functions
+  ERM.reportEditorV2 = ERM.reportEditorV2 || {};
+  ERM.reportEditorV2.selectBlock = selectBlock;
+  ERM.reportEditorV2.selectBlockRange = selectBlockRange;
+  ERM.reportEditorV2.clearBlockSelection = clearBlockSelection;
+  ERM.reportEditorV2.getSelectedBlocks = function() { return state.selectedBlocks; };
+  ERM.reportEditorV2.getSelectedBlocksText = getSelectedBlocksText;
+  ERM.reportEditorV2.deleteSelectedBlocks = deleteSelectedBlocks;
+
   /**
    * Initialize Editor
    */
@@ -312,6 +905,9 @@
 
     // Update numbered list start values after initial render
     updateNumberedListStarts();
+
+    // Load embed content for any saved embeds (heatmaps, KPI cards, etc.)
+    loadAllEmbeds();
 
     // Save initial state for undo
     // Use setTimeout to ensure DOM is fully rendered
@@ -442,6 +1038,8 @@
       '</div>' +
 
       // AI inline response (hidden by default) - Notion-style panel
+      // STRUCTURE: Header (fixed) -> Content (scrolls) -> Actions (fixed at bottom)
+      // Actions are OUTSIDE content div so they NEVER scroll
       '<div class="ai-inline-response" id="ai-inline-response">' +
       '  <div class="ai-inline-header">' +
       '    <div class="ai-inline-title">' +
@@ -452,7 +1050,9 @@
       '      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
       '    </button>' +
       '  </div>' +
-      '  <div class="ai-inline-content" id="ai-inline-content"></div>' +
+      '  <div class="ai-inline-content" id="ai-inline-content">' +
+      '    <div class="ai-inline-text-wrap"></div>' +
+      '  </div>' +
       '  <div class="ai-inline-actions">' +
       '    <button class="ai-inline-btn ai-inline-insert" id="ai-insert">Insert below</button>' +
       '    <button class="ai-inline-btn ai-inline-replace" id="ai-replace">Replace</button>' +
@@ -647,6 +1247,15 @@
     // Don't show if already visible
     if (document.getElementById('helper-popup')) return;
 
+    // UX Rule: Only one teaching surface at a time
+    // Temporarily hide the floating AI button to avoid visual clutter
+    var floatingAiContainer = document.querySelector('.floating-ai-container');
+    if (floatingAiContainer) {
+      floatingAiContainer.style.opacity = '0';
+      floatingAiContainer.style.pointerEvents = 'none';
+      floatingAiContainer.style.transition = 'opacity 0.2s ease';
+    }
+
     // Create popup
     var popup = document.createElement('div');
     popup.id = 'helper-popup';
@@ -654,7 +1263,7 @@
     popup.innerHTML =
       '<div class="helper-popup-content">' +
       '  <span class="helper-popup-icon">✨</span>' +
-      '  <span class="helper-popup-text">Scroll down for quick-start options</span>' +
+      '  <span class="helper-popup-text">Quick-start options are available below</span>' +
       '  <button class="helper-popup-dismiss" id="helper-popup-dismiss">×</button>' +
       '</div>';
 
@@ -698,6 +1307,13 @@
       setTimeout(function() {
         if (popup.parentNode) popup.remove();
       }, 300);
+    }
+
+    // Restore the floating AI button
+    var floatingAiContainer = document.querySelector('.floating-ai-container');
+    if (floatingAiContainer) {
+      floatingAiContainer.style.opacity = '';
+      floatingAiContainer.style.pointerEvents = '';
     }
   }
 
@@ -1540,6 +2156,10 @@
       if (editable) {
         editable.focus();
       }
+      // Check for page overflow after block insertion
+      setTimeout(function() {
+        schedulePageAwarenessUpdate(newEl);
+      }, 10);
     }
 
     markDirty();
@@ -1581,6 +2201,14 @@
 
     markDirty();
     updateNumberedListStarts();
+
+    // Check for page overflow after inserting bullets
+    var lastBullet = editorContent.querySelector('.editor-v2-block[data-block-type="bullet"]:last-of-type');
+    if (lastBullet) {
+      setTimeout(function() {
+        schedulePageAwarenessUpdate(lastBullet);
+      }, 10);
+    }
   }
 
   /**
@@ -1609,6 +2237,14 @@
     }
 
     markDirty();
+
+    // Check for page overflow after inserting chart placeholder
+    var newEl = document.querySelector('[data-block-id="' + blockId + '"]');
+    if (newEl) {
+      setTimeout(function() {
+        schedulePageAwarenessUpdate(newEl);
+      }, 10);
+    }
   }
 
   /**
@@ -2002,6 +2638,10 @@
   function renderBlockControls(blockId) {
     return (
       '<div class="block-controls" data-block-id="' + blockId + '">' +
+      '  <button class="block-control block-select" data-block-id="' + blockId + '" title="Select block (Shift+Click for range)" tabindex="-1">' +
+      '    <svg class="checkbox-empty" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>' +
+      '    <svg class="checkbox-checked" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3" fill="#3b82f6"/><path d="M7 12l3 3 7-7" fill="none"/></svg>' +
+      '  </button>' +
       '  <button class="block-control block-add" data-block-id="' + blockId + '" title="Add block below" tabindex="-1">' +
       '    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
       '  </button>' +
@@ -2153,6 +2793,7 @@
 
   /**
    * Render embedded content (heatmap, chart, table, etc.)
+   * Uses dashboard renderers for consistent styling with dashboard
    */
   function renderEmbed(block, blockId) {
     var embedType = block.embedType || 'heatmap';
@@ -2160,16 +2801,69 @@
     var layout = block.layout || 'side-by-side';
     var controls = renderBlockControls(blockId);
 
+    // Build register dropdown options (dashboard-style custom dropdown)
+    // Try 'registers' first (primary key), then 'riskRegisters' for compatibility
+    var registers = ERM.storage ? (ERM.storage.get('registers') || ERM.storage.get('riskRegisters') || []) : [];
+    var selectedLabel = 'All Registers';
+
+    // Find selected register name
+    if (registerId !== 'all') {
+      for (var r = 0; r < registers.length; r++) {
+        if (registers[r].id === registerId) {
+          selectedLabel = registers[r].name || 'Unnamed';
+          break;
+        }
+      }
+    }
+
+    // Build dropdown options HTML
+    var checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    var dropdownOptions = '<div class="embed-dropdown-option' + (registerId === 'all' ? ' selected' : '') + '" data-value="all">' +
+      '<span class="embed-option-label">All Registers</span>' +
+      '<span class="embed-option-check">' + checkIcon + '</span>' +
+      '</div>';
+
+    for (var i = 0; i < registers.length; i++) {
+      var reg = registers[i];
+      var isSelected = (registerId === reg.id);
+      dropdownOptions += '<div class="embed-dropdown-option' + (isSelected ? ' selected' : '') + '" data-value="' + escapeHtml(reg.id) + '">' +
+        '<span class="embed-option-label">' + escapeHtml(reg.name || 'Unnamed') + '</span>' +
+        '<span class="embed-option-check">' + checkIcon + '</span>' +
+        '</div>';
+    }
+
+    // Minimal SVG icons for toolbar (Notion-style)
+    var chevronIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    var refreshIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>';
+    var aiIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5L12 2Z"/></svg>';
+    var deleteIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
+
+    // Notion-style minimal embed - no loud headers, just clean content with hover toolbar
     return (
       '<div class="editor-v2-block editor-v2-embed" data-block-id="' + blockId + '" data-block-type="embed" data-embed-type="' + embedType + '" data-register-id="' + registerId + '" data-layout="' + layout + '">' +
       controls +
       '  <div class="block-element">' +
-      '    <div class="editor-v2-embed-content" id="embed-content-' + blockId + '">' +
-      '      <div class="editor-v2-embed-loading">Loading...</div>' +
+      '    <div class="embed-hover-toolbar">' +
+      '      <div class="embed-register-dropdown" data-block-id="' + blockId + '">' +
+      '        <button type="button" class="embed-dropdown-trigger">' +
+      '          <span class="embed-dropdown-value">' + escapeHtml(selectedLabel) + '</span>' +
+      '          <span class="embed-dropdown-arrow">' + chevronIcon + '</span>' +
+      '        </button>' +
+      '        <div class="embed-dropdown-menu">' +
+      dropdownOptions +
+      '        </div>' +
+      '      </div>' +
+      '      <button type="button" class="embed-toolbar-btn embed-btn-refresh" data-action="refresh" title="Refresh">' + refreshIcon + '</button>' +
+      '      <button type="button" class="embed-toolbar-btn embed-btn-ai" data-action="ai" title="AI Insights">' + aiIcon + '</button>' +
+      '      <button type="button" class="embed-toolbar-btn embed-btn-delete" data-action="delete" title="Delete">' + deleteIcon + '</button>' +
+      '      <div class="embed-delete-confirm" style="display: none;">' +
+      '        <span>Delete?</span>' +
+      '        <button type="button" class="embed-confirm-yes" data-action="confirm-delete">Yes</button>' +
+      '        <button type="button" class="embed-confirm-no" data-action="cancel-delete">No</button>' +
+      '      </div>' +
       '    </div>' +
-      '    <div class="editor-v2-embed-toolbar">' +
-      '      <button class="embed-toolbar-btn" data-action="edit" title="Edit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
-      '      <button class="embed-toolbar-btn" data-action="delete" title="Delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+      '    <div class="editor-v2-embed-content" id="embed-content-' + blockId + '">' +
+      '      <div class="editor-v2-embed-loading"></div>' +
       '    </div>' +
       '  </div>' +
       '</div>'
@@ -2621,6 +3315,9 @@
       // Mouseup for text selection
       editorContent.addEventListener('mouseup', handleMouseup);
 
+      // Initialize block selection system (Notion-style multi-select)
+      initBlockSelection(editorContent);
+
       // Focus tracking - update activeBlock when focus moves between blocks
       editorContent.addEventListener('focusin', function(e) {
         var block = e.target.closest('.editor-v2-block');
@@ -2678,6 +3375,128 @@
             if (newBlock) {
               state.activeBlock = newBlock;
             }
+          }
+        }
+
+        // Handle embed toolbar button clicks
+        var toolbarBtn = e.target.closest('.embed-toolbar-btn');
+        if (toolbarBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          var action = toolbarBtn.getAttribute('data-action');
+          var embedBlock = toolbarBtn.closest('.editor-v2-embed');
+          console.log('[V2 Editor] Embed toolbar click - action:', action, 'block:', embedBlock ? 'found' : 'not found');
+          if (embedBlock && action) {
+            handleEmbedToolbarAction(embedBlock, action);
+          }
+          return;
+        }
+
+        // Handle embed delete confirmation buttons
+        var confirmBtn = e.target.closest('.embed-confirm-yes, .embed-confirm-no');
+        if (confirmBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          var action = confirmBtn.getAttribute('data-action');
+          var embedBlock = confirmBtn.closest('.editor-v2-embed');
+          console.log('[V2 Editor] Embed confirm click - action:', action);
+          if (embedBlock && action) {
+            handleEmbedToolbarAction(embedBlock, action);
+          }
+          return;
+        }
+
+        // Handle embed register dropdown trigger (open/close menu)
+        var dropdownTrigger = e.target.closest('.embed-dropdown-trigger');
+        if (dropdownTrigger) {
+          e.preventDefault();
+          e.stopPropagation();
+          var dropdown = dropdownTrigger.closest('.embed-register-dropdown');
+          if (dropdown) {
+            // Close any other open dropdowns first
+            var allDropdowns = document.querySelectorAll('.embed-register-dropdown.open');
+            for (var d = 0; d < allDropdowns.length; d++) {
+              if (allDropdowns[d] !== dropdown) {
+                allDropdowns[d].classList.remove('open');
+              }
+            }
+            // Toggle this dropdown
+            dropdown.classList.toggle('open');
+          }
+          return;
+        }
+
+        // Handle embed register dropdown option selection
+        var dropdownOption = e.target.closest('.embed-dropdown-option');
+        if (dropdownOption) {
+          e.preventDefault();
+          e.stopPropagation();
+          var dropdown = dropdownOption.closest('.embed-register-dropdown');
+          if (dropdown) {
+            var blockId = dropdown.getAttribute('data-block-id');
+            var newRegisterId = dropdownOption.getAttribute('data-value');
+            var embedBlock = document.querySelector('[data-block-id="' + blockId + '"]');
+
+            if (embedBlock) {
+              // Update selected state in dropdown
+              var allOptions = dropdown.querySelectorAll('.embed-dropdown-option');
+              for (var o = 0; o < allOptions.length; o++) {
+                allOptions[o].classList.remove('selected');
+              }
+              dropdownOption.classList.add('selected');
+
+              // Update trigger text to show selected register name
+              var triggerValue = dropdown.querySelector('.embed-dropdown-value');
+              var optionLabel = dropdownOption.querySelector('.embed-option-label');
+              if (triggerValue && optionLabel) {
+                var newLabel = optionLabel.textContent;
+                triggerValue.textContent = newLabel;
+              }
+
+              // Close dropdown
+              dropdown.classList.remove('open');
+
+              // Update block data attribute for persistence
+              embedBlock.setAttribute('data-register-id', newRegisterId);
+
+              // Reload content with new filter
+              var embedType = embedBlock.getAttribute('data-embed-type');
+              var layout = embedBlock.getAttribute('data-layout');
+              loadEmbedContent(blockId, embedType, newRegisterId, layout);
+              markDirty(true);
+            }
+          }
+          return;
+        }
+
+        // Click below/after an embed block - create new paragraph for typing
+        var embedBlock = e.target.closest('.editor-v2-embed');
+        if (embedBlock) {
+          var clickY = e.clientY;
+          var embedRect = embedBlock.getBoundingClientRect();
+          // If click is in the bottom 30px of the embed, create new block after
+          if (clickY > embedRect.bottom - 30) {
+            var nextBlock = embedBlock.nextElementSibling;
+            if (!nextBlock || nextBlock.getAttribute('data-block-type') !== 'paragraph') {
+              var newBlock = insertBlockAfter(embedBlock, 'paragraph');
+              if (newBlock) {
+                state.activeBlock = newBlock;
+                var contentEl = newBlock.querySelector('[contenteditable="true"]');
+                if (contentEl) {
+                  contentEl.focus();
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Close embed dropdowns when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.embed-register-dropdown')) {
+          var openDropdowns = document.querySelectorAll('.embed-register-dropdown.open');
+          for (var d = 0; d < openDropdowns.length; d++) {
+            openDropdowns[d].classList.remove('open');
           }
         }
       });
@@ -3013,6 +3832,14 @@
    * Handle keydown in editor
    */
   function handleKeydown(e) {
+    // Skip if in block selection mode - let the block selection keydown handler handle it
+    if (state.blockSelectionMode && state.selectedBlocks.length > 0) {
+      // Only intercept Delete/Backspace/Escape - these are handled by block selection
+      if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Escape') {
+        return; // Let the document-level block selection handler process this
+      }
+    }
+
     // Handle typing when multi-block selection exists
     // This ensures proper block cleanup when user types to replace a cross-block selection
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -4230,9 +5057,62 @@
 
   /**
    * Handle mouseup for text selection
+   * CRITICAL: This must NOT interfere with block selection mode
    */
   function handleMouseup(e) {
+    // CRITICAL: If we're in block selection mode, do NOT show text toolbar
+    // Block selection takes precedence over text selection
+    if (state.blockSelectionMode) {
+      console.log('[V2] Mouseup ignored - in block selection mode');
+      return;
+    }
+
+    // If user is dragging blocks, ignore text selection
+    if (state.isBlockDragging) {
+      console.log('[V2] Mouseup ignored - block drag in progress');
+      return;
+    }
+
+    // CRITICAL: Don't process mouseup if it originated from AI panels
+    // This prevents the selection from being cleared when clicking inside Ask AI panel
+    var askAiPanel = document.getElementById('ask-ai-panel');
+    var aiResponsePanel = document.getElementById('ai-inline-response');
+    var aiActionsDropdown = document.getElementById('ai-actions-dropdown');
+    var floatingToolbar = document.getElementById('report-floating-toolbar');
+
+    if (askAiPanel && askAiPanel.contains(e.target)) {
+      console.log('[V2] Mouseup inside Ask AI panel - preserving selection');
+      return;
+    }
+    if (aiResponsePanel && aiResponsePanel.contains(e.target)) {
+      console.log('[V2] Mouseup inside AI response panel - preserving selection');
+      return;
+    }
+    if (aiActionsDropdown && aiActionsDropdown.contains(e.target)) {
+      console.log('[V2] Mouseup inside AI actions dropdown - preserving selection');
+      return;
+    }
+    // Also ignore clicks on the floating toolbar itself
+    if (floatingToolbar && floatingToolbar.contains(e.target)) {
+      console.log('[V2] Mouseup inside floating toolbar - preserving selection');
+      return;
+    }
+
+    // Check if click was on a block select button (block selection trigger)
+    var selectBtn = e.target.closest('.block-select');
+    if (selectBtn) {
+      console.log('[V2] Mouseup on block select - not showing text toolbar');
+      return;
+    }
+
     setTimeout(function() {
+      // Double-check we're not in block selection mode after timeout
+      if (state.blockSelectionMode) {
+        console.log('[V2] Block selection mode activated during timeout - hiding toolbar');
+        hideSelectionPills();
+        return;
+      }
+
       var selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) {
         hideSelectionPills();
@@ -4242,6 +5122,11 @@
       var selectedText = selection.toString().trim();
 
       if (selectedText.length > 0) {
+        // Clear any block selection when text is selected
+        if (state.selectedBlocks.length > 0) {
+          clearBlockSelection();
+        }
+
         state.currentSelection = selectedText;
         state.currentRange = selection.getRangeAt(0).cloneRange();
 
@@ -4255,7 +5140,13 @@
         console.log('[V2] Text selected:', selectedText.substring(0, 50) + '...');
         showSelectionPills(selection);
       } else {
-        hideSelectionPills();
+        // Only hide if AI panels are not visible
+        var askAiPanelVisible = askAiPanel && askAiPanel.classList.contains('visible');
+        var aiResponseVisible = aiResponsePanel && aiResponsePanel.classList.contains('visible');
+
+        if (!askAiPanelVisible && !aiResponseVisible) {
+          hideSelectionPills();
+        }
       }
     }, 10);
   }
@@ -4548,15 +5439,26 @@
       return;
     }
 
-    // AI commands - use the shared Ask AI panel
+    // AI commands - use the shared Ask AI panel with context awareness
     if (commandId === 'ai') {
-      // Update AI module state before showing panel
-      if (ERM.reportEditorAI) {
-        ERM.reportEditorAI.setState('selection', state.currentSelection);
-        ERM.reportEditorAI.setState('selectionRange', state.currentRange);
-        ERM.reportEditorAI.setState('activeBlock', state.activeBlock);
-        ERM.reportEditorAI.setState('currentReport', state.currentReport);
-        ERM.reportEditorAI.showAskAIPanel();
+      if (ERM.reportEditorAI && ERM.reportEditorAI.openAskAIForBlock) {
+        // Get the context block (the block the + button belongs to)
+        var contextBlock = insertAfterBlock || state.activeBlock;
+        if (contextBlock) {
+          var blockId = contextBlock.getAttribute('data-block-id');
+          var blockType = contextBlock.getAttribute('data-block-type');
+
+          // Determine AI mode based on block type
+          var aiMode = (blockType === 'embed') ? 'chart' : 'block';
+
+          console.log('[V2 Editor] Ask AI from + button - block:', blockId, 'type:', blockType, 'mode:', aiMode);
+          ERM.reportEditorAI.openAskAIForBlock(blockId, aiMode);
+        } else {
+          // No context block - open in generic mode
+          console.log('[V2 Editor] Ask AI from + button - no context block');
+          ERM.reportEditorAI.setState('currentReport', state.currentReport);
+          ERM.reportEditorAI.showAskAIPanel();
+        }
       } else {
         showAIPrompt(); // Fallback to V2 modal
       }
@@ -4651,10 +5553,11 @@
 
   /**
    * Hide selection toolbar
+   * @param {boolean} keepHighlight - If true, keep the selection highlight visible
    */
-  function hideSelectionPills() {
-    console.log('[V2] hideSelectionPills called');
-    hideFloatingToolbar();
+  function hideSelectionPills(keepHighlight) {
+    console.log('[V2] hideSelectionPills called, keepHighlight:', keepHighlight);
+    hideFloatingToolbar(keepHighlight);
     // Also hide turn-into dropdown when selection is cleared
     hideTurnIntoDropdown();
     state.selectionPillsVisible = false;
@@ -4811,6 +5714,7 @@
 
     // Convert all selected blocks
     // Process in reverse order to maintain DOM positions during conversion
+    console.log('[executeTurnInto] Converting', blocksToConvert.length, 'blocks to', blockType);
     for (var i = blocksToConvert.length - 1; i >= 0; i--) {
       var block = blocksToConvert[i];
       var currentType = block.getAttribute('data-block-type');
@@ -4824,16 +5728,35 @@
       }
     }
 
+    // Clear block selection after conversion
+    if (state.selectedBlocks && state.selectedBlocks.length > 0) {
+      clearBlockSelection();
+    }
+
     // Update numbered list starts after all conversions
     updateNumberedListStarts();
     markDirty();
   }
 
   /**
-   * Get all blocks within the current text selection
+   * Get all blocks within the current selection
+   * PRIORITY: Check checkbox-based block selection (state.selectedBlocks) FIRST
+   * Then fallback to text selection range
    * Returns array of block elements in document order
    */
   function getSelectedBlocks() {
+    // PRIORITY 1: Check for checkbox-based block selection (multi-select via checkboxes)
+    if (state.selectedBlocks && state.selectedBlocks.length > 0) {
+      console.log('[getSelectedBlocks] Using checkbox selection:', state.selectedBlocks.length, 'blocks');
+      var blocks = [];
+      for (var i = 0; i < state.selectedBlocks.length; i++) {
+        var block = document.querySelector('[data-block-id="' + state.selectedBlocks[i] + '"]');
+        if (block) blocks.push(block);
+      }
+      return blocks;
+    }
+
+    // PRIORITY 2: Check for text selection range
     var selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return [];
 
@@ -5041,9 +5964,23 @@
   /**
    * Execute AI action - uses ERM.aiService.executeAction for proper actions
    */
+  /**
+   * Helper to set content in AI inline panel
+   * Actions are now OUTSIDE contentDiv, so we just update text-wrap
+   */
+  function setAIInlineContent(contentDiv, html) {
+    var textWrap = contentDiv.querySelector('.ai-inline-text-wrap');
+    if (textWrap) {
+      textWrap.innerHTML = html;
+    } else {
+      // Fallback: create text-wrap
+      contentDiv.innerHTML = '<div class="ai-inline-text-wrap">' + html + '</div>';
+    }
+  }
+
   function executeAIAction(actionId) {
     hideAIDropdown(true); // Keep highlight while action is being processed
-    hideSelectionPills();
+    hideSelectionPills(true); // Keep highlight while action is being processed
 
     if (actionId === 'custom') {
       showAIPrompt();
@@ -5053,11 +5990,22 @@
     var selectedText = state.currentSelection;
     if (!selectedText) return;
 
+    // Ensure selection is highlighted and stays visible during AI processing
+    if (ERM.reportEditorAI && ERM.reportEditorAI.highlightSelection) {
+      ERM.reportEditorAI.highlightSelection();
+    }
+
+    // Add pulsing animation class to highlights during AI processing
+    var highlights = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
+    for (var h = 0; h < highlights.length; h++) {
+      highlights[h].classList.add('ai-processing');
+    }
+
     // Show loading
     var responseDiv = document.getElementById('ai-inline-response');
     var contentDiv = document.getElementById('ai-inline-content');
 
-    contentDiv.innerHTML = '<div class="ai-loading"><span class="ai-loading-spinner"></span> AI is thinking...</div>';
+    setAIInlineContent(contentDiv, '<div class="ai-loading"><span class="ai-loading-spinner"></span> AI is thinking...</div>');
 
     // Position the response panel intelligently relative to selection
     positionAIResponsePanel(responseDiv);
@@ -5083,8 +6031,14 @@
       };
 
       ERM.aiService.executeAction(serviceAction, selectedText, context, function(result) {
+        // Remove pulsing animation from highlights regardless of success/error
+        var highlightsToUpdate = document.querySelectorAll('.ai-selection-highlight.ai-processing');
+        for (var hi = 0; hi < highlightsToUpdate.length; hi++) {
+          highlightsToUpdate[hi].classList.remove('ai-processing');
+        }
+
         if (result.error) {
-          contentDiv.innerHTML = '<div class="ai-error">Error: ' + escapeHtml(result.error) + '</div>';
+          setAIInlineContent(contentDiv, '<div class="ai-error">Error: ' + escapeHtml(result.error) + '</div>');
         } else {
           showAIResponse(result.text);
         }
@@ -5288,6 +6242,14 @@
     var margin = 16;
     var gap = 8;
 
+    // VIEWPORT-AWARE POSITIONING
+    var viewportHeight = window.innerHeight;
+    var viewportWidth = window.innerWidth;
+
+    // Cap panel height at 70% of viewport
+    var maxPanelHeight = Math.floor(viewportHeight * 0.70);
+    var estimatedPanelHeight = Math.min(380, maxPanelHeight);
+
     var left, top;
 
     // Try to position relative to the floating toolbar first (most reliable)
@@ -5295,35 +6257,83 @@
     if (toolbar && toolbar.classList.contains('visible')) {
       var toolbarRect = toolbar.getBoundingClientRect();
       left = toolbarRect.left;
-      top = toolbarRect.bottom + gap;
+
+      // Check if there's enough space below
+      var spaceBelow = viewportHeight - toolbarRect.bottom - margin;
+      var spaceAbove = toolbarRect.top - margin;
+
+      if (spaceBelow >= estimatedPanelHeight) {
+        top = toolbarRect.bottom + gap;
+      } else if (spaceAbove >= estimatedPanelHeight) {
+        top = toolbarRect.top - estimatedPanelHeight - gap;
+      } else {
+        // Use whatever space is larger
+        top = spaceBelow >= spaceAbove ? toolbarRect.bottom + gap : Math.max(margin, toolbarRect.top - estimatedPanelHeight - gap);
+      }
     }
     // Fallback: use currentRange
     else if (state.currentRange) {
       var rangeRect = state.currentRange.getBoundingClientRect();
       if (rangeRect.width > 0 || rangeRect.height > 0) {
         left = rangeRect.left;
-        top = rangeRect.bottom + gap;
+
+        var spaceBelow = viewportHeight - rangeRect.bottom - margin;
+        var spaceAbove = rangeRect.top - margin;
+
+        if (spaceBelow >= estimatedPanelHeight) {
+          top = rangeRect.bottom + gap;
+        } else if (spaceAbove >= estimatedPanelHeight) {
+          top = rangeRect.top - estimatedPanelHeight - gap;
+        } else {
+          top = spaceBelow >= spaceAbove ? rangeRect.bottom + gap : Math.max(margin, rangeRect.top - estimatedPanelHeight - gap);
+        }
       }
     }
 
     // Final fallback: center horizontally, position in upper third
     if (left === undefined || top === undefined) {
-      left = (window.innerWidth - panelWidth) / 2;
-      top = window.innerHeight * 0.25;
+      left = (viewportWidth - panelWidth) / 2;
+      top = viewportHeight * 0.15;
     }
 
     // Ensure panel stays in viewport
+    var actualPanelWidth = Math.min(panelWidth, viewportWidth - margin * 2);
+
+    // Horizontal bounds
     if (left < margin) left = margin;
-    if (left + panelWidth > window.innerWidth - margin) {
-      left = window.innerWidth - panelWidth - margin;
+    if (left + actualPanelWidth > viewportWidth - margin) {
+      left = viewportWidth - actualPanelWidth - margin;
     }
+
+    // Vertical bounds
     if (top < margin) top = margin;
+
+    // Calculate maximum height that can fit from this top position
+    var availableHeight = viewportHeight - top - margin;
+    var finalMaxHeight = Math.min(maxPanelHeight, availableHeight);
+
+    // If panel would be too short, try repositioning higher
+    if (finalMaxHeight < 250 && top > margin) {
+      var idealTop = viewportHeight - maxPanelHeight - margin;
+      if (idealTop >= margin) {
+        top = idealTop;
+        finalMaxHeight = maxPanelHeight;
+      } else {
+        top = margin;
+        finalMaxHeight = viewportHeight - margin * 2;
+      }
+    }
 
     // Apply position (using fixed positioning)
     responseDiv.style.position = 'fixed';
     responseDiv.style.left = left + 'px';
     responseDiv.style.top = top + 'px';
+    responseDiv.style.width = actualPanelWidth + 'px';
+    responseDiv.style.maxHeight = finalMaxHeight + 'px';
     responseDiv.style.transform = '';
+
+    // LOCK PAGE SCROLL - Single scroll context
+    document.body.classList.add('ai-action-panel-open');
   }
 
   /**
@@ -5334,7 +6344,7 @@
     var responseDiv = document.getElementById('ai-inline-response');
     var contentDiv = document.getElementById('ai-inline-content');
 
-    contentDiv.innerHTML = '<div class="ai-loading"><span class="ai-loading-spinner"></span> AI is thinking...</div>';
+    setAIInlineContent(contentDiv, '<div class="ai-loading"><span class="ai-loading-spinner"></span> AI is thinking...</div>');
 
     // Position the response div intelligently relative to selection
     positionAIResponsePanel(responseDiv);
@@ -5351,7 +6361,7 @@
         temperature: 0.7
       }, function(result) {
         if (result.error) {
-          contentDiv.innerHTML = '<div class="ai-error">Error: ' + escapeHtml(result.error) + '</div>';
+          setAIInlineContent(contentDiv, '<div class="ai-error">Error: ' + escapeHtml(result.error) + '</div>');
         } else {
           callback(result.text);
         }
@@ -5360,7 +6370,7 @@
       // Fallback to mock ERM.ai if available
       ERM.ai.query(promptText, function(error, response) {
         if (error) {
-          contentDiv.innerHTML = '<div class="ai-error">Error: ' + error.message + '</div>';
+          setAIInlineContent(contentDiv, '<div class="ai-error">Error: ' + error.message + '</div>');
         } else {
           callback(response);
         }
@@ -5510,9 +6520,24 @@
     var contentDiv = document.getElementById('ai-inline-content');
     // Parse Markdown to HTML for preview
     var htmlContent = parseMarkdownToHTML(response);
-    contentDiv.innerHTML = '<div class="ai-response-text">' + htmlContent + '</div>';
+
+    // Find or create the text wrapper (actions are now outside contentDiv)
+    var textWrap = contentDiv.querySelector('.ai-inline-text-wrap');
+    if (textWrap) {
+      textWrap.innerHTML = '<div class="ai-response-text">' + htmlContent + '</div>';
+    } else {
+      // Fallback: create text-wrap
+      contentDiv.innerHTML = '<div class="ai-inline-text-wrap"><div class="ai-response-text">' + htmlContent + '</div></div>';
+    }
+
     state.pendingAIResponse = response;
     state.pendingAIResponseHTML = htmlContent;
+
+    // Remove pulsing animation from highlights (AI is done thinking)
+    var highlights = document.querySelectorAll('.ai-selection-highlight.ai-processing');
+    for (var h = 0; h < highlights.length; h++) {
+      highlights[h].classList.remove('ai-processing');
+    }
   }
 
   /**
@@ -5640,6 +6665,9 @@
     }
     state.pendingAIResponse = null;
     state.pendingAIResponseHTML = null;
+
+    // UNLOCK PAGE SCROLL
+    document.body.classList.remove('ai-action-panel-open');
 
     // Remove selection highlight when AI interaction is complete
     if (ERM.reportEditorAI && ERM.reportEditorAI.unhighlightSelection) {
@@ -5803,8 +6831,8 @@
   function populateRegisterOptions() {
     var container = document.getElementById('embed-register-options');
 
-    // Get registers from ERM
-    var registers = ERM.storage.get('riskRegisters') || [];
+    // Get registers from ERM - try 'registers' first (primary key), then 'riskRegisters' for compatibility
+    var registers = ERM.storage.get('registers') || ERM.storage.get('riskRegisters') || [];
 
     var html = '<label class="embed-picker-option"><input type="radio" name="embed-register" value="all" checked> All Registers</label>';
 
@@ -5840,29 +6868,54 @@
     var html = renderEmbed(block, block.id);
 
     if (state.activeBlock) {
+      // Insert after the active block (which is already inside a page)
       state.activeBlock.insertAdjacentHTML('afterend', html);
     } else {
-      document.getElementById('editor-content').insertAdjacentHTML('beforeend', html);
+      // No active block - find the last block on the last page and insert after it
+      var pages = document.querySelectorAll('.editor-v2-page');
+      var lastPage = pages[pages.length - 1];
+      if (lastPage) {
+        var lastBlock = lastPage.querySelector('.editor-v2-block:last-of-type');
+        if (lastBlock) {
+          lastBlock.insertAdjacentHTML('afterend', html);
+        } else {
+          // Page exists but has no blocks - insert at beginning of page
+          lastPage.insertAdjacentHTML('afterbegin', html);
+        }
+      } else {
+        // Fallback - should not happen but just in case
+        document.getElementById('editor-content').insertAdjacentHTML('beforeend', html);
+      }
     }
+
+    // Get reference to the new block element
+    var newBlockEl = document.querySelector('[data-block-id="' + block.id + '"]');
 
     // Load actual content
     loadEmbedContent(block.id, embedType, registerId, layout);
 
     hideEmbedPicker();
     markDirty();
+    // Note: Page awareness is triggered in loadEmbedContent after content is loaded
+    // This ensures we check overflow with the actual content height, not the loading placeholder
   }
 
   /**
-   * Load embed content
+   * Load embed content using dashboard renderers for consistency
    */
   function loadEmbedContent(blockId, embedType, registerId, layout) {
     var container = document.getElementById('embed-content-' + blockId);
     if (!container) return;
 
-    // Use existing report components to render content
+    // Use dashboard renderers for consistent styling
+    var renderers = ERM.dashboard && ERM.dashboard.renderers;
+    var options = { registerId: registerId || 'all', layout: layout || 'side-by-side' };
+
     switch (embedType) {
       case 'heatmap':
-        if (ERM.reports && ERM.reports.renderHeatmap) {
+        if (renderers && renderers.renderHeatmap) {
+          renderers.renderHeatmap(container, options);
+        } else if (ERM.reports && ERM.reports.renderHeatmap) {
           container.innerHTML = ERM.reports.renderHeatmap(registerId, layout);
         } else {
           container.innerHTML = '<div class="embed-placeholder">Heatmap for register: ' + registerId + '</div>';
@@ -5870,7 +6923,9 @@
         break;
 
       case 'risks':
-        if (ERM.reports && ERM.reports.renderTopRisks) {
+        if (renderers && renderers.renderTopRisks) {
+          renderers.renderTopRisks(container, options);
+        } else if (ERM.reports && ERM.reports.renderTopRisks) {
           container.innerHTML = ERM.reports.renderTopRisks(registerId);
         } else {
           container.innerHTML = '<div class="embed-placeholder">Top Risks for register: ' + registerId + '</div>';
@@ -5878,7 +6933,9 @@
         break;
 
       case 'chart':
-        if (ERM.reports && ERM.reports.renderCategoryChart) {
+        if (renderers && renderers.renderRiskConcentration) {
+          renderers.renderRiskConcentration(container, options);
+        } else if (ERM.reports && ERM.reports.renderCategoryChart) {
           container.innerHTML = ERM.reports.renderCategoryChart(registerId);
         } else {
           container.innerHTML = '<div class="embed-placeholder">Category Chart for register: ' + registerId + '</div>';
@@ -5886,10 +6943,22 @@
         break;
 
       case 'kpi':
-        if (ERM.reports && ERM.reports.renderKPICards) {
+        if (renderers && renderers.renderKPICards) {
+          renderers.renderKPICards(container, options);
+        } else if (ERM.reports && ERM.reports.renderKPICards) {
           container.innerHTML = ERM.reports.renderKPICards(registerId);
         } else {
           container.innerHTML = '<div class="embed-placeholder">KPI Cards for register: ' + registerId + '</div>';
+        }
+        break;
+
+      case 'controls':
+        if (renderers && renderers.renderControlCoverage) {
+          renderers.renderControlCoverage(container, options);
+        } else if (ERM.reports && ERM.reports.renderControls) {
+          container.innerHTML = ERM.reports.renderControls(registerId);
+        } else {
+          container.innerHTML = '<div class="embed-placeholder">Controls for register: ' + registerId + '</div>';
         }
         break;
 
@@ -5900,12 +6969,117 @@
           container.innerHTML = '<div class="embed-placeholder">Risk Register: ' + registerId + '</div>';
         }
         break;
+    }
 
-      case 'controls':
-        if (ERM.reports && ERM.reports.renderControls) {
-          container.innerHTML = ERM.reports.renderControls(registerId);
+    // Trigger page awareness after content loads
+    // This ensures proper page flow when embed content changes height
+    var blockEl = document.querySelector('[data-block-id="' + blockId + '"]');
+    if (blockEl) {
+      setTimeout(function() {
+        schedulePageAwarenessUpdate(blockEl);
+      }, 200);
+    }
+  }
+
+  /**
+   * Load all embed content after editor is rendered
+   * Called after initial render to populate saved embeds
+   */
+  function loadAllEmbeds() {
+    var embedBlocks = document.querySelectorAll('.editor-v2-block[data-block-type="embed"]');
+    console.log('[V2 Editor] Loading', embedBlocks.length, 'embed blocks');
+
+    embedBlocks.forEach(function(block) {
+      var blockId = block.getAttribute('data-block-id');
+      var embedType = block.getAttribute('data-embed-type');
+      var registerId = block.getAttribute('data-register-id');
+      var layout = block.getAttribute('data-layout');
+
+      if (blockId && embedType) {
+        console.log('[V2 Editor] Loading embed:', blockId, embedType, registerId);
+        loadEmbedContent(blockId, embedType, registerId, layout);
+      }
+    });
+  }
+
+  /**
+   * Handle embed toolbar actions (refresh, ai, delete)
+   */
+  function handleEmbedToolbarAction(embedBlock, action) {
+    var blockId = embedBlock.getAttribute('data-block-id');
+    console.log('[V2 Editor] handleEmbedToolbarAction called - action:', action, 'blockId:', blockId);
+
+    switch (action) {
+      case 'refresh':
+        // Re-load the embed content with current settings
+        var embedType = embedBlock.getAttribute('data-embed-type');
+        var registerId = embedBlock.getAttribute('data-register-id') || 'all';
+        var layout = embedBlock.getAttribute('data-layout') || 'side-by-side';
+
+        // Show loading indicator
+        var contentEl = document.getElementById('embed-content-' + blockId);
+        if (contentEl) {
+          contentEl.classList.add('embed-loading');
+        }
+
+        // Reload content
+        setTimeout(function() {
+          loadEmbedContent(blockId, embedType, registerId, layout);
+          if (contentEl) {
+            contentEl.classList.remove('embed-loading');
+          }
+          if (ERM.toast) {
+            ERM.toast.success('Content refreshed');
+          }
+        }, 300);
+        break;
+
+      case 'ai':
+        // Open Ask AI panel with chart context (content-aware mode)
+        console.log('[Embed AI] Opening Ask AI panel for embed block:', blockId);
+
+        // Use the new openAskAIForBlock entry point
+        if (ERM.reportEditorAI && ERM.reportEditorAI.openAskAIForBlock) {
+          ERM.reportEditorAI.openAskAIForBlock(blockId, 'chart');
         } else {
-          container.innerHTML = '<div class="embed-placeholder">Controls for register: ' + registerId + '</div>';
+          console.warn('[Embed AI] ERM.reportEditorAI.openAskAIForBlock not available');
+          if (ERM.toast) {
+            ERM.toast.info('AI Assistant not available');
+          }
+        }
+        break;
+
+      case 'delete':
+        // Show inline delete confirmation
+        var confirmEl = embedBlock.querySelector('.embed-delete-confirm');
+        var deleteBtn = embedBlock.querySelector('.embed-btn-delete');
+        if (confirmEl) {
+          confirmEl.style.display = 'flex';
+        }
+        if (deleteBtn) {
+          deleteBtn.style.display = 'none';
+        }
+        break;
+
+      case 'confirm-delete':
+        // Actually delete the block
+        saveState(); // Save for undo
+        embedBlock.remove();
+        markDirty(true);
+        if (ERM.toast) {
+          ERM.toast.success('Block deleted');
+        }
+        break;
+
+      case 'cancel-delete':
+        // Hide confirmation, show delete button again
+        var confirmEl = embedBlock.querySelector('.embed-delete-confirm');
+        var deleteBtn = embedBlock.querySelector('.embed-btn-delete');
+        if (confirmEl) {
+          confirmEl.style.display = 'none';
+        }
+        if (deleteBtn) {
+          deleteBtn.style.display = '';
         }
         break;
     }
@@ -6713,6 +7887,20 @@
         // HTML block (tables from AI) - get raw HTML from wrapper
         var saveHtmlBlockEl = block.querySelector('.editor-v2-html-block');
         blockData.content = saveHtmlBlockEl ? saveHtmlBlockEl.innerHTML : '';
+      } else if (blockData.type === 'table') {
+        // Proper table block - extract rows and cells from DOM
+        var saveTableRows = block.querySelectorAll('tr');
+        blockData.rows = [];
+        for (var tr = 0; tr < saveTableRows.length; tr++) {
+          var saveCells = saveTableRows[tr].querySelectorAll('th, td');
+          var saveRowData = { cells: [] };
+          for (var td = 0; td < saveCells.length; td++) {
+            saveRowData.cells.push({
+              content: saveCells[td].innerHTML
+            });
+          }
+          blockData.rows.push(saveRowData);
+        }
       } else {
         var editable = block.querySelector('[contenteditable="true"]') || block;
         // Use innerHTML to preserve formatting (bold, italic, etc.)
@@ -6933,19 +8121,120 @@
       'tbody tr:nth-child(even) td { background: #f9fafb; }' +
 
       // ===========================================
-      // EMBEDS
+      // EMBEDS - Container (Clean, no chrome)
       // ===========================================
-      '.pdf-embed { margin: 20px 0; padding: 18px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; page-break-inside: avoid; break-inside: avoid; }' +
-      '.pdf-embed table { margin: 12px 0; }' +
+      '.pdf-embed { margin: 16px 0; padding: 0; background: transparent; border: none; border-radius: 0; page-break-inside: avoid; break-inside: avoid; }' +
 
       // ===========================================
-      // RISK BADGES
+      // EMBED - Section Titles (Headers) - MUST SHOW
       // ===========================================
-      '.risk-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }' +
-      '.risk-critical { background: #fef2f2; color: #dc2626; }' +
-      '.risk-high { background: #fff7ed; color: #ea580c; }' +
-      '.risk-medium { background: #fffbeb; color: #ca8a04; }' +
-      '.risk-low { background: #f0fdf4; color: #16a34a; }' +
+      '.pdf-embed .section-title, .pdf-embed h2.section-title { display: block !important; font-size: 13px !important; font-weight: 600 !important; color: #111827 !important; margin: 0 0 10px 0 !important; padding: 0 !important; border: none !important; }' +
+      '.pdf-embed .section-header { display: block !important; margin-bottom: 8px !important; }' +
+      '.pdf-embed .section-subtitle { display: none !important; }' +
+      '.pdf-embed .section-header-row { display: none !important; }' +
+      '.pdf-embed .dashboard-section { margin: 0 !important; padding: 0 !important; background: transparent !important; border: none !important; }' +
+      // Hide ONLY heatmap section title (they have card headers)
+      '.pdf-embed .heatmaps-section > .section-title { display: none !important; }' +
+
+      // ===========================================
+      // EMBED - Top Risks Table (Notion-style)
+      // ===========================================
+      '.pdf-embed .top-risks-table-wrapper { background: transparent !important; border: none !important; overflow: visible !important; }' +
+      '.pdf-embed .top-risks-table { width: 100% !important; border-collapse: collapse !important; font-size: 10px !important; border: none !important; table-layout: fixed !important; }' +
+      '.pdf-embed .top-risks-table thead { background: transparent !important; }' +
+      '.pdf-embed .top-risks-table th { padding: 6px 4px !important; font-size: 9px !important; font-weight: 500 !important; color: #9ca3af !important; text-transform: none !important; border: none !important; border-bottom: 1px solid #e5e7eb !important; background: transparent !important; }' +
+      '.pdf-embed .top-risks-table td { padding: 6px 4px !important; font-size: 10px !important; color: #374151 !important; border: none !important; border-bottom: 1px solid #f3f4f6 !important; vertical-align: top !important; }' +
+      '.pdf-embed .top-risks-table tbody tr:last-child td { border-bottom: none !important; }' +
+      // Column widths
+      '.pdf-embed .top-risks-table th:nth-child(1), .pdf-embed .top-risks-table td:nth-child(1) { width: auto !important; min-width: 100px !important; }' +
+      '.pdf-embed .top-risks-table th:nth-child(2), .pdf-embed .top-risks-table td:nth-child(2) { width: 80px !important; }' +
+      '.pdf-embed .top-risks-table th:nth-child(3), .pdf-embed .top-risks-table td:nth-child(3) { width: 40px !important; text-align: center !important; }' +
+      '.pdf-embed .top-risks-table th:nth-child(4), .pdf-embed .top-risks-table td:nth-child(4) { width: 60px !important; }' +
+      '.pdf-embed .top-risks-table th:nth-child(5), .pdf-embed .top-risks-table td:nth-child(5) { width: 70px !important; }' +
+      '.pdf-embed .top-risks-table th:nth-child(6), .pdf-embed .top-risks-table td:nth-child(6) { width: 80px !important; white-space: normal !important; word-wrap: break-word !important; }' +
+      // Risk title wrapping
+      '.pdf-embed .risk-title-text { font-weight: 500 !important; color: #111827 !important; font-size: 10px !important; white-space: normal !important; word-wrap: break-word !important; line-height: 1.3 !important; }' +
+
+      // ===========================================
+      // EMBED - Risk Badges (Status Pills)
+      // ===========================================
+      '.pdf-embed .risk-badge { display: inline-flex !important; padding: 2px 6px !important; border-radius: 999px !important; font-size: 9px !important; font-weight: 600 !important; white-space: nowrap !important; }' +
+      '.pdf-embed .risk-badge-low { background: #ecfdf3 !important; color: #027a48 !important; }' +
+      '.pdf-embed .risk-badge-medium { background: #fffaeb !important; color: #b54708 !important; }' +
+      '.pdf-embed .risk-badge-high { background: #fff7ed !important; color: #c2410c !important; }' +
+      '.pdf-embed .risk-badge-critical { background: #fef2f2 !important; color: #b91c1c !important; }' +
+
+      // ===========================================
+      // EMBED - Heatmaps (Side by side, centered)
+      // ===========================================
+      '.pdf-embed .heatmaps-section { display: block !important; }' +
+      '.pdf-embed .heatmaps-row { display: flex !important; flex-direction: row !important; gap: 20px !important; flex-wrap: nowrap !important; justify-content: center !important; align-items: flex-start !important; padding: 4px 0 !important; }' +
+      '.pdf-embed .heatmap-card { flex: 0 0 auto !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }' +
+      '.pdf-embed .heatmap-card-header { padding: 0 0 2px 0 !important; margin-bottom: 2px !important; border-bottom: none !important; }' +
+      '.pdf-embed .heatmap-card-title { font-size: 10px !important; font-weight: 600 !important; color: #374151 !important; }' +
+      '.pdf-embed .heatmap-card-subtitle { display: none !important; }' +
+      // Heatmap grid layout
+      '.pdf-embed .heatmap-wrapper { width: auto !important; }' +
+      '.pdf-embed .heatmap-grid-container { gap: 1px !important; }' +
+      '.pdf-embed .heatmap-main { gap: 1px !important; }' +
+      '.pdf-embed .heatmap-row { display: flex !important; gap: 1px !important; align-items: center !important; }' +
+      '.pdf-embed .heatmap-row-label { width: 10px !important; font-size: 7px !important; color: #6b7280 !important; text-align: right !important; padding-right: 2px !important; }' +
+      // Heatmap cells - compact
+      '.pdf-embed .heatmap-cell { width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important; max-width: 24px !important; max-height: 24px !important; border-radius: 3px !important; display: flex !important; align-items: center !important; justify-content: center !important; flex-direction: column !important; }' +
+      '.pdf-embed .heatmap-x-row { display: flex !important; gap: 1px !important; padding-left: 12px !important; }' +
+      '.pdf-embed .heatmap-x-label { width: 24px !important; font-size: 7px !important; text-align: center !important; color: #6b7280 !important; }' +
+      '.pdf-embed .heatmap-y-label { font-size: 6px !important; color: #9ca3af !important; letter-spacing: 0.3px !important; }' +
+      '.pdf-embed .heatmap-x-axis-title { font-size: 6px !important; color: #9ca3af !important; margin-top: 2px !important; letter-spacing: 0.3px !important; }' +
+      '.pdf-embed .heatmap-spacer { width: 10px !important; }' +
+      // Cell colors - EXACT MATCH to dashboard
+      '.pdf-embed .risk-low { background: #bef264 !important; }' +
+      '.pdf-embed .risk-medium { background: #fde047 !important; }' +
+      '.pdf-embed .risk-high { background: #fb923c !important; }' +
+      '.pdf-embed .risk-critical { background: #f87171 !important; }' +
+      // Risk dots inside cells
+      '.pdf-embed .risk-dots { display: flex !important; flex-wrap: wrap !important; gap: 1px !important; padding: 1px !important; justify-content: center !important; align-items: center !important; max-width: 22px !important; }' +
+      '.pdf-embed .risk-dot { width: 3px !important; height: 3px !important; border-radius: 50% !important; background: rgba(0,0,0,0.5) !important; }' +
+      '.pdf-embed .risk-dot-more { font-size: 6px !important; color: rgba(0,0,0,0.6) !important; }' +
+      '.pdf-embed .cell-count { font-size: 6px !important; color: rgba(0,0,0,0.5) !important; margin-top: 1px !important; }' +
+      // Legend - SMALL, centered, matching cell colors
+      '.pdf-embed .heatmap-legend { display: flex !important; justify-content: center !important; margin-top: 6px !important; gap: 8px !important; flex-wrap: wrap !important; }' +
+      '.pdf-embed .legend-item { display: inline-flex !important; align-items: center !important; font-size: 8px !important; font-weight: 500 !important; padding: 2px 5px !important; border-radius: 3px !important; }' +
+      '.pdf-embed .legend-item.risk-low { background: #bef264 !important; color: #3f6212 !important; }' +
+      '.pdf-embed .legend-item.risk-medium { background: #fde047 !important; color: #713f12 !important; }' +
+      '.pdf-embed .legend-item.risk-high { background: #fb923c !important; color: #7c2d12 !important; }' +
+      '.pdf-embed .legend-item.risk-critical { background: #f87171 !important; color: #7f1d1d !important; }' +
+
+      // ===========================================
+      // EMBED - KPI Cards (Inline stats)
+      // ===========================================
+      '.pdf-embed .kpi-cards { display: flex !important; gap: 0 !important; flex-wrap: wrap !important; padding: 6px 0 !important; }' +
+      '.pdf-embed .kpi-card { flex: 1 1 auto !important; min-width: 60px !important; max-width: 100px !important; background: transparent !important; padding: 4px 10px 4px 0 !important; border: none !important; border-right: 1px solid #e5e7eb !important; }' +
+      '.pdf-embed .kpi-card:last-child { border-right: none !important; padding-right: 0 !important; }' +
+      '.pdf-embed .kpi-icon { display: none !important; }' +
+      '.pdf-embed .kpi-value { font-size: 16px !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.2 !important; }' +
+      '.pdf-embed .kpi-label { font-size: 9px !important; font-weight: 500 !important; color: #9ca3af !important; margin-top: 1px !important; }' +
+      '.pdf-embed .kpi-subtle { display: none !important; }' +
+
+      // ===========================================
+      // EMBED - Risk Concentration Chart (with title)
+      // ===========================================
+      '.pdf-embed .risk-concentration-chart { display: flex !important; flex-direction: column !important; gap: 4px !important; padding: 6px 0 !important; }' +
+      '.pdf-embed .category-bar-row { display: grid !important; grid-template-columns: 100px 1fr 45px !important; align-items: center !important; gap: 8px !important; padding: 3px 0 !important; background: transparent !important; border: none !important; }' +
+      '.pdf-embed .category-bar-label { font-size: 10px !important; font-weight: 500 !important; color: #374151 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }' +
+      '.pdf-embed .category-bar-track { width: 100% !important; height: 6px !important; background: #f3f4f6 !important; border-radius: 3px !important; overflow: hidden !important; }' +
+      '.pdf-embed .category-bar { height: 100% !important; background: #94a3b8 !important; border-radius: 3px !important; }' +
+      '.pdf-embed .category-bar-value { font-size: 9px !important; font-weight: 500 !important; color: #6b7280 !important; text-align: right !important; }' +
+
+      // ===========================================
+      // EMBED - Control Coverage (with title)
+      // ===========================================
+      '.pdf-embed .control-cards { display: flex !important; gap: 0 !important; flex-wrap: wrap !important; padding: 6px 0 !important; }' +
+      '.pdf-embed .control-card { background: transparent !important; border: none !important; border-right: 1px solid #e5e7eb !important; padding: 4px 10px 4px 0 !important; margin-right: 10px !important; min-width: 60px !important; }' +
+      '.pdf-embed .control-card:last-child { border-right: none !important; padding-right: 0 !important; margin-right: 0 !important; }' +
+      '.pdf-embed .control-card-value { font-size: 14px !important; font-weight: 600 !important; color: #111827 !important; line-height: 1.2 !important; margin-bottom: 1px !important; }' +
+      '.pdf-embed .control-card-label { font-size: 8px !important; font-weight: 500 !important; color: #9ca3af !important; line-height: 1.2 !important; }' +
+      '.pdf-embed .control-card::after { display: none !important; }' +
+      '.pdf-embed .control-card[data-tooltip]::before { display: none !important; }' +
 
       // ===========================================
       // CHART PLACEHOLDERS
@@ -7790,7 +9079,7 @@
       '<div class="unsaved-modal-backdrop"></div>' +
       '<div class="unsaved-modal-content">' +
       '  <div class="unsaved-modal-icon">' +
-      '    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">' +
+      '    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">' +
       '      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>' +
       '      <line x1="12" y1="9" x2="12" y2="13"/>' +
       '      <line x1="12" y1="17" x2="12.01" y2="17"/>' +
@@ -8012,9 +9301,22 @@
 
   /**
    * Show floating toolbar above selection
+   * CRITICAL: Never show during block selection mode
    */
   function showFloatingToolbar(selection) {
     console.log('[V2] showFloatingToolbar called with selection:', selection);
+
+    // CRITICAL: Never show toolbar during block selection mode
+    if (state.blockSelectionMode) {
+      console.log('[V2] showFloatingToolbar: BLOCKED - in block selection mode');
+      return;
+    }
+
+    // Don't show during block dragging
+    if (state.isBlockDragging) {
+      console.log('[V2] showFloatingToolbar: BLOCKED - block drag in progress');
+      return;
+    }
 
     if (!selection || selection.rangeCount === 0) {
       console.log('[V2] showFloatingToolbar: No valid selection');
@@ -8209,14 +9511,28 @@
       hideMoreDropdown();
       hideCommentComposer();
 
-      // Update shared AI state with current selection BEFORE highlight
-      if (state.currentRange) {
+      // Check if we're in BLOCK SELECTION mode (checkbox multi-select)
+      if (state.blockSelectionMode && state.selectedBlocks.length > 0) {
+        console.log('[V2] Ask AI: Block selection mode with', state.selectedBlocks.length, 'blocks');
+        // Pass block selection to AI module
+        var blockText = getSelectedBlocksText();
+        ERM.reportEditorAI.setState('selection', blockText);
+        ERM.reportEditorAI.setState('selectedBlocks', state.selectedBlocks.slice()); // Copy array
+        ERM.reportEditorAI.setState('selectionRange', null); // No text range in block mode
+        ERM.reportEditorAI.setState('activeBlock', state.activeBlock);
+      }
+      // Otherwise use text selection
+      else if (state.currentRange) {
+        // CAPTURE SELECTION LOCK before focus changes
+        // This creates persistent highlight that survives focus loss
+        captureSelectionLock();
+
         var selectedText = state.currentRange.toString();
         ERM.reportEditorAI.setState('selection', selectedText);
         ERM.reportEditorAI.setState('selectionRange', state.currentRange.cloneRange());
+        ERM.reportEditorAI.setState('selectedBlocks', []); // Clear block selection
 
-        // Immediately highlight selection before focus changes
-        // This preserves the visual selection even when clicking into the panel
+        // Also apply the old highlight system for compatibility
         ERM.reportEditorAI.highlightSelection();
       }
 
@@ -8236,13 +9552,26 @@
       hideMoreDropdown();
       hideCommentComposer();
 
-      // Update shared AI state with current selection and highlight
-      if (state.currentRange) {
+      // Check if we're in BLOCK SELECTION mode (checkbox multi-select)
+      if (state.blockSelectionMode && state.selectedBlocks.length > 0) {
+        console.log('[V2] Magic Write: Block selection mode with', state.selectedBlocks.length, 'blocks');
+        var blockText = getSelectedBlocksText();
+        ERM.reportEditorAI.setState('selection', blockText);
+        ERM.reportEditorAI.setState('selectedBlocks', state.selectedBlocks.slice());
+        ERM.reportEditorAI.setState('selectionRange', null);
+        ERM.reportEditorAI.setState('activeBlock', state.activeBlock);
+      }
+      // Otherwise use text selection
+      else if (state.currentRange) {
+        // CAPTURE SELECTION LOCK before focus changes
+        captureSelectionLock();
+
         var selectedText = state.currentRange.toString();
         ERM.reportEditorAI.setState('selection', selectedText);
         ERM.reportEditorAI.setState('selectionRange', state.currentRange.cloneRange());
+        ERM.reportEditorAI.setState('selectedBlocks', []);
 
-        // Immediately highlight selection before focus changes
+        // Also apply the old highlight system for compatibility
         ERM.reportEditorAI.highlightSelection();
       }
 
@@ -9056,7 +10385,67 @@
     redo: redo,
     updatePageAwareness: updatePageAwareness,
     schedulePageAwarenessUpdate: schedulePageAwarenessUpdate,
-    autoPaginate: autoPaginate
+    autoPaginate: autoPaginate,
+    // Selection lock API
+    selectionLock: {
+      capture: captureSelectionLock,
+      clear: clearSelectionLock,
+      getText: getSelectionLockText,
+      isLocked: isSelectionLocked,
+      get: getSelectionLock,
+      applyHighlight: function() {
+        if (selectionLock.originalRange) {
+          applySelectionLockHighlight(selectionLock.originalRange);
+        }
+      }
+    },
+    /**
+     * Replace locked selection or entire block content
+     * Used by AI Replace action - respects selection lock if it exists
+     * @param {HTMLElement} targetBlock - Block element to replace content in
+     * @param {string} newText - New text/HTML content to insert
+     */
+    replaceSelectionOrBlock: function(targetBlock, newText) {
+      // Save state for undo before making changes
+      saveState();
+
+      // Check if we have a locked selection
+      if (selectionLock.isLocked && selectionLock.blockElement) {
+        // Replace only the locked selection
+        var lockHighlights = document.querySelectorAll('.selection-lock[data-selection-lock]');
+        if (lockHighlights.length > 0) {
+          var firstHighlight = lockHighlights[0];
+          var parent = firstHighlight.parentNode;
+
+          // Insert new content before first highlight
+          var wrapper = document.createElement('span');
+          wrapper.innerHTML = newText;
+          parent.insertBefore(wrapper, firstHighlight);
+
+          // Remove all highlight spans
+          for (var h = 0; h < lockHighlights.length; h++) {
+            if (lockHighlights[h].parentNode) {
+              lockHighlights[h].parentNode.removeChild(lockHighlights[h]);
+            }
+          }
+
+          // Normalize parent
+          if (parent.normalize) parent.normalize();
+        }
+
+        // Clear selection lock
+        clearSelectionLock();
+      } else {
+        // Replace entire block content
+        var contentEl = targetBlock ? targetBlock.querySelector('.block-content, [contenteditable="true"]') : null;
+        if (contentEl) {
+          contentEl.innerHTML = newText;
+        }
+      }
+
+      // Mark dirty and save
+      markDirty(true);
+    }
   };
 
   console.log('Report Editor V2 loaded');

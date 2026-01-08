@@ -1,4 +1,8 @@
 {
+  "model": "sonnet",
+  "env": {
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000"
+  },
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
@@ -60,7 +64,28 @@
       "Bash(git push:*)",
       "Bash(git remote set-url:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nERM AI APP V2 - No Templates\n\nRemoved all industry template files and references to reduce codebase size.\n\nRemoved:\n- assets/templates/ folder \\(53 files, 2.8MB\\)\n- Template script references from index.html\n- Template documentation files\n\nThe app still works - AI-generated risks via DeepSeek are still available.\nStatic template-based starter risks will return empty gracefully.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(del \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\risk-register.js\")",
+      "Bash(del \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\css\\\\risk-register.css\")",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(comm:*)",
+      "Bash(while read f)",
+      "Bash(do echo \" - $f\")",
+      "Bash(done)",
+      "Bash(do echo \"   - $f\")",
+      "Bash(for f in \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\modules\\\\reports\"/*.js)",
+      "Bash(do if grep -q addEventListener \"$f\")",
+      "Bash(fi)",
+      "Bash(for f in \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\modules\\\\risk-register\"/*.js)",
+      "Bash(for f in \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\modules\\\\controls\"/*.js)",
+      "Bash(for f in \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\core\"/*.js)",
+      "Bash(npx http-server -p 3000)",
+      "Bash(timeout /t 3)",
+      "Bash(del \"c:\\\\Users\\\\sfschool\\\\Desktop\\\\All apps\\\\MVP ERM - Copy\\\\assets\\\\js\\\\modules\\\\risk-register\\\\risk-modal-register.js\")",
+      "Bash(timeout /t)",
+      "Bash(powershell -Command \"\\(Get-Content -Path ''assets\\\\js\\\\modules\\\\controls\\\\controls-ai-ui.js'' -Raw\\) -replace ''for \\\\\\(var i = 0; i < Math\\\\.min\\\\\\(allRisks\\\\.length, 8\\\\\\); i\\\\+\\\\+\\\\\\)'', ''for \\(var i = 0; i < allRisks.length; i++\\)'' | Set-Content -Path ''assets\\\\js\\\\modules\\\\controls\\\\controls-ai-ui.js'' -NoNewline\")",
+      "Bash(powershell -Command \"\n$content = Get-Content -Path ''assets\\\\js\\\\modules\\\\controls\\\\controls-ai-ui.js'' -Raw\n\n# Replace the _renderLinkedRisksDeepSeek function to show ALL risks\n$oldFunc = @''\nERM.controlsAI._renderLinkedRisksDeepSeek = function\\\\\\(suggestions, allRisks\\\\\\) \\\\{\n  var self = this;\n\n  // Build a map of risk IDs for quick lookup\n  var riskMap = \\\\{\\\\};\n  for \\\\\\(var i = 0; i < allRisks\\\\.length; i\\\\+\\\\+\\\\\\) \\\\{\n    riskMap\\\\[allRisks\\\\[i\\\\]\\\\.id\\\\] = allRisks\\\\[i\\\\];\n  \\\\}\n\n  var content =\n    ''<div class=\"\"ai-suggestions-container\"\">'' \\\\+\n    ''<p class=\"\"ai-suggestions-intro\"\">AI recommends linking these risks \\\\\\(click Use to auto-check\\\\\\):</p>'' \\\\+\n    ''<div class=\"\"ai-suggestions-list ai-stagger-container\"\">'';\n''@\n\n$newStart = @''\nERM.controlsAI._renderLinkedRisksDeepSeek = function\\(suggestions, allRisks\\) {\n  var self = this;\n\n  // Build a map of risk IDs for quick lookup  \n  var riskMap = {};\n  var recommendedIds = {};\n  for \\(var i = 0; i < allRisks.length; i++\\) {\n    riskMap[allRisks[i].id] = allRisks[i];\n  }\n  // Track which risks are AI recommended\n  for \\(var r = 0; r < suggestions.length; r++\\) {\n    if \\(suggestions[r].riskId\\) {\n      recommendedIds[suggestions[r].riskId] = true;\n    }\n  }\n\n  var content =\n    ''<div class=\"\"ai-suggestions-container\"\" style=\"\"max-height: 60vh; overflow-y: auto;\"\">'' +\n    ''<p class=\"\"ai-suggestions-intro\"\">AI recommends these risks. All register risks shown below:</p>'' +\n    ''<div class=\"\"ai-suggestions-list ai-stagger-container\"\">'';\n''@\n\nif \\($content -match ''var riskMap = \\\\{\\\\};[\\\\r\\\\n]+  for \\\\\\(var i = 0; i < allRisks\\\\.length; i\\\\+\\\\+\\\\\\)''\\) {\n  Write-Host ''Found pattern''\n} else {\n  Write-Host ''Pattern not found''\n}\n\")"
     ]
   }
 }

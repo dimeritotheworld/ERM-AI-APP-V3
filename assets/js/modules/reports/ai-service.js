@@ -445,10 +445,81 @@
 
     'ask-ai': function(text, context) {
       var prompt = '';
-      var hasContext = context.section || context.selectedText || context.reportName;
+      var hasContext = context.section || context.selectedText || context.reportName || context.isChartMode || context.isBlockMode;
 
-      // Only mention report context if we actually have context
-      if (hasContext) {
+      // Check if we're in chart/embed mode with deep context
+      if (context.isChartMode && context.chartContext) {
+        var cc = context.chartContext;
+        prompt = 'CONTEXT: You are analyzing a ' + (cc.title || 'chart') + ' from an enterprise risk management report.\n\n';
+
+        prompt += 'CHART INFORMATION:\n';
+        prompt += '- Chart Type: ' + (cc.chartKind || 'unknown') + '\n';
+        prompt += '- Title: ' + (cc.title || 'Embedded Content') + '\n';
+        prompt += '- Register Filter: ' + (cc.register ? cc.register.title : 'All Registers') + '\n';
+
+        // Add the actual data
+        if (cc.data && Object.keys(cc.data).length > 0) {
+          prompt += '\nCHART DATA:\n';
+          prompt += JSON.stringify(cc.data, null, 2) + '\n';
+        }
+
+        // Add computed insights
+        if (cc.insights && Object.keys(cc.insights).length > 0) {
+          prompt += '\nKEY INSIGHTS:\n';
+          for (var key in cc.insights) {
+            if (cc.insights.hasOwnProperty(key)) {
+              prompt += '- ' + key + ': ' + cc.insights[key] + '\n';
+            }
+          }
+        }
+
+        // Add visible labels from the DOM
+        if (cc.visibleLabels && cc.visibleLabels.length > 0) {
+          prompt += '\nVISIBLE LABELS: ' + cc.visibleLabels.join(', ') + '\n';
+        }
+
+        prompt += '\n';
+      }
+      // Block mode - context from any block type
+      else if (context.isBlockMode && context.blockContext) {
+        var bc = context.blockContext;
+        prompt = 'CONTEXT: You are assisting with an enterprise risk management report.\n\n';
+
+        prompt += 'BLOCK INFORMATION:\n';
+        prompt += '- Block Type: ' + (bc.blockType || 'paragraph') + '\n';
+        prompt += '- Content Type: ' + (bc.title || 'Text') + '\n';
+
+        if (bc.hasContent && bc.textContent) {
+          prompt += '\nBLOCK CONTENT:\n"' + bc.textContent + '"\n';
+        }
+
+        if (bc.isTable && bc.tableData) {
+          prompt += '\nTABLE DATA:\n';
+          if (bc.tableData.headers && bc.tableData.headers.length > 0) {
+            prompt += 'Headers: ' + bc.tableData.headers.join(' | ') + '\n';
+          }
+          if (bc.tableData.rows && bc.tableData.rows.length > 0) {
+            prompt += 'Rows (' + bc.tableData.rows.length + '):\n';
+            for (var r = 0; r < Math.min(bc.tableData.rows.length, 10); r++) {
+              prompt += '  ' + bc.tableData.rows[r].join(' | ') + '\n';
+            }
+            if (bc.tableData.rows.length > 10) {
+              prompt += '  ... and ' + (bc.tableData.rows.length - 10) + ' more rows\n';
+            }
+          }
+        }
+
+        if (bc.isList && bc.listItems && bc.listItems.length > 0) {
+          prompt += '\nLIST ITEMS:\n';
+          for (var li = 0; li < bc.listItems.length; li++) {
+            prompt += '- ' + bc.listItems[li] + '\n';
+          }
+        }
+
+        prompt += '\n';
+      }
+      // Standard report context
+      else if (hasContext) {
         prompt = 'CONTEXT: You are assisting with an enterprise risk management report.\n';
         if (context.reportName) {
           prompt += 'Report: "' + context.reportName + '"\n';
@@ -470,6 +541,126 @@
         '- Use numbered lists (1. 2. 3.) for steps or sequences\n' +
         '- Use markdown tables when comparing data or showing categories\n' +
         '- Use ## or ### headings to organize longer responses\n';
+
+      // Add ERM expert persona and chart-specific instructions
+      if (context.isChartMode) {
+        prompt += '\nYOU ARE A SENIOR ERM EXPERT & REPORT WRITER:\n' +
+          '- You are a seasoned Enterprise Risk Management (ERM) expert with 25+ years experience\n' +
+          '- Deep expertise in ISO 31000, COSO ERM Framework, and industry-specific risk standards\n' +
+          '- You understand risk appetite, risk tolerance, inherent vs residual risk, control effectiveness\n' +
+          '- You can adapt your analysis to ANY industry, sector, company, department, or function the user mentions\n' +
+          '- If the user references a specific industry (healthcare, finance, manufacturing, tech, etc.), tailor your insights accordingly\n\n' +
+          'KEY RISK INDICATORS (KRI) EXPERTISE:\n' +
+          '- Expert in designing, selecting, and calibrating KRIs that provide early warning signals\n' +
+          '- Understand leading vs lagging indicators, threshold setting, and escalation triggers\n' +
+          '- Can recommend appropriate KRIs for any risk category or business function\n' +
+          '- Know how to link KRIs to risk appetite statements and tolerance levels\n\n' +
+          'GOVERNANCE, RISK & COMPLIANCE (GRC) KNOWLEDGE:\n' +
+          '- Deep understanding of governance structures: Board, Audit Committee, Risk Committee, Executive Management\n' +
+          '- Know the Three Lines Model (operations, risk/compliance, internal audit)\n' +
+          '- Expert in roles and responsibilities: CRO, Risk Owners, Control Owners, Risk Champions\n' +
+          '- Understand regulatory requirements and compliance frameworks across industries\n\n' +
+          'INTERNAL AUDIT EXPERTISE:\n' +
+          '- Understand internal audit methodologies, risk-based audit planning, and assurance mapping\n' +
+          '- Know IIA Standards, audit reporting, and finding severity ratings\n' +
+          '- Can interpret audit findings, management responses, and remediation tracking\n' +
+          '- Understand the relationship between internal audit and second line functions\n\n' +
+          'EXPERT REPORT WRITING:\n' +
+          '- You are an expert report writer for ERM, governance, compliance, and internal/external audit\n' +
+          '- Can write for ALL stakeholders: Board, Audit Committee, Executive Team, Regulators, External Auditors\n' +
+          '- Adapt tone, detail level, and focus based on the audience\n' +
+          '- Create clear, actionable, evidence-based content that drives decision-making\n\n';
+
+        prompt += 'ANALYSIS APPROACH:\n' +
+          '- Reference specific values from the data provided - be precise with numbers\n' +
+          '- Use the 5x5 risk matrix levels correctly: Low (1-4), Medium (5-9), High (10-14), Critical (15-25)\n' +
+          '- Provide ACTIONABLE insights - not just observations, but what to DO about it\n' +
+          '- If user asks for detail, break down your thinking step-by-step to show clear thought process\n' +
+          '- If user asks for summary, be concise but impactful - executive-ready\n' +
+          '- Adapt response length based on user request (detailed analysis vs quick summary)\n\n';
+
+        // Add chart-type specific expertise
+        var chartKind = context.chartContext ? context.chartContext.chartKind : '';
+        if (chartKind === 'heatmap') {
+          prompt += 'HEATMAP EXPERTISE:\n' +
+            '- Analyze risk concentration patterns - where are risks clustering?\n' +
+            '- Compare inherent vs residual distributions - is control strategy working?\n' +
+            '- Identify outliers and hot spots requiring immediate attention\n' +
+            '- Suggest risk treatment priorities based on position in matrix\n\n';
+        } else if (chartKind === 'risks' || chartKind === 'register') {
+          prompt += 'TOP RISKS / RISK REGISTER EXPERTISE:\n' +
+            '- Assess risk severity and urgency based on scores\n' +
+            '- Evaluate adequacy of risk ownership assignments\n' +
+            '- Identify risks lacking controls or with inadequate treatment plans\n' +
+            '- Suggest prioritization for risk mitigation efforts\n\n';
+        } else if (chartKind === 'kpi') {
+          prompt += 'KPI METRICS EXPERTISE:\n' +
+            '- Interpret what each metric means for organizational risk posture\n' +
+            '- Identify concerning trends or thresholds being breached\n' +
+            '- Benchmark against industry standards where relevant\n' +
+            '- Recommend actions based on KPI performance\n\n';
+        } else if (chartKind === 'controls') {
+          prompt += 'CONTROL COVERAGE EXPERTISE:\n' +
+            '- Assess control adequacy relative to risk severity\n' +
+            '- Identify coverage gaps and uncontrolled high-priority risks\n' +
+            '- Evaluate control mix (preventive vs detective vs corrective)\n' +
+            '- Recommend control improvements and testing priorities\n\n';
+        } else if (chartKind === 'chart') {
+          prompt += 'RISK CATEGORY ANALYSIS EXPERTISE:\n' +
+            '- Analyze risk distribution across categories\n' +
+            '- Identify over-concentrated or under-represented risk areas\n' +
+            '- Consider whether categorization reflects organizational structure\n' +
+            '- Suggest category-specific risk management strategies\n\n';
+        }
+
+        prompt += 'OUTPUT REQUIREMENTS:\n' +
+          '- Write content suitable for insertion into a professional risk report\n' +
+          '- Match the formality expected by board/executive/management audiences\n' +
+          '- Be specific and data-driven, not generic\n';
+      }
+
+      // Add ERM expert persona and block-specific instructions
+      if (context.isBlockMode) {
+        prompt += '\nYOU ARE A SENIOR ERM EXPERT & REPORT WRITER:\n' +
+          '- You are a seasoned Enterprise Risk Management (ERM) expert with 25+ years experience\n' +
+          '- Deep expertise in ISO 31000, COSO ERM Framework, and industry-specific risk standards\n' +
+          '- You understand risk governance, risk culture, risk reporting, and stakeholder communication\n' +
+          '- You can adapt your writing to ANY industry, sector, company, department, or function the user mentions\n' +
+          '- If the user references a specific context, tailor your response accordingly\n\n' +
+          'KEY RISK INDICATORS (KRI) EXPERTISE:\n' +
+          '- Expert in designing, selecting, and calibrating KRIs that provide early warning signals\n' +
+          '- Understand leading vs lagging indicators, threshold setting, and escalation triggers\n' +
+          '- Can recommend appropriate KRIs for any risk category or business function\n' +
+          '- Know how to link KRIs to risk appetite statements and tolerance levels\n\n' +
+          'GOVERNANCE, RISK & COMPLIANCE (GRC) KNOWLEDGE:\n' +
+          '- Deep understanding of governance structures: Board, Audit Committee, Risk Committee, Executive Management\n' +
+          '- Know the Three Lines Model (operations, risk/compliance, internal audit)\n' +
+          '- Expert in roles and responsibilities: CRO, Risk Owners, Control Owners, Risk Champions\n' +
+          '- Understand regulatory requirements and compliance frameworks across industries\n\n' +
+          'INTERNAL AUDIT EXPERTISE:\n' +
+          '- Understand internal audit methodologies, risk-based audit planning, and assurance mapping\n' +
+          '- Know IIA Standards, audit reporting, and finding severity ratings\n' +
+          '- Can interpret audit findings, management responses, and remediation tracking\n' +
+          '- Understand the relationship between internal audit and second line functions\n\n' +
+          'EXPERT REPORT WRITING:\n' +
+          '- You are an expert report writer for ERM, governance, compliance, and internal/external audit\n' +
+          '- Can write for ALL stakeholders: Board, Audit Committee, Executive Team, Regulators, External Auditors\n' +
+          '- Adapt tone, detail level, and focus based on the audience\n' +
+          '- Create clear, actionable, evidence-based content that drives decision-making\n\n';
+
+        prompt += 'WRITING APPROACH:\n' +
+          '- Reference the provided content when relevant - build on what exists\n' +
+          '- Write content that flows naturally with the existing document\n' +
+          '- If user asks for detail, break down your thinking step-by-step\n' +
+          '- If user asks for summary, be concise but capture all key points\n' +
+          '- Adapt response length and depth based on user request\n' +
+          '- Keep professional tone appropriate for risk management reports\n\n';
+
+        prompt += 'OUTPUT REQUIREMENTS:\n' +
+          '- Output should be suitable for insertion into a professional ERM report\n' +
+          '- Use appropriate business language for the target audience\n' +
+          '- Be substantive and actionable, not filler content\n';
+      }
 
       prompt += FORMAT_RULES_FULL;
 

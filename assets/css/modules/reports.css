@@ -93,9 +93,7 @@
   margin-right: 6px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin moved to core/components.css */
 
 /* Button disabled state during AI generation */
 .btn-primary:disabled {
@@ -126,7 +124,7 @@
 }
 
 .template-select-item:hover {
-  background: #eff6ff;
+  background: var(--blue-50);
   border-color: #bfdbfe;
 }
 
@@ -281,7 +279,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 300px;
+  /* No min-height: let content determine height (empty state has its own min-height)
+     No margin-top: spacing provided by info-banner margin-bottom (16px) */
   background: transparent;
   overflow: visible;
   position: relative;
@@ -579,39 +578,16 @@
   gap: 12px;
 }
 
-/* Empty State */
-.reports-empty-state {
+/* ========================================
+   REPORTS EMPTY STATE
+   MOVED TO core/components.css as .module-empty-state (Canonical)
+   Use class="module-empty-state" in HTML
+   All modules use components.css .module-empty-state as single source
+   ======================================== */
+
+/* Reports-specific: span full grid width */
+.reports-grid .module-empty-state {
   grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 40px;
-  text-align: center;
-}
-
-.empty-illustration {
-  margin-bottom: 24px;
-}
-
-.empty-illustration svg {
-  width: 120px;
-  height: 120px;
-}
-
-.empty-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-}
-
-.empty-description {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0 0 24px 0;
-  max-width: 360px;
-  line-height: 1.6;
 }
 
 /* ========================================
@@ -980,69 +956,21 @@
 .checkbox-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 /* ========================================
-   FORM ROW
+   FORM ROW - MOVED TO core/components.css (Canonical)
+   Removed: .form-row, .form-row .form-group
+   ~8 lines removed
    ======================================== */
-
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-
-.form-row .form-group {
-  flex: 1;
-}
 
 /* ========================================
    BUTTON VARIANTS
+   MOVED TO core/components.css (Canonical)
+   Removed: .btn-sm, .btn-danger-outline, .btn-icon, .btn-icon-danger
+   ~44 lines removed - use components.css as single source
    ======================================== */
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-.btn-danger-outline {
-  background: transparent;
-  border: 1px solid #fecaca;
-  color: #dc2626;
-}
-
-.btn-danger-outline:hover {
-  background: #fef2f2;
-  border-color: #fca5a5;
-}
-
-.btn-icon {
-  background: transparent;
-  border: none;
-  padding: 6px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-}
-
-.btn-icon:hover {
-  background: #f1f5f9;
-  color: #3b82f6;
-}
-
-.btn-icon-danger:hover {
-  background: #fef2f2;
-  color: #ef4444;
-}
-
-.btn-icon svg {
-  width: 16px;
-  height: 16px;
-}
 
 /* ========================================
    RESPONSIVE
@@ -1077,9 +1005,7 @@
     gap: 12px;
   }
 
-  .form-row {
-    flex-direction: column;
-  }
+  /* .form-row responsive handled in core/components.css */
 
   .report-meta-row {
     flex-direction: column;
@@ -1237,23 +1163,12 @@ html.theme-dark .reports-count {
   border-left-color: var(--border-color);
 }
 
-html.theme-dark .reports-empty-state {
-  background: var(--card-bg);
-}
-
-html.theme-dark .empty-title {
-  color: var(--text-primary);
-}
-
-html.theme-dark .empty-description {
-  color: var(--text-secondary);
-}
-
-html.theme-dark .empty-illustration svg rect[fill="#f1f5f9"] {
+/* Dark mode empty state: uses .module-empty-state from components.css */
+html.theme-dark .module-empty-state .empty-illustration svg rect[fill="#f1f5f9"] {
   fill: var(--bg-tertiary);
 }
 
-html.theme-dark .empty-illustration svg rect[stroke="#e2e8f0"] {
+html.theme-dark .module-empty-state .empty-illustration svg rect[stroke="#e2e8f0"] {
   stroke: var(--border-color);
 }
 
@@ -1349,7 +1264,7 @@ html.theme-dark .btn-icon {
 
 html.theme-dark .btn-icon:hover {
   background: var(--bg-hover);
-  color: #3b82f6;
+  color: var(--ai-accent);
 }
 
 html.theme-dark .btn-icon-danger:hover {
@@ -1443,7 +1358,7 @@ html.theme-dark .suggestions-label {
 }
 
 .progress-step.completed:not(:last-child)::after {
-  background: #3b82f6;
+  background: var(--ai-accent);
 }
 
 .step-number {
@@ -1464,8 +1379,8 @@ html.theme-dark .suggestions-label {
 }
 
 .progress-step.active .step-number {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -1484,7 +1399,7 @@ html.theme-dark .suggestions-label {
 }
 
 .progress-step.active .step-label {
-  color: #3b82f6;
+  color: var(--ai-accent);
   font-weight: 600;
 }
 
@@ -1574,7 +1489,7 @@ html.theme-dark .suggestions-label {
 .source-checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 .quick-select-row {
@@ -1589,15 +1504,15 @@ html.theme-dark .suggestions-label {
 }
 
 .data-source-card.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
 }
 
 .data-source-card input[type="checkbox"] {
   margin-top: 2px;
   width: 18px;
   height: 18px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 .data-source-icon {
@@ -1685,7 +1600,7 @@ html.theme-dark .suggestions-label {
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1717,14 +1632,14 @@ html.theme-dark .suggestions-label {
 }
 
 .section-item.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
+  background: var(--blue-50);
+  border-color: var(--ai-accent);
 }
 
 .section-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 .section-icon {
@@ -1861,7 +1776,7 @@ html.theme-dark .suggestions-label {
 /* AI Sidebar */
 .ai-sidebar {
   width: 280px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-500) 100%);
   border-radius: 12px;
   padding: 20px;
   color: white;
@@ -1967,8 +1882,8 @@ html.theme-dark .suggestions-label {
 }
 
 .editor-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -2161,8 +2076,8 @@ html.theme-dark .suggestions-label {
 }
 
 .format-option.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
 }
 
 .format-option.disabled {
@@ -2271,7 +2186,7 @@ html.theme-dark .suggestions-label {
 
 .output-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -2384,8 +2299,8 @@ html.theme-dark .suggestions-label {
 }
 
 .editor-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -2402,7 +2317,7 @@ html.theme-dark .suggestions-label {
 }
 
 .editor-ai-sidebar {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-500) 100%);
   border-radius: 12px;
   padding: 20px;
   color: white;
@@ -2447,7 +2362,7 @@ html.theme-dark .suggestions-label {
 
 .editor-toolbar-btn:hover {
   background: #f0f9ff;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 .editor-area {
@@ -2461,7 +2376,7 @@ html.theme-dark .suggestions-label {
 }
 
 .editor-area:focus {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 /* Quill Editor Overrides */
@@ -2519,7 +2434,7 @@ html.theme-dark .data-source-card:hover {
 
 html.theme-dark .data-source-card.selected {
   background: rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .data-source-name {
@@ -2554,7 +2469,7 @@ html.theme-dark .section-item:hover {
 
 html.theme-dark .section-item.selected {
   background: rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .section-name {
@@ -2634,8 +2549,8 @@ html.theme-dark .editor-area {
 }
 
 .report-type-card.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
 }
 
 .type-icon {
@@ -2665,7 +2580,7 @@ html.theme-dark .editor-area {
 
 .type-check {
   font-size: 16px;
-  color: #3b82f6;
+  color: var(--ai-accent);
   font-weight: 700;
   flex-shrink: 0;
   width: 20px;
@@ -2701,14 +2616,14 @@ html.theme-dark .editor-area {
 }
 
 .classification-option.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
 }
 
 .classification-option input[type="radio"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
   margin: 0;
 }
 
@@ -2821,8 +2736,8 @@ html.theme-dark .editor-area {
 }
 
 .classification-badge.internal {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--blue-100);
+  color: var(--ai-accent-hover);
 }
 
 .classification-badge.confidential {
@@ -2940,8 +2855,8 @@ html.theme-dark .editor-area {
 }
 
 .classification-tag.internal {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--blue-100);
+  color: var(--ai-accent-hover);
 }
 
 .classification-tag.confidential {
@@ -3047,7 +2962,7 @@ html.theme-dark .report-type-card:hover {
 
 html.theme-dark .report-type-card.selected {
   background: rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .type-name {
@@ -3070,7 +2985,7 @@ html.theme-dark .classification-option:hover {
 
 html.theme-dark .classification-option.selected {
   background: rgba(59, 130, 246, 0.15);
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .classification-option .option-label {
@@ -3204,8 +3119,8 @@ html.theme-dark .editor-tab:hover {
 }
 
 html.theme-dark .editor-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -3409,13 +3324,13 @@ html.theme-dark .preview-section-content {
 
 .section-checklist-item.dragging {
   opacity: 0.5;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .section-checklist-item.drag-over {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--ai-accent);
+  background: var(--blue-50);
   transform: scale(1.02);
 }
 
@@ -3462,7 +3377,7 @@ html.theme-dark .preview-section-content {
 .section-checklist-item input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 .section-checklist-item .section-name {
@@ -3488,7 +3403,7 @@ html.theme-dark .preview-section-content {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  background: #3b82f6 !important;
+  background: var(--ai-accent) !important;
   border: none !important;
   color: white !important;
   font-size: 16px;
@@ -3504,7 +3419,7 @@ html.theme-dark .preview-section-content {
 }
 
 .btn-edit-section {
-  background: #3b82f6 !important;
+  background: var(--ai-accent) !important;
 }
 
 .btn-remove-section {
@@ -3513,7 +3428,7 @@ html.theme-dark .preview-section-content {
 }
 
 .btn-edit-section:hover {
-  background: #2563eb !important;
+  background: var(--ai-accent-hover) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
 }
@@ -3562,12 +3477,7 @@ html.theme-dark .preview-section-content {
   padding: 8px 0;
 }
 
-.modal-description {
-  font-size: 14px;
-  color: #64748b;
-  margin-bottom: 16px;
-  line-height: 1.6;
-}
+/* .modal-description moved to core/components.css (Canonical) */
 
 .section-examples {
   margin-top: 16px;
@@ -3673,8 +3583,8 @@ html.theme-dark .preview-section-content {
 }
 
 .classification-badge.public {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--blue-100);
+  color: var(--blue-800);
 }
 
 .classification-badge.internal {
@@ -3869,7 +3779,7 @@ html.theme-dark .preview-section-content {
   top: 0;
   right: 20px;
   z-index: 100;
-  background: #3b82f6;
+  background: var(--ai-accent);
   color: white;
   padding: 8px 16px;
   border-radius: 0 0 8px 8px;
@@ -4074,7 +3984,7 @@ html.theme-dark .preview-section-content {
 }
 
 .section-dropdown:focus {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -4106,12 +4016,12 @@ html.theme-dark .preview-section-content {
 }
 
 .toggle-btn:hover {
-  color: #3b82f6;
+  color: var(--ai-accent);
 }
 
 .toggle-btn.active {
   background: white;
-  color: #3b82f6;
+  color: var(--ai-accent);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -4134,8 +4044,8 @@ html.theme-dark .preview-section-content {
 }
 
 .edit-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -4201,7 +4111,7 @@ html.theme-dark .preview-section-content {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: #3b82f6;
+  background: var(--ai-accent);
   color: white;
   padding: 6px 12px;
   border-radius: 6px;
@@ -4552,8 +4462,8 @@ html.theme-dark .preview-section-content {
 }
 
 .toolbar-select:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: var(--ai-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .toolbar-btn {
@@ -4586,8 +4496,8 @@ html.theme-dark .preview-section-content {
 }
 
 .toolbar-btn.active {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -4734,22 +4644,7 @@ html.theme-dark .preview-section-content {
   margin: 4px 0;
 }
 
-/* Form textarea */
-.form-textarea {
-  padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 60px;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+/* .form-textarea MOVED TO core/components.css (Canonical) */
 
 /* Responsive for Two-Screen Layout */
 @media (max-width: 992px) {
@@ -4893,29 +4788,9 @@ html.theme-dark .preview-sections-list li {
 
 /* ========================================
    EDIT REPORT MODAL - SIMPLE WORKING LAYOUT
-   ======================================== */
-
-.modal-fullscreen {
-  width: 90vw;
-  height: 90vh;
-  margin: 5vh auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-fullscreen .modal-header {
-  flex-shrink: 0;
-}
-
-.modal-fullscreen .modal-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.modal-fullscreen .modal-footer {
-  flex-shrink: 0;
-}
+   ========================================
+   Base modal-fullscreen styles are in base-modal.css
+   Only report-specific extensions here */
 
 .report-edit-layout {
   display: flex;
@@ -5055,8 +4930,8 @@ html.theme-dark .edit-tab:hover {
 }
 
 html.theme-dark .edit-tab.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -5082,8 +4957,8 @@ html.theme-dark .toolbar-select:hover {
 }
 
 html.theme-dark .toolbar-select:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  border-color: var(--ai-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 html.theme-dark .toolbar-btn {
@@ -5094,12 +4969,12 @@ html.theme-dark .toolbar-btn {
 
 html.theme-dark .toolbar-btn:hover {
   background: var(--bg-secondary);
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 html.theme-dark .toolbar-btn.active {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -5405,98 +5280,9 @@ html.theme-dark .rename-input {
 }
 
 /* ========================================
-   SHARE MODAL STYLES
+   SHARE MODAL STYLES - REMOVED (orphaned - no JS uses these classes)
+   ~90 lines deleted
    ======================================== */
-
-.share-options-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.share-option-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-}
-
-.share-option-btn:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #1e40af;
-}
-
-.share-option-btn svg {
-  width: 20px;
-  height: 20px;
-  color: #64748b;
-  flex-shrink: 0;
-}
-
-.share-option-btn:hover svg {
-  color: #3b82f6;
-}
-
-.share-link-input-wrapper {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.share-link-input {
-  flex: 1;
-  padding: 10px 14px;
-  font-size: 13px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #f8fafc;
-  color: #64748b;
-}
-
-.copy-link-btn {
-  padding: 10px 16px;
-  background: #c41e3a;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.copy-link-btn:hover {
-  background: #a91830;
-}
-
-html.theme-dark .share-option-btn {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-html.theme-dark .share-option-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-html.theme-dark .share-link-input {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-}
 
 /* ========================================
    PDF EXPORT MODAL STYLES
@@ -6014,7 +5800,7 @@ html.theme-dark .export-progress-subtitle {
 
 .inline-popup-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
@@ -6056,8 +5842,8 @@ html.theme-dark .export-progress-subtitle {
 }
 
 .chip-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
@@ -6098,13 +5884,13 @@ html.theme-dark .export-progress-subtitle {
 }
 
 .inline-popup-footer .btn-primary {
-  background: #3b82f6;
+  background: var(--ai-accent);
   color: white;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .inline-popup-footer .btn-primary:hover {
-  background: #2563eb;
+  background: var(--ai-accent-hover);
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
 }
@@ -6256,7 +6042,7 @@ html.theme-dark .inline-popup-input {
 }
 
 html.theme-dark .inline-popup-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
 }
 
@@ -6275,8 +6061,8 @@ html.theme-dark .chip-btn {
 }
 
 html.theme-dark .chip-btn:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent);
   color: white;
 }
 
@@ -6426,9 +6212,9 @@ html.theme-dark .inline-popup-footer .btn-secondary:hover {
 }
 
 .cover-classification.public {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border: 2px solid #3b82f6;
+  background: var(--blue-100);
+  color: var(--blue-900);
+  border: 2px solid var(--ai-accent);
 }
 
 /* Dark theme for cover page */
@@ -6534,7 +6320,7 @@ html.theme-dark .cover-watermark img {
 }
 
 .register-dropdown:focus {
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
@@ -6575,14 +6361,14 @@ html.theme-dark .cover-watermark img {
 }
 
 .selection-card.selected {
-  background: #eff6ff;
-  border-color: #3b82f6;
+  background: var(--blue-50);
+  border-color: var(--ai-accent);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
 }
 
 .selection-card.selected:hover {
-  background: #dbeafe;
-  border-color: #2563eb;
+  background: var(--blue-100);
+  border-color: var(--ai-accent-hover);
 }
 
 /* Card Checkbox/Radio */
@@ -6596,7 +6382,7 @@ html.theme-dark .cover-watermark img {
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--ai-accent);
 }
 
 /* Card Content */
@@ -6728,7 +6514,7 @@ html.theme-dark .cover-watermark img {
   display: flex;
   gap: 16px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-600) 100%);
   border-radius: 12px;
   margin-top: 32px;
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
@@ -6792,7 +6578,7 @@ html.theme-dark .selection-card:hover {
 
 html.theme-dark .selection-card.selected {
   background: #1e3a8a;
-  border-color: #3b82f6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .selection-card.selected:hover {
@@ -6832,20 +6618,20 @@ html.theme-dark .empty-state-info {
    CHART IMPORT & ACTIONS
    ======================================== */
 
-/* Purple Add Chart Button */
+/* Add Chart Button - Enterprise Blue */
 .toolbar-btn-add-chart {
-  background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%) !important;
-  color: white !important;
-  border-radius: 8px !important;
-  padding: 8px 12px !important;
-  transition: all 0.2s ease !important;
-  border: none !important;
+  background: var(--ai-accent);
+  color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  border: none;
 }
 
 .toolbar-btn-add-chart:hover {
-  background: linear-gradient(135deg, #7e22ce 0%, #6b21a8 100%) !important;
+  background: var(--ai-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .toolbar-btn-add-chart svg {
@@ -6920,8 +6706,8 @@ html.theme-dark .empty-state-info {
 }
 
 .inserted-chart:hover {
-  border-color: #9333ea;
-  box-shadow: 0 4px 16px rgba(147, 51, 234, 0.15);
+  border-color: var(--ai-accent);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
 }
 
 .chart-placeholder {
@@ -7057,21 +6843,21 @@ html.theme-dark .empty-state-info {
 
 .insight-recommendations {
   padding: 16px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, var(--blue-50) 0%, var(--blue-100) 100%);
   border-radius: 10px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--blue-200);
 }
 
 .insight-recommendations h4 {
   margin: 0 0 12px 0;
   font-size: 15px;
-  color: #1e40af;
+  color: var(--blue-800);
 }
 
 .insight-recommendations ul {
   margin: 0;
   padding-left: 20px;
-  color: #1e3a8a;
+  color: var(--blue-900);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -7114,7 +6900,7 @@ html.theme-dark .inserted-chart {
 }
 
 html.theme-dark .inserted-chart:hover {
-  border-color: #9333ea;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .chart-caption {
@@ -7157,7 +6943,7 @@ html.theme-dark .insight-item strong {
 }
 
 html.theme-dark .insight-recommendations {
-  background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #1e293b 0%, var(--blue-900) 100%);
   border-color: #3730a3;
 }
 
@@ -7170,214 +6956,11 @@ html.theme-dark .insight-recommendations ul {
 }
 
 /* ========================================
-   AI THINKING MODAL - Report Generation
+   AI THINKING MODAL - REMOVED (Dead Code)
+   ~212 lines removed - these classes were never used:
+   .ai-thinking-container, .ai-thinking-brain, .brain-icon, .brain-pulse,
+   .ai-thinking-title, .ai-thinking-stages, .ai-stage, .ai-stage-dot,
+   .ai-stage-text, .ai-thinking-prompt, @keyframes pulse-expand,
+   @keyframes brain-glow, @keyframes dot-pulse
+   Use features/ai-ui.css for AI thinking UI instead
    ======================================== */
-
-.ai-thinking-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px 20px;
-  text-align: center;
-}
-
-.ai-thinking-brain {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.ai-thinking-brain .brain-icon {
-  color: #6366f1;
-  z-index: 2;
-  animation: brain-glow 2s ease-in-out infinite;
-}
-
-.ai-thinking-brain .brain-pulse {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
-  animation: pulse-expand 2s ease-out infinite;
-}
-
-.ai-thinking-brain .brain-pulse.delay-1 {
-  animation-delay: 0.5s;
-}
-
-.ai-thinking-brain .brain-pulse.delay-2 {
-  animation-delay: 1s;
-}
-
-@keyframes pulse-expand {
-  0% {
-    transform: scale(0.5);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes brain-glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
-  }
-  50% {
-    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.8));
-  }
-}
-
-.ai-thinking-brain.success .brain-icon {
-  color: #22c55e;
-  animation: none;
-  filter: drop-shadow(0 0 12px rgba(34, 197, 94, 0.6));
-}
-
-.ai-thinking-brain.success .brain-pulse {
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.3) 0%, transparent 70%);
-}
-
-.ai-thinking-brain.error .brain-icon {
-  color: #ef4444;
-  animation: none;
-  filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
-}
-
-.ai-thinking-brain.error .brain-pulse {
-  display: none;
-}
-
-.ai-thinking-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary, #0f172a);
-  margin: 0 0 24px 0;
-  min-height: 27px;
-}
-
-.ai-thinking-stages {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 280px;
-  margin-bottom: 24px;
-}
-
-.ai-stage {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  opacity: 0.4;
-  transition: all 0.3s ease;
-}
-
-.ai-stage.active {
-  opacity: 1;
-}
-
-.ai-stage.complete {
-  opacity: 1;
-}
-
-.ai-stage-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #cbd5e1;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.ai-stage.active .ai-stage-dot {
-  background: #6366f1;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
-  animation: dot-pulse 1s ease-in-out infinite;
-}
-
-.ai-stage.complete .ai-stage-dot {
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
-  animation: none;
-}
-
-@keyframes dot-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.3);
-  }
-}
-
-.ai-stage-text {
-  font-size: 13px;
-  color: var(--text-secondary, #64748b);
-  text-align: left;
-}
-
-.ai-stage.active .ai-stage-text {
-  color: var(--text-primary, #0f172a);
-  font-weight: 500;
-}
-
-.ai-stage.complete .ai-stage-text {
-  color: #22c55e;
-}
-
-.ai-thinking-prompt {
-  background: var(--bg-tertiary, #f1f5f9);
-  border-radius: 8px;
-  padding: 12px 16px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.ai-thinking-prompt .prompt-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-tertiary, #94a3b8);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.ai-thinking-prompt .prompt-text {
-  font-size: 13px;
-  color: var(--text-primary, #0f172a);
-  font-style: italic;
-  line-height: 1.4;
-}
-
-/* Dark theme support */
-html.theme-dark .ai-thinking-title {
-  color: #f1f5f9;
-}
-
-html.theme-dark .ai-thinking-prompt {
-  background: #1e293b;
-}
-
-html.theme-dark .ai-thinking-prompt .prompt-text {
-  color: #e2e8f0;
-}
-
-html.theme-dark .ai-stage-text {
-  color: #94a3b8;
-}
-
-html.theme-dark .ai-stage.active .ai-stage-text {
-  color: #f1f5f9;
-}
-
-html.theme-dark .ai-stage-dot {
-  background: #475569;
-}

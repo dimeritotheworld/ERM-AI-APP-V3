@@ -555,7 +555,7 @@ select.filter-select {
 
 .badge-type-detective {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--ai-accent);
 }
 
 .badge-type-corrective {
@@ -564,8 +564,8 @@ select.filter-select {
 }
 
 .badge-type-directive {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: var(--c-ai-soft);
+  color: var(--ai-accent);
 }
 
 .badge-type-default {
@@ -612,7 +612,7 @@ select.filter-select {
 
 .badge-status-planned {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--ai-accent);
 }
 
 .linked-count {
@@ -634,25 +634,8 @@ select.filter-select {
   opacity: 1;
 }
 
-.btn-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-icon:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-}
-
+/* .btn-icon moved to core/components.css (Canonical)
+   Module-specific override for delete button only */
 .btn-icon.btn-delete-control:hover {
   background: rgba(220, 38, 38, 0.1);
   color: #dc2626;
@@ -667,20 +650,7 @@ select.filter-select {
   gap: 24px;
 }
 
-.form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.form-label-row .form-label {
-  margin-bottom: 0;
-}
-
-.form-label-row .form-section-title {
-  margin-bottom: 0;
-}
+/* .form-label-row MOVED TO core/components.css (Canonical) */
 
 /* Linked risks list - DEPRECATED: Container removed to match risk register pattern */
 /* Tooltips now work properly without the restricting overflow container */
@@ -690,174 +660,13 @@ select.filter-select {
    ======================================== */
 
 /* AI field button */
-.ai-field-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #8b5cf6;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.1),
-    rgba(236, 72, 153, 0.1)
-  );
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.ai-field-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.2),
-    rgba(236, 72, 153, 0.2)
-  );
-  border-color: rgba(139, 92, 246, 0.5);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-}
-
-.ai-field-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-/* AI Check Bar */
-.ai-check-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.08),
-    rgba(236, 72, 153, 0.08)
-  );
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 8px;
-  margin-top: 8px;
-}
-
-.ai-check-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-check-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  border-radius: 6px;
-  color: white;
-}
-
-.ai-check-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.ai-check-text {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.ai-check-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-ai {
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  color: white;
-  border: none;
-}
-
-.btn-ai:hover {
-  background: linear-gradient(135deg, #7c3aed, #db2777);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-}
-
-.btn-ai-outline {
-  background: transparent;
-  color: #8b5cf6;
-  border: 1px solid rgba(139, 92, 246, 0.4);
-}
-
-.btn-ai-outline:hover {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: #8b5cf6;
-}
-
-/* AI Suggestions */
-.ai-suggestions-container {
-  padding: 8px 0;
-}
-
-.ai-suggestions-intro {
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-  font-size: 0.875rem;
-}
-
-.ai-suggestions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.ai-suggestion-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.15s ease;
-}
-
-.ai-suggestion-item:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  background: rgba(139, 92, 246, 0.05);
-}
-
-.ai-suggestion-content {
-  flex: 1;
-}
-
-.ai-suggestion-text {
-  margin: 0 0 4px 0;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  line-height: 1.4;
-}
-
-.ai-suggestion-desc {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.btn-ai-use {
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  color: white;
-  border: none;
-  flex-shrink: 0;
-}
-
-.btn-ai-use:hover {
-  background: linear-gradient(135deg, #7c3aed, #db2777);
-}
+/* AI STYLES MOVED TO features/ai-ui.css (Canonical)
+   Removed: .ai-field-btn, .ai-check-bar, .ai-check-content, .ai-check-icon,
+            .ai-check-text, .ai-check-actions, .btn-ai, .btn-ai-outline,
+            .ai-suggestions-container, .ai-suggestions-intro, .ai-suggestions-list,
+            .ai-suggestion-item, .ai-suggestion-content, .ai-suggestion-text,
+            .ai-suggestion-desc, .btn-ai-use
+   ~170 lines removed */
 
 /* AI Type Analysis */
 .ai-type-analysis {
@@ -880,7 +689,7 @@ select.filter-select {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  background: var(--ai-accent);
   border-radius: 10px;
   color: white;
 }
@@ -937,8 +746,8 @@ select.filter-select {
 .keyword-tag {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: var(--c-ai-soft);
+  color: var(--ai-accent);
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 20px;
@@ -1048,7 +857,7 @@ select.filter-select {
 }
 
 .strength-recommendations h5 {
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .strength-issues h5 svg,
@@ -1120,22 +929,9 @@ select.filter-select {
   white-space: pre-wrap;
 }
 
-/* AI Filled Animation */
-.ai-filled {
-  animation: aiFillPulse 0.5s ease;
-}
-
-@keyframes aiFillPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(139, 92, 246, 0.1);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
-  }
-}
+/* AI Filled Animation
+   Note: .ai-filled is defined canonically in features/ai-assistant.css
+   Removed duplicate to prevent cascade conflicts */
 
 /* ========================================
    CONTROL SELECTOR (for Risk Form)
@@ -1257,19 +1053,7 @@ select.filter-select {
     width: 100%;
   }
 
-  .ai-check-bar {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .ai-check-actions {
-    justify-content: stretch;
-  }
-
-  .ai-check-actions .btn {
-    flex: 1;
-  }
+  /* AI responsive styles moved to features/ai-ui.css */
 }
 
 /* AI Recommended Risks in Control Form */
@@ -1308,64 +1092,11 @@ select.filter-select {
 }
 
 /* ========================================
-   EMPTY STATE (Windows Explorer Style)
+   EMPTY STATE
+   MOVED TO core/components.css as .module-empty-state (Canonical)
+   Use class="module-empty-state" in HTML
+   margin-top provided by .module-list-wrapper (16px)
    ======================================== */
-
-.controls-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 40px;
-  text-align: center;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  min-height: 400px;
-}
-
-.controls-empty-state .empty-illustration {
-  margin-bottom: 24px;
-}
-
-.controls-empty-state .empty-illustration svg {
-  width: 120px;
-  height: 120px;
-}
-
-.controls-empty-state .empty-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-}
-
-.controls-empty-state .empty-description {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0 0 24px 0;
-  max-width: 400px;
-  line-height: 1.6;
-}
-
-.controls-empty-state .btn {
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Dark mode */
-html.theme-dark .controls-empty-state {
-  background: var(--card-bg);
-  border-color: var(--card-border);
-}
-
-html.theme-dark .controls-empty-state .empty-title {
-  color: var(--text-primary);
-}
-
-html.theme-dark .controls-empty-state .empty-description {
-  color: var(--text-secondary);
-}
 
 /* ========================================
    CONTROL FORM ALIGNMENT FIXES
@@ -1391,15 +1122,9 @@ html.theme-dark .controls-empty-state .empty-description {
   width: 100%;
 }
 
-/* Make labels consistent height regardless of content */
-.control-form .form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 24px;
-  margin-bottom: 6px;
-}
+/* .control-form .form-label-row redundant - base rule in components.css */
 
+/* Module-specific: ensure labels have min-height for alignment */
 .control-form .form-label {
   min-height: 24px;
   display: flex;

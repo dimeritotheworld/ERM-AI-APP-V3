@@ -13,6 +13,38 @@
   --primary-light: #e63946;
   --brand-gradient: linear-gradient(135deg, #c41e3a 0%, #8b1538 100%);
 
+  /* Enterprise Blue - Single source of truth for AI/accent colors */
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+
+  /* AI Colors - Enterprise blue (no purple, no glow, no pulse) */
+  --ai-accent: var(--blue-500);
+  --ai-accent-hover: var(--blue-600);
+  --ai-accent-dark: var(--blue-700);
+  --ai-border: #E5E7EB;
+  --ai-bg: #F9FAFB;
+  --ai-bg-soft: var(--blue-50);
+  --ai-bg-hover: var(--blue-100);
+  --ai-recommended-bg: var(--blue-50);
+  --ai-text-primary: #111827;
+  --ai-text-muted: #6B7280;
+  --ai-shadow: rgba(59, 130, 246, 0.3);
+  --ai-shadow-hover: rgba(59, 130, 246, 0.4);
+
+  /* Legacy aliases (for backwards compatibility during transition) */
+  --c-ai: var(--blue-500);
+  --c-ai-hover: var(--blue-600);
+  --c-ai-soft: rgba(59, 130, 246, 0.08);
+  --c-ai-border: #E5E7EB;
+
   /* Risk Level Colors - Consistent with heatmap */
   --risk-critical: #dc2626;  /* Red - 15-25 */
   --risk-high: #ea580c;      /* Orange - 10-14 */
@@ -78,15 +110,17 @@
   --transition-normal: 0.2s ease;
   --transition-slow: 0.3s ease;
 
-  /* Z-Index Scale */
+  /* Z-Index Scale (Unified UI Layer Hierarchy)
+     See base-modal.css for authoritative layer management
+     Hierarchy: Tooltip < Toast < Popover < Modal */
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-fixed: 300;
-  --z-modal-backdrop: 400;
-  --z-modal: 500;
-  --z-popover: 600;
-  --z-tooltip: 700;
-  --z-toast: 800;
+  --z-tooltip: 6000;
+  --z-toast: 7000;
+  --z-popover: 8000;
+  --z-modal-backdrop: 9000;
+  --z-modal: 9000;
 }
 
 /* ========================================

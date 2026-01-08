@@ -1,117 +1,7 @@
 /**
  * Report Editor Styles
- * Inline editing, AI assistance, and commenting UI
+ * Floating toolbar and AI assistance UI for V2 editor
  */
-
-/* ========================================
-   SELECTION HIGHLIGHT
-   ======================================== */
-
-/* Visual highlight for selected text when using Ask AI or AI Actions.
-   Uses a soft blue tint - like native browser selection but persistent.
-   Must match the styles in report-editor-ai.css */
-.ai-selection-highlight {
-  background-color: rgba(147, 197, 253, 0.45);
-  border-radius: 2px;
-  padding: 0 2px;
-  margin: 0 -2px;
-  display: inline;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-/* ========================================
-   EDITABLE BLOCKS
-   ======================================== */
-
-.report-editable-block {
-  position: relative;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  background: white;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  transition: all 0.15s ease;
-}
-
-.report-editable-block:hover {
-  border-color: #e2e8f0;
-}
-
-.report-editable-block:focus-within {
-  border-color: #c41e3a;
-  box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-}
-
-.report-editable-block.block-modified {
-  border-left: 3px solid #c41e3a;
-}
-
-.block-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.block-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #64748b;
-}
-
-.block-content {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #1e293b;
-  outline: none;
-  min-height: 60px;
-}
-
-.block-content:empty::before {
-  content: attr(data-placeholder);
-  color: #94a3b8;
-  font-style: italic;
-}
-
-.block-content .placeholder {
-  color: #94a3b8;
-  font-style: italic;
-}
-
-.block-content p {
-  margin: 0 0 12px 0;
-}
-
-.block-content p:last-child {
-  margin-bottom: 0;
-}
-
-/* Comment marker */
-.comment-marker {
-  position: absolute;
-  right: -32px;
-  top: 16px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fef3c7;
-  border: 1px solid #fbbf24;
-  border-radius: 50%;
-  color: #d97706;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.comment-marker:hover {
-  background: #fbbf24;
-  color: white;
-  transform: scale(1.1);
-}
 
 /* ========================================
    FLOATING TOOLBAR (Notion-style)
@@ -315,7 +205,7 @@
   width: 160px;
   background: white;
   border: 1px solid #e2e8f0;
-  border-top: 3px solid #8b5cf6;
+  border-top: 3px solid var(--ai-accent);
   border-radius: 10px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08);
   padding: 6px;
@@ -335,7 +225,7 @@
 /* When dropdown opens upward */
 #more-options-dropdown.more-options-dropdown.dropdown-above {
   border-top: 1px solid #e2e8f0;
-  border-bottom: 3px solid #8b5cf6;
+  border-bottom: 3px solid var(--ai-accent);
 }
 
 .more-dropdown-item {
@@ -386,7 +276,7 @@
   width: 220px !important;
   background: white !important;
   border: 1px solid #e2e8f0 !important;
-  border-top: 3px solid #8b5cf6 !important;
+  border-top: 3px solid var(--ai-accent) !important;
   border-radius: 10px !important;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08) !important;
   padding: 6px !important;
@@ -408,7 +298,7 @@
 /* When dropdown opens upward */
 #ai-actions-dropdown.ai-actions-dropdown.dropdown-above {
   border-top: 1px solid #e2e8f0 !important;
-  border-bottom: 3px solid #8b5cf6 !important;
+  border-bottom: 3px solid var(--ai-accent) !important;
 }
 
 #ai-actions-dropdown.ai-actions-dropdown.dropdown-above.visible {
@@ -558,18 +448,7 @@
   font-size: 13px;
 }
 
-.ai-loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e2e8f0;
-  border-top-color: #c41e3a;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* .ai-loading-spinner MOVED TO features/ai-ui.css (Canonical) */
 
 .ai-preview-actions {
   display: flex;
@@ -851,7 +730,7 @@
   margin: 10px 0;
   padding: 10px 14px;
   background: #f8fafc;
-  border-left: 3px solid #8b5cf6;
+  border-left: 3px solid var(--ai-accent);
   color: #475569;
   font-style: italic;
 }
@@ -865,463 +744,10 @@
 }
 
 /* ========================================
-   ASK AI PANEL
+   ASK AI PANEL - STYLES MOVED TO report-editor-ai.css
+   All Ask AI panel styles are now in report-editor-ai.css
+   to avoid duplication and conflicts.
    ======================================== */
-
-/* ===========================================
-   ASK AI PANEL - Notion-style subtle design
-   Goal: Editor helper, not chatbot. Calm, quiet, professional.
-   =========================================== */
-.ask-ai-panel {
-  position: fixed;
-  width: 400px;
-  max-width: 420px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  z-index: 9999999;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(4px);
-  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  max-height: min(70vh, 520px);
-}
-
-.ask-ai-panel.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-/* When panel opens upward */
-.ask-ai-panel.dropdown-above {
-  transform: translateY(-4px);
-}
-
-.ask-ai-panel.dropdown-above.visible {
-  transform: translateY(0);
-}
-
-/* Header - subtle, no colored background */
-.ask-ai-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  flex-shrink: 0;
-  background: transparent;
-}
-
-.ask-ai-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-}
-
-/* Small sparkle icon in neutral color */
-.ask-ai-title svg {
-  width: 14px;
-  height: 14px;
-  color: #6b7280;
-}
-
-.ask-ai-title::before {
-  content: '✦';
-  font-size: 12px;
-  color: #9ca3af;
-  margin-right: 2px;
-}
-
-.ask-ai-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ask-ai-close:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
-
-/* Context area - minimal */
-.ask-ai-context {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 16px;
-  background: transparent;
-  border-bottom: 1px solid #f1f5f9;
-  flex-shrink: 0;
-}
-
-.context-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  flex-shrink: 0;
-  padding-top: 2px;
-}
-
-.ask-ai-context-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.context-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 400;
-  color: #6b7280;
-}
-
-.context-chip-empty {
-  background: transparent;
-  border-style: dashed;
-  border-color: #d1d5db;
-  color: #9ca3af;
-  font-style: italic;
-}
-
-.ask-ai-suggestions {
-  padding: 8px 10px;
-  border-bottom: 1px solid #f1f5f9;
-  flex-shrink: 0;
-}
-
-.suggestion-item {
-  padding: 8px 10px;
-  margin-bottom: 2px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #334155;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.suggestion-item:last-child {
-  margin-bottom: 0;
-}
-
-.suggestion-item:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
-/* Input area - clean, minimal */
-.ask-ai-input-area {
-  padding: 12px 16px;
-  flex-shrink: 0;
-}
-
-.ask-ai-input-area textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #374151;
-  resize: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  font-family: inherit;
-}
-
-.ask-ai-input-area textarea:focus {
-  outline: none;
-  border-color: #9ca3af;
-  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.1);
-}
-
-.ask-ai-input-area textarea::placeholder {
-  color: #9ca3af;
-}
-
-/* Submit button - dark, editor-style */
-.ask-ai-input-area .btn {
-  margin-top: 10px;
-  width: 100%;
-  background: #111827;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.ask-ai-input-area .btn:hover {
-  background: #1f2937;
-}
-
-.ask-ai-input-area .btn:active {
-  background: #374151;
-}
-
-/* Response area - editorial style, like draft text */
-.ask-ai-response {
-  display: none;
-  padding: 16px;
-  border-bottom: 1px solid #f1f5f9;
-  flex: 1 1 auto;
-  min-height: 80px;
-  max-height: 50vh;
-  overflow-y: auto;
-}
-
-/* Hide suggestions when response is visible */
-.ask-ai-response:not(:empty) + .ask-ai-suggestions {
-  display: none;
-}
-
-/* Loading indicator - subtle, no spinner */
-.ask-ai-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 20px 16px;
-  color: #9ca3af;
-  font-size: 12px;
-}
-
-.ask-ai-loading::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background: #9ca3af;
-  border-radius: 50%;
-  animation: subtle-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes subtle-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* AI Result - looks like draft paragraph, NOT a card/bubble */
-.ask-ai-result {
-  background: transparent;
-  border: none;
-  border-left: 2px solid #e5e7eb;
-  border-radius: 0;
-  padding: 0 0 0 12px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Result text - MUST match editor exactly
-   What users see in Ask AI panel = what they get in editor
-   Font: 16px (matches .editor-v2-paragraph)
-   Line-height: 1.7 (matches editor)
-   Font-family: same system font stack as editor */
-.ask-ai-result .result-text {
-  font-size: 16px;
-  line-height: 1.7;
-  color: #374151;
-  margin-bottom: 16px;
-  max-height: 280px;
-  overflow-y: auto;
-  overflow-x: auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  /* CRITICAL: Override flex for proper block/table layout */
-  display: block !important;
-}
-
-/* Headings - match editor exactly */
-.ask-ai-result .result-text h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #111827;
-  margin: 24px 0 8px 0;
-  line-height: 1.3;
-}
-.ask-ai-result .result-text h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #111827;
-  margin: 20px 0 6px 0;
-  line-height: 1.35;
-}
-.ask-ai-result .result-text h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #374151;
-  margin: 16px 0 4px 0;
-  line-height: 1.4;
-}
-.ask-ai-result .result-text h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #374151;
-  margin: 14px 0 4px 0;
-  line-height: 1.4;
-}
-
-/* Paragraphs - match editor */
-.ask-ai-result .result-text p {
-  font-size: 16px;
-  line-height: 1.7;
-  margin: 0 0 12px 0;
-}
-
-/* Lists - match editor exactly (16px, 1.7 line-height) */
-.ask-ai-result .result-text ul,
-.ask-ai-result .result-text ol {
-  font-size: 16px;
-  line-height: 1.7;
-  margin: 8px 0;
-  padding-left: 24px;
-}
-.ask-ai-result .result-text ul {
-  list-style-type: disc !important;
-}
-.ask-ai-result .result-text ol {
-  list-style-type: decimal !important;
-}
-.ask-ai-result .result-text li {
-  display: list-item !important;
-  padding: 2px 0;
-}
-
-/* Tables in Ask AI result - match editor table styling */
-.ask-ai-result .result-text table,
-.ask-ai-result .result-text table.ai-table {
-  display: table !important;
-  width: 100%;
-  border-collapse: collapse !important;
-  border-spacing: 0 !important;
-  margin: 12px 0;
-  font-size: 14px;
-  table-layout: auto;
-}
-
-.ask-ai-result .result-text tr {
-  display: table-row !important;
-}
-
-.ask-ai-result .result-text th,
-.ask-ai-result .result-text td {
-  display: table-cell !important;
-  padding: 10px 14px;
-  border: 1px solid #d1d5db !important;
-  text-align: left;
-  vertical-align: top;
-}
-
-.ask-ai-result .result-text th {
-  background: #f3f4f6;
-  font-weight: 600;
-  color: #374151;
-}
-
-.ask-ai-result .result-text td {
-  color: #334155;
-}
-
-.ask-ai-result .result-text tr:nth-child(even) td {
-  background: #f9fafb;
-}
-
-/* Result text scrollbar */
-.ask-ai-result .result-text::-webkit-scrollbar {
-  width: 4px;
-}
-
-.ask-ai-result .result-text::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.ask-ai-result .result-text::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 2px;
-}
-
-/* Action buttons - editor style */
-.result-actions {
-  display: flex;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
-  margin-top: auto;
-  flex-shrink: 0;
-}
-
-.result-actions .btn {
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.12s ease;
-}
-
-/* Primary action (Insert) - dark */
-.result-actions .btn-primary,
-.result-actions .btn:first-child {
-  background: #111827;
-  color: #ffffff;
-  border: none;
-}
-
-.result-actions .btn-primary:hover,
-.result-actions .btn:first-child:hover {
-  background: #1f2937;
-}
-
-/* Secondary actions (Append, Copy) - ghost */
-.result-actions .btn-secondary,
-.result-actions .btn:not(:first-child) {
-  background: transparent;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-}
-
-.result-actions .btn-secondary:hover,
-.result-actions .btn:not(:first-child):hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-}
-
-/* Disclaimer - subtle, not purple */
-.ask-ai-disclaimer {
-  padding: 8px 16px;
-  background: #f9fafb;
-  border-top: 1px solid #f1f5f9;
-  border-radius: 0 0 10px 10px;
-  font-size: 10px;
-  color: #9ca3af;
-  text-align: center;
-  flex-shrink: 0;
-}
 
 /* ========================================
    COMMENT COMPOSER
@@ -1332,7 +758,7 @@
   width: 280px;
   background: white;
   border: 1px solid #e2e8f0;
-  border-top: 3px solid #8b5cf6;
+  border-top: 3px solid var(--ai-accent);
   border-radius: 10px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.08);
   z-index: 9999999;
@@ -1351,7 +777,7 @@
 /* When composer opens upward */
 .comment-composer.dropdown-above {
   border-top: 1px solid #e2e8f0;
-  border-bottom: 3px solid #8b5cf6;
+  border-bottom: 3px solid var(--ai-accent);
 }
 
 .comment-composer-header {
@@ -1390,7 +816,7 @@
   background: #faf5ff;
   border-bottom: 1px solid #e9d5ff;
   font-size: 11px;
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
   font-style: italic;
   max-height: 50px;
   overflow: hidden;
@@ -1749,11 +1175,11 @@ html.theme-dark .comment-text {
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #6b21a8;
+  color: var(--ai-accent-hover);
 }
 
 .insert-content-title svg {
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .insert-content-close {
@@ -1773,7 +1199,7 @@ html.theme-dark .comment-text {
 
 .insert-content-close:hover {
   background: rgba(139, 92, 246, 0.15);
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
 }
 
 .insert-content-body {
@@ -1862,7 +1288,7 @@ html.theme-dark .comment-text {
   background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
   border: 1px solid #e9d5ff;
   border-radius: 8px;
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
   flex-shrink: 0;
 }
 
@@ -1910,15 +1336,15 @@ html.theme-dark .comment-text {
   font-weight: 500;
 }
 
-.btn-outline-purple {
-  color: #7c3aed;
-  border: 1px solid #c4b5fd;
+.btn-outline-ai {
+  color: var(--ai-accent);
+  border: 1px solid var(--ai-border);
   background: transparent;
 }
 
-.btn-outline-purple:hover {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: #8b5cf6;
+.btn-outline-ai:hover {
+  background: var(--ai-bg);
+  border-color: var(--ai-accent);
 }
 
 /* ========================================
@@ -1944,7 +1370,7 @@ html.theme-dark .comment-text {
 }
 
 .embedded-content-block.embedded-selected {
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 4px 12px rgba(139, 92, 246, 0.15);
 }
 
@@ -1973,11 +1399,11 @@ html.theme-dark .comment-text {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #6b21a8;
+  color: var(--ai-accent-hover);
 }
 
 .embedded-content-label svg {
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .embedded-content-badge {
@@ -1985,7 +1411,7 @@ html.theme-dark .comment-text {
   font-weight: 500;
   padding: 3px 8px;
   background: rgba(139, 92, 246, 0.1);
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
   border-radius: 12px;
 }
 
@@ -2065,7 +1491,7 @@ html.theme-dark .comment-text {
 .embedded-table .cell-ref {
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 11px;
-  color: #6b21a8;
+  color: var(--ai-accent-hover);
 }
 
 .embedded-table .cell-score {
@@ -2106,8 +1532,8 @@ html.theme-dark .comment-text {
 
 .status-badge.status-in-progress,
 .status-badge.status-mitigating {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--blue-100);
+  color: var(--ai-accent-hover);
 }
 
 .status-badge.status-closed,
@@ -2327,7 +1753,7 @@ html.theme-dark .comment-text {
 }
 
 .embedded-kpi-card.kpi-controls .kpi-value {
-  color: #2563eb;
+  color: var(--ai-accent-hover);
 }
 
 /* ========================================
@@ -2366,7 +1792,7 @@ html.theme-dark .comment-text {
 
 .category-bar-embedded {
   height: 100%;
-  background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+  background: var(--ai-accent);
   border-radius: 6px;
   transition: width 0.3s ease;
 }
@@ -2375,7 +1801,7 @@ html.theme-dark .comment-text {
   width: 40px;
   font-size: 12px;
   font-weight: 600;
-  color: #6b21a8;
+  color: var(--ai-accent-hover);
   text-align: right;
 }
 
@@ -2411,7 +1837,7 @@ html.theme-dark .comment-text {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: var(--ai-accent);
   color: white;
   font-size: 12px;
   font-weight: 700;
@@ -2478,7 +1904,7 @@ html.theme-dark .comment-text {
   gap: 4px;
   padding: 6px 10px;
   background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border: 2px solid #8b5cf6;
+  border: 2px solid var(--ai-accent);
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000003;
@@ -2502,14 +1928,14 @@ html.theme-dark .comment-text {
   transform: translateX(-50%);
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid #8b5cf6;
+  border-top: 8px solid var(--ai-accent);
 }
 
 #embedded-content-toolbar.embedded-content-toolbar.toolbar-below::after {
   bottom: auto;
   top: -8px;
   border-top: none;
-  border-bottom: 8px solid #8b5cf6;
+  border-bottom: 8px solid var(--ai-accent);
 }
 
 .embedded-toolbar-btn {
@@ -2520,7 +1946,7 @@ html.theme-dark .comment-text {
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: #6b21a8;
+  color: var(--ai-accent-hover);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -2530,7 +1956,7 @@ html.theme-dark .comment-text {
 
 .embedded-toolbar-btn:hover {
   background: rgba(139, 92, 246, 0.15);
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
 }
 
 .embedded-toolbar-btn svg {
@@ -2540,13 +1966,13 @@ html.theme-dark .comment-text {
 }
 
 .embedded-toolbar-btn.embedded-toolbar-btn-primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: var(--ai-accent);
   color: white;
   padding: 6px 10px;
 }
 
 .embedded-toolbar-btn.embedded-toolbar-btn-primary:hover {
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  background: var(--ai-accent);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
 }
 
@@ -2586,7 +2012,7 @@ html.theme-dark .insert-content-close {
 
 html.theme-dark .insert-content-close:hover {
   background: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .insert-content-section-title {
@@ -2642,7 +2068,7 @@ html.theme-dark .embedded-content-block.embedded-hover {
 }
 
 html.theme-dark .embedded-content-block.embedded-selected {
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
 }
 
@@ -2657,7 +2083,7 @@ html.theme-dark .embedded-content-label {
 
 html.theme-dark .embedded-content-badge {
   background: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .embedded-table th {
@@ -2706,7 +2132,7 @@ html.theme-dark .category-bar-track-embedded {
 }
 
 html.theme-dark .category-count-embedded {
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .top-risk-item {
@@ -2742,7 +2168,7 @@ html.theme-dark .heatmap-dot-more {
 
 html.theme-dark #embedded-content-toolbar.embedded-content-toolbar {
   background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .embedded-toolbar-btn {
@@ -2751,7 +2177,7 @@ html.theme-dark .embedded-toolbar-btn {
 
 html.theme-dark .embedded-toolbar-btn:hover {
   background: rgba(139, 92, 246, 0.2);
-  color: #a78bfa;
+  color: var(--blue-400);
 }
 
 html.theme-dark .embedded-toolbar-divider {
@@ -2774,7 +2200,7 @@ html.theme-dark .embedded-toolbar-divider {
   background: white;
   border: 2px solid #c4b5fd;
   border-radius: 50%;
-  color: #8b5cf6;
+  color: var(--ai-accent);
   cursor: pointer;
   z-index: 1000000;
   opacity: 0;
@@ -2793,8 +2219,8 @@ html.theme-dark .embedded-toolbar-divider {
 
 .floating-plus-btn:hover,
 .floating-plus-btn.expanded {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  border-color: #7c3aed;
+  background: var(--ai-accent);
+  border-color: var(--ai-accent-hover);
   color: white;
   transform: scale(1.1);
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
@@ -2806,13 +2232,13 @@ html.theme-dark .embedded-toolbar-divider {
 
 .floating-plus-btn:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
 }
 
 .floating-plus-btn:focus-visible {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
 }
 
@@ -2847,14 +2273,14 @@ html.theme-dark .embedded-toolbar-divider {
 html.theme-dark .floating-plus-btn {
   background: #1e293b;
   border-color: #4338ca;
-  color: #a78bfa;
+  color: var(--blue-400);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 html.theme-dark .floating-plus-btn:hover,
 html.theme-dark .floating-plus-btn.expanded {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  border-color: #6d28d9;
+  background: var(--ai-accent-hover);
+  border-color: var(--blue-700);
   color: white;
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
 }
@@ -2908,7 +2334,7 @@ html.theme-dark .floating-plus-btn.expanded {
 
 .insert-option-select:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
 }
 
@@ -2950,11 +2376,11 @@ html.theme-dark .floating-plus-btn.expanded {
 }
 
 .layout-option input[type="radio"]:checked + .layout-option-visual {
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
 }
 
 .layout-option input[type="radio"]:checked ~ .layout-label {
-  color: #8b5cf6;
+  color: var(--ai-accent);
   font-weight: 500;
 }
 
@@ -2974,7 +2400,7 @@ html.theme-dark .floating-plus-btn.expanded {
 .layout-box {
   width: 16px;
   height: 16px;
-  background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #c4b5fd 0%, var(--blue-400) 100%);
   border-radius: 2px;
 }
 
@@ -3065,7 +2491,7 @@ html.theme-dark .floating-plus-btn.expanded {
 
 .coverage-none .coverage-value { color: #dc2626; }
 .coverage-directive .coverage-value { color: #f59e0b; }
-.coverage-detective .coverage-value { color: #3b82f6; }
+.coverage-detective .coverage-value { color: var(--ai-accent); }
 .coverage-preventive .coverage-value { color: #10b981; }
 
 /* KPI Card Variants */
@@ -3117,7 +2543,7 @@ html.theme-dark .insert-option-select {
 }
 
 html.theme-dark .insert-option-select:focus {
-  border-color: #8b5cf6;
+  border-color: var(--ai-accent);
 }
 
 html.theme-dark .heatmap-options-section {

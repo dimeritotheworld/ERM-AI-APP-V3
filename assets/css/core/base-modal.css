@@ -1,0 +1,912 @@
+/**
+ * Dimeri ERM - Unified Modal & Pop-Up System
+ *
+ * DESIGN CONTRACT v1.0 - NON-NEGOTIABLE RULES
+ * ============================================
+ *
+ * This file is the SINGLE SOURCE OF TRUTH for all modals and pop-ups.
+ * All pop-ups derive from this base. Variations are props, not new CSS.
+ *
+ * GOLDEN RULES:
+ * 1. ONLY ONE modal may exist on screen at any time
+ * 2. Never stack modals (modal on top of modal)
+ * 3. Opening a new modal MUST close the previous one first
+ * 4. ESC key closes topmost layer only
+ * 5. Modal owns the screen - all other layers close when modal opens
+ *
+ * UI LAYER HIERARCHY (strongest → weakest):
+ * - Modal (z-index: 9000) - Max: 1, blocking
+ * - Popover/Panel (z-index: 8000) - Max: 1, closes on click outside
+ * - Toast (z-index: 7000) - Max: 1, auto-dismiss
+ * - Tooltip (z-index: 6000) - Max: 1 per cursor
+ *
+ * SIZE VARIANTS:
+ * - SM (480px) - Confirmations, export, simple upgrade
+ * - MD (640px) - Default, create risk, AI suggestions
+ * - LG (880px) - AI setup flows, multi-step review
+ *
+ * CONTENT VARIANTS (add via options.variant in JS):
+ * - 'thinking'      - AI processing modal, no header/footer
+ * - 'portfolio'     - Scrollable large content
+ * - 'compact'       - Reduced padding for inline prompts
+ * - 'form-tooltips' - Allow overflow for tooltips in forms
+ *
+ * VISUAL RULES:
+ * - No neon, no gradients (except subtle bg)
+ * - No purple (deprecated)
+ * - No red backgrounds
+ * - Primary action: Brand red (buttons only)
+ * - AI assistance: Muted blue
+ * - Typography: Neutral, confident, instructional
+ *
+ * LEGACY SYSTEMS (use base modal for new code):
+ * - first-time-ux.css - FTUX overlay (uses z-index vars)
+ * - dashboard.css - Dashboard popups
+ * - preview-dashboard.css - Preview overlays
+ * - report-editor-v2.css - Editor modal overlays
+ */
+
+/* ========================================
+   CSS CUSTOM PROPERTIES - MODAL SYSTEM
+   Single source for all modal values
+   ======================================== */
+:root {
+  /* Z-index hierarchy (DO NOT CHANGE ORDER) */
+  --z-tooltip: 6000;
+  --z-toast: 7000;
+  --z-popover: 8000;
+  --z-modal: 9000;
+
+  /* Modal sizing (non-negotiable) */
+  --modal-sm: 480px;
+  --modal-md: 640px;
+  --modal-lg: 880px;
+
+  /* Modal spacing (consistent everywhere) */
+  --modal-padding-header: 24px 32px;
+  --modal-padding-body: 32px;
+  --modal-padding-footer: 24px 32px;
+  --modal-radius: 16px;
+  --modal-max-height: 90vh;
+
+  /* Overlay */
+  --overlay-bg: rgba(15, 23, 42, 0.6);
+
+  /* Scrollbar */
+  --scrollbar-width: 6px;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+
+  /* Animation timing */
+  --modal-transition: 200ms ease;
+}
+
+/* ========================================
+   MODAL OVERLAY (BLOCKING)
+   The dark backdrop that blocks all interaction
+   ======================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: var(--z-modal);
+
+  /* Initial state - hidden */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--modal-transition), visibility var(--modal-transition);
+}
+
+/* Active state */
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* IMPORTANT: Disable pointer events on body when modal is open */
+body.modal-open {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+body.modal-open .modal-overlay {
+  pointer-events: auto;
+}
+
+/* ========================================
+   BASE MODAL
+   Single source component - all modals derive from this
+   ======================================== */
+.modal {
+  background: var(--bg-secondary, #ffffff);
+  border-radius: var(--modal-radius);
+  width: 100%;
+  max-width: var(--modal-md);
+  max-height: var(--modal-max-height);
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  /* Initial state - scaled down */
+  transform: scale(0.95) translateY(20px);
+  transition: transform var(--modal-transition);
+
+  /* Ensure modal is always centered */
+  position: relative;
+  margin: auto;
+}
+
+/* Active state - scale up */
+.modal-overlay.active .modal {
+  transform: scale(1) translateY(0);
+}
+
+/* ========================================
+   MODAL SIZE VARIANTS
+   Props-based sizing, not new components
+   ======================================== */
+.modal.modal-sm,
+.modal-sm .modal {
+  max-width: var(--modal-sm);
+}
+
+.modal.modal-md,
+.modal-md .modal {
+  max-width: var(--modal-md);
+}
+
+.modal.modal-lg,
+.modal-lg .modal {
+  max-width: var(--modal-lg);
+}
+
+/* Fullscreen variant - Use sparingly (report editor only)
+   Per spec: "No full-screen modals for core ERM flows" */
+.modal.modal-fullscreen,
+.modal-fullscreen .modal {
+  width: 90vw;
+  max-width: 90vw;
+  height: 90vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-fullscreen .modal-header {
+  flex-shrink: 0;
+}
+
+.modal-fullscreen .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--modal-padding-body);
+}
+
+.modal-fullscreen .modal-footer {
+  flex-shrink: 0;
+}
+
+/* ========================================
+   MODAL HEADER
+   Fixed position, never scrolls
+   ======================================== */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--modal-padding-header);
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+/* Modal title with AI icon */
+.modal-title .ai-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--ai-accent);
+  flex-shrink: 0;
+}
+
+/* Close button */
+.modal-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--text-secondary, #64748b);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: var(--bg-tertiary, #f1f5f9);
+  color: var(--text-primary, #1e293b);
+}
+
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========================================
+   MODAL BODY
+   Scrollable content area
+   ======================================== */
+.modal-body {
+  padding: var(--modal-padding-body);
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0; /* Important for flex scroll */
+
+  /* Calculate max height: viewport - header - footer - padding */
+  max-height: calc(var(--modal-max-height) - 160px);
+}
+
+/* Custom scrollbar - thin, neutral, low contrast */
+.modal-body::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox scrollbar */
+.modal-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* ========================================
+   MODAL FOOTER
+   Fixed position, never scrolls
+   Contains action buttons
+   ======================================== */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: var(--modal-padding-footer);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  flex-shrink: 0;
+  background: var(--bg-secondary, #ffffff);
+}
+
+/* Footer with left-aligned content */
+.modal-footer.spread {
+  justify-content: space-between;
+}
+
+/* Footer with centered content */
+.modal-footer.centered {
+  justify-content: center;
+}
+
+/* ========================================
+   MODAL DESCRIPTION
+   Standard intro text styling
+   ======================================== */
+.modal-description {
+  font-size: 0.9375rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+/* ========================================
+   MODAL INTENT VARIANTS
+   Visual styling based on modal purpose
+   These are configuration, NOT new components
+   ======================================== */
+
+/* Standard/Default - No special styling */
+
+/* AI Assist Intent - Subtle blue accent */
+.modal.modal-ai .modal-header {
+  background: linear-gradient(135deg, var(--blue-50, #eff6ff) 0%, #f8fafc 100%);
+  border-bottom-color: var(--blue-100, #dbeafe);
+}
+
+.modal.modal-ai .modal-title {
+  color: var(--blue-800, #1e40af);
+}
+
+/* Upgrade Intent - Clean, no pressure */
+.modal.modal-upgrade .modal-footer {
+  background: #f8fafc;
+}
+
+/* Danger/Destructive Intent - Warning state */
+.modal.modal-danger .modal-header {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%);
+  border-bottom-color: #fecaca;
+}
+
+.modal.modal-danger .modal-title {
+  color: #dc2626;
+}
+
+/* Success Intent - Confirmation state */
+.modal.modal-success .modal-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-bottom-color: #bbf7d0;
+}
+
+.modal.modal-success .modal-title {
+  color: #16a34a;
+}
+
+/* ========================================
+   POPOVER / PANEL LAYER
+   Non-modal, closes on click outside
+   Max: 1 on screen
+   ======================================== */
+.popover {
+  position: absolute;
+  background: var(--bg-secondary, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: var(--z-popover);
+
+  /* Initial state */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.15s ease;
+}
+
+.popover.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* RULE: When modal opens, close all popovers */
+body.modal-open .popover {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ========================================
+   TOAST LAYER
+   Notification, auto-dismiss
+   Max: 1 on screen
+   ======================================== */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--bg-secondary, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 320px;
+  max-width: 480px;
+  pointer-events: auto;
+
+  /* Initial state - slide from right */
+  transform: translateX(calc(100% + 24px));
+  transition: transform 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+/* RULE: When modal opens, dismiss toasts */
+body.modal-open .toast-container {
+  opacity: 0.5;
+}
+
+/* ========================================
+   TOOLTIP LAYER
+   Contextual, follows cursor
+   Max: 1 per focus
+   ======================================== */
+.tooltip {
+  position: absolute;
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  max-width: 250px;
+  z-index: var(--z-tooltip);
+
+  /* Initial state */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+}
+
+.tooltip.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip arrow */
+.tooltip::after {
+  content: '';
+  position: absolute;
+  border: 6px solid transparent;
+}
+
+.tooltip.tooltip-top::after {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: #1e293b;
+}
+
+.tooltip.tooltip-bottom::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: #1e293b;
+}
+
+/* ========================================
+   OPTION CARDS (for modal choices)
+   Used in create flows, selection modals
+   ======================================== */
+.modal-options {
+  display: grid;
+  gap: 16px;
+}
+
+.modal-options.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.modal-options.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.modal-option-card {
+  background: var(--bg-secondary, #ffffff);
+  border: 2px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-option-card:hover {
+  border-color: var(--primary-color);
+  background: rgba(196, 30, 58, 0.02);
+}
+
+.modal-option-card.selected {
+  border-color: var(--primary-color);
+  background: rgba(196, 30, 58, 0.05);
+}
+
+.modal-option-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-option-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: var(--bg-tertiary, #f1f5f9);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.modal-option-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 8px 0;
+}
+
+.modal-option-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Pro/Upgrade badge on option card */
+.modal-option-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  margin-top: 12px;
+}
+
+.modal-option-badge.pro {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+}
+
+/* ========================================
+   SCROLLABLE CONTENT WITH STICKY FOOTER
+   For modals with long lists (AI suggestions, selections)
+   ======================================== */
+.modal-scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+  max-height: calc(var(--modal-max-height) - 220px);
+}
+
+.modal-scrollable-content::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.modal-scrollable-content::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.modal-scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* Sticky footer pattern */
+.modal-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-secondary, #ffffff);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  padding: 16px 24px;
+  margin: 0 -32px -32px;
+}
+
+/* ========================================
+   AI THINKING / PROCESSING STATE
+   Calm, non-technical progress indicators
+   ======================================== */
+.modal-processing {
+  text-align: center;
+  padding: 48px 32px;
+}
+
+.modal-processing-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  background: var(--blue-50, #eff6ff);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: processingPulse 2s ease-in-out infinite;
+}
+
+.modal-processing-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--ai-accent);
+}
+
+@keyframes processingPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.modal-processing-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 8px 0;
+}
+
+.modal-processing-text {
+  font-size: 0.9375rem;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+/* Processing steps list */
+.modal-processing-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+  text-align: left;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-processing-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+}
+
+.modal-processing-step.active {
+  color: var(--ai-accent);
+}
+
+.modal-processing-step.completed {
+  color: var(--success, #10b981);
+}
+
+.modal-processing-step-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   INLINE EXPLANATIONS (AI "why" content)
+   Muted, expandable, never dominant
+   ======================================== */
+.modal-explanation {
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid var(--blue-200, #bfdbfe);
+  margin-top: 12px;
+}
+
+.modal-explanation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.modal-explanation-toggle:hover {
+  color: var(--ai-accent);
+}
+
+.modal-explanation-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.modal-explanation-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+
+.modal-explanation-content {
+  display: none;
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.6;
+}
+
+.modal-explanation-content.show {
+  display: block;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+@media (max-width: 768px) {
+  :root {
+    --modal-sm: 100%;
+    --modal-md: 100%;
+    --modal-lg: 100%;
+  }
+
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .modal {
+    border-radius: 12px;
+    max-height: calc(100vh - 32px);
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .modal-footer {
+    padding: 20px 24px;
+    flex-wrap: wrap;
+  }
+
+  .modal-options.grid-2,
+  .modal-options.grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+html.theme-dark {
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb: #475569;
+  --scrollbar-thumb-hover: #64748b;
+}
+
+html.theme-dark .modal {
+  background: var(--bg-secondary, #1e293b);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+html.theme-dark .modal-header {
+  border-bottom-color: var(--border-color, #334155);
+}
+
+html.theme-dark .modal-footer {
+  border-top-color: var(--border-color, #334155);
+  background: var(--bg-secondary, #1e293b);
+}
+
+html.theme-dark .modal-explanation {
+  background: #0f172a;
+  border-left-color: #1e40af;
+}
+
+html.theme-dark .tooltip {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* ========================================
+   MODAL CONTENT VARIANTS
+   Class-based patterns - NO :has() hacks
+   Add these classes to modal-overlay or modal
+   ======================================== */
+
+/* AI Thinking Modal - full height, no header/footer */
+.modal-overlay.modal-thinking {
+  align-items: flex-start;
+  padding-top: 40px;
+  overflow-y: auto;
+}
+
+.modal-overlay.modal-thinking .modal {
+  max-height: none;
+  overflow: visible;
+}
+
+.modal-overlay.modal-thinking .modal-body {
+  max-height: none;
+  overflow-y: visible;
+  padding: 24px;
+}
+
+.modal-overlay.modal-thinking .modal-header,
+.modal-overlay.modal-thinking .modal-footer {
+  display: none;
+}
+
+/* Portfolio Review Modal - scrollable large content */
+.modal-overlay.modal-portfolio .modal {
+  overflow: hidden;
+}
+
+.modal-overlay.modal-portfolio .modal-body {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: calc(80vh - 160px);
+  padding-bottom: 24px;
+  padding-right: 8px;
+}
+
+/* Compact Modal - reduced padding for inline prompts */
+.modal-overlay.modal-compact .modal-body {
+  padding: 20px 24px 16px;
+}
+
+.modal-overlay.modal-compact .modal-footer {
+  border-top: none;
+  padding-top: 8px;
+}
+
+/* Form Modal with tooltips - allow overflow */
+.modal-overlay.modal-form-tooltips .form-section,
+.modal-overlay.modal-form-tooltips .form-group {
+  overflow: visible;
+  position: relative;
+  z-index: auto;
+  background: transparent;
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modal-overlay,
+  .popover,
+  .toast,
+  .tooltip {
+    transition: none;
+  }
+
+  .modal-processing-icon {
+    animation: none;
+  }
+}
+
+/* Focus trap visual indicator */
+.modal:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}

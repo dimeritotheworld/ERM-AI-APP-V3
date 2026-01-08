@@ -23,7 +23,12 @@
     highlightElements: [],  // Array for multi-element selections
     pendingAIResult: null,
     lastAskAIQuestion: null,
-    currentReport: null
+    currentReport: null,
+    selectedBlocks: [], // Block IDs for block-level multi-select
+    // Chart/embed context for AI
+    chartContext: null,  // { blockType, chartKind, title, register, filters, data, insights }
+    blockContext: null,  // { blockType, textContent, tableData, listItems, etc. }
+    aiMode: 'text'       // 'text', 'chart', or 'block'
   };
 
   // ========================================
@@ -51,6 +56,790 @@
 
   ERM.reportEditorAI.getState = function(key) {
     return state[key];
+  };
+
+  // ========================================
+  // CHART/EMBED CONTEXT EXTRACTION
+  // ========================================
+
+  /**
+   * Extract deep context from a chart/embed block
+   * @param {HTMLElement} embedBlock - The embed block element
+   * @returns {Object} Context payload for AI
+   */
+  ERM.reportEditorAI.extractChartContext = function(embedBlock) {
+    if (!embedBlock) return null;
+
+    var blockId = embedBlock.getAttribute('data-block-id');
+    var embedType = embedBlock.getAttribute('data-embed-type') || 'unknown';
+    var registerId = embedBlock.getAttribute('data-register-id') || 'all';
+    var layout = embedBlock.getAttribute('data-layout') || 'side-by-side';
+
+    console.log('[ReportEditorAI] Extracting chart context - blockId:', blockId, 'embedType:', embedType, 'registerId:', registerId);
+
+    // Get register name
+    var registerTitle = 'All Registers';
+    if (registerId !== 'all') {
+      var registers = ERM.storage ? (ERM.storage.get('registers') || ERM.storage.get('riskRegisters') || []) : [];
+      for (var i = 0; i < registers.length; i++) {
+        if (registers[i].id === registerId) {
+          registerTitle = registers[i].name || 'Unnamed Register';
+          break;
+        }
+      }
+    }
+
+    // Build context object
+    var context = {
+      blockType: 'embed',
+      chartKind: embedType,
+      blockId: blockId,
+      title: this.getChartTitle(embedType),
+      register: {
+        id: registerId,
+        title: registerTitle
+      },
+      filters: {
+        registerId: registerId,
+        layout: layout
+      },
+      data: {},
+      insights: {},
+      visibleLabels: []
+    };
+
+    // Extract actual data based on embed type
+    try {
+      context.data = this.extractChartData(embedType, registerId);
+      context.insights = this.computeChartInsights(embedType, context.data);
+      context.visibleLabels = this.extractVisibleLabels(embedBlock);
+    } catch (e) {
+      console.warn('[ReportEditorAI] Error extracting chart data:', e);
+    }
+
+    console.log('[ReportEditorAI] Chart context extracted:', {
+      chartKind: context.chartKind,
+      register: context.register.title,
+      dataKeys: Object.keys(context.data),
+      insightKeys: Object.keys(context.insights)
+    });
+
+    return context;
+  };
+
+  /**
+   * Get human-readable title for chart type
+   */
+  ERM.reportEditorAI.getChartTitle = function(embedType) {
+    var titles = {
+      'heatmap': 'Risk Heatmap',
+      'risks': 'Top Risks',
+      'chart': 'Risk Concentration by Category',
+      'kpi': 'KPI Cards',
+      'controls': 'Control Coverage',
+      'register': 'Risk Register Table'
+    };
+    return titles[embedType] || 'Embedded Content';
+  };
+
+  /**
+   * Extract actual data used to render the chart
+   */
+  ERM.reportEditorAI.extractChartData = function(embedType, registerId) {
+    var data = {};
+    var allRisks = ERM.storage ? ERM.storage.get('risks') || [] : [];
+    var allControls = ERM.storage ? ERM.storage.get('controls') || [] : [];
+    var registers = ERM.storage ? (ERM.storage.get('registers') || ERM.storage.get('riskRegisters') || []) : [];
+
+    // Filter risks by register if needed
+    var risks = allRisks;
+    if (registerId && registerId !== 'all') {
+      risks = allRisks.filter(function(r) {
+        return r.registerId === registerId;
+      });
+    }
+
+    switch (embedType) {
+      case 'heatmap':
+        // Heatmap data: risk distribution by likelihood x impact
+        data.totalRisks = risks.length;
+        data.inherentGrid = this.buildHeatmapGrid(risks, 'inherent');
+        data.residualGrid = this.buildHeatmapGrid(risks, 'residual');
+        data.risksByLevel = this.categorizeRisksByLevel(risks);
+        break;
+
+      case 'risks':
+        // Top risks data
+        var sortedRisks = risks.slice().sort(function(a, b) {
+          var scoreA = (a.inherentLikelihood || 1) * (a.inherentImpact || 1);
+          var scoreB = (b.inherentLikelihood || 1) * (b.inherentImpact || 1);
+          return scoreB - scoreA;
+        });
+        data.topRisks = sortedRisks.slice(0, 10).map(function(r) {
+          return {
+            id: r.id,
+            title: r.title,
+            category: r.category,
+            owner: r.owner,
+            inherentScore: (r.inherentLikelihood || 1) * (r.inherentImpact || 1),
+            residualScore: (r.residualLikelihood || 1) * (r.residualImpact || 1),
+            treatment: r.treatment,
+            controlsCount: r.linkedControls ? r.linkedControls.length : 0
+          };
+        });
+        data.totalRisks = risks.length;
+        break;
+
+      case 'chart':
+        // Category distribution
+        var categories = {};
+        for (var i = 0; i < risks.length; i++) {
+          var cat = risks[i].category || 'Uncategorized';
+          categories[cat] = (categories[cat] || 0) + 1;
+        }
+        data.categoryDistribution = categories;
+        data.totalRisks = risks.length;
+        data.categoryCount = Object.keys(categories).length;
+        break;
+
+      case 'kpi':
+        // KPI metrics
+        var highRisks = 0, criticalRisks = 0, uncontrolled = 0, noOwner = 0;
+        for (var i = 0; i < risks.length; i++) {
+          var score = (risks[i].residualLikelihood || 1) * (risks[i].residualImpact || 1);
+          if (score >= 15) criticalRisks++;
+          else if (score >= 10) highRisks++;
+          if (!risks[i].linkedControls || risks[i].linkedControls.length === 0) uncontrolled++;
+          if (!risks[i].owner) noOwner++;
+        }
+        data.totalRisks = risks.length;
+        data.criticalRisks = criticalRisks;
+        data.highRisks = highRisks;
+        data.uncontrolledRisks = uncontrolled;
+        data.risksWithoutOwner = noOwner;
+        data.totalControls = allControls.length;
+        break;
+
+      case 'controls':
+        // Control coverage data
+        var linkedRiskIds = {};
+        for (var i = 0; i < allControls.length; i++) {
+          var ctrl = allControls[i];
+          if (ctrl.linkedRisks) {
+            for (var j = 0; j < ctrl.linkedRisks.length; j++) {
+              linkedRiskIds[ctrl.linkedRisks[j]] = true;
+            }
+          }
+        }
+        var coveredRisks = 0;
+        for (var i = 0; i < risks.length; i++) {
+          if (linkedRiskIds[risks[i].id] || (risks[i].linkedControls && risks[i].linkedControls.length > 0)) {
+            coveredRisks++;
+          }
+        }
+        data.totalRisks = risks.length;
+        data.totalControls = allControls.length;
+        data.coveredRisks = coveredRisks;
+        data.uncoveredRisks = risks.length - coveredRisks;
+        data.coveragePercent = risks.length > 0 ? Math.round((coveredRisks / risks.length) * 100) : 0;
+        break;
+
+      default:
+        data.totalRisks = risks.length;
+        data.totalControls = allControls.length;
+    }
+
+    return data;
+  };
+
+  /**
+   * Build heatmap grid for a given risk type
+   */
+  ERM.reportEditorAI.buildHeatmapGrid = function(risks, type) {
+    var grid = {};
+    var likelihoodKey = type === 'inherent' ? 'inherentLikelihood' : 'residualLikelihood';
+    var impactKey = type === 'inherent' ? 'inherentImpact' : 'residualImpact';
+
+    for (var i = 0; i < risks.length; i++) {
+      var likelihood = risks[i][likelihoodKey] || 1;
+      var impact = risks[i][impactKey] || 1;
+      var key = likelihood + 'x' + impact;
+      grid[key] = (grid[key] || 0) + 1;
+    }
+    return grid;
+  };
+
+  /**
+   * Categorize risks by level (Low, Medium, High, Critical)
+   */
+  ERM.reportEditorAI.categorizeRisksByLevel = function(risks) {
+    var levels = { low: 0, medium: 0, high: 0, critical: 0 };
+    for (var i = 0; i < risks.length; i++) {
+      var score = (risks[i].residualLikelihood || 1) * (risks[i].residualImpact || 1);
+      if (score >= 15) levels.critical++;
+      else if (score >= 10) levels.high++;
+      else if (score >= 5) levels.medium++;
+      else levels.low++;
+    }
+    return levels;
+  };
+
+  /**
+   * Compute insights from chart data
+   */
+  ERM.reportEditorAI.computeChartInsights = function(embedType, data) {
+    var insights = {};
+
+    switch (embedType) {
+      case 'heatmap':
+        insights.totalRisks = data.totalRisks;
+        if (data.risksByLevel) {
+          insights.criticalPercent = data.totalRisks > 0 ? Math.round((data.risksByLevel.critical / data.totalRisks) * 100) : 0;
+          insights.highPercent = data.totalRisks > 0 ? Math.round((data.risksByLevel.high / data.totalRisks) * 100) : 0;
+          insights.concentrationSummary = data.risksByLevel.critical + ' critical, ' + data.risksByLevel.high + ' high, ' + data.risksByLevel.medium + ' medium, ' + data.risksByLevel.low + ' low';
+        }
+        break;
+
+      case 'risks':
+        insights.totalRisks = data.totalRisks;
+        if (data.topRisks && data.topRisks.length > 0) {
+          var highestScore = data.topRisks[0].inherentScore;
+          insights.highestRiskScore = highestScore;
+          insights.highestRiskTitle = data.topRisks[0].title;
+          var avgScore = 0;
+          for (var i = 0; i < data.topRisks.length; i++) {
+            avgScore += data.topRisks[i].inherentScore;
+          }
+          insights.averageTopRiskScore = Math.round(avgScore / data.topRisks.length * 10) / 10;
+        }
+        break;
+
+      case 'chart':
+        insights.totalRisks = data.totalRisks;
+        insights.categoryCount = data.categoryCount;
+        if (data.categoryDistribution) {
+          var maxCat = '', maxCount = 0;
+          for (var cat in data.categoryDistribution) {
+            if (data.categoryDistribution[cat] > maxCount) {
+              maxCount = data.categoryDistribution[cat];
+              maxCat = cat;
+            }
+          }
+          insights.dominantCategory = maxCat;
+          insights.dominantCategoryCount = maxCount;
+        }
+        break;
+
+      case 'kpi':
+        insights.riskSummary = data.totalRisks + ' total risks';
+        insights.criticalHighCount = data.criticalRisks + data.highRisks;
+        insights.uncontrolledPercent = data.totalRisks > 0 ? Math.round((data.uncontrolledRisks / data.totalRisks) * 100) : 0;
+        break;
+
+      case 'controls':
+        insights.coveragePercent = data.coveragePercent;
+        insights.gapCount = data.uncoveredRisks;
+        break;
+    }
+
+    return insights;
+  };
+
+  /**
+   * Extract visible labels from the rendered chart DOM
+   */
+  ERM.reportEditorAI.extractVisibleLabels = function(embedBlock) {
+    var labels = [];
+    var contentEl = embedBlock.querySelector('.editor-v2-embed-content');
+    if (!contentEl) return labels;
+
+    // Extract section titles
+    var titles = contentEl.querySelectorAll('.section-title, .heatmap-card-title, .kpi-label, h2, h3');
+    for (var i = 0; i < titles.length; i++) {
+      var text = titles[i].textContent.trim();
+      if (text && labels.indexOf(text) === -1) {
+        labels.push(text);
+      }
+    }
+
+    // Extract legend items
+    var legendItems = contentEl.querySelectorAll('.legend-item, .legend-text');
+    for (var i = 0; i < legendItems.length; i++) {
+      var text = legendItems[i].textContent.trim();
+      if (text && labels.indexOf(text) === -1) {
+        labels.push(text);
+      }
+    }
+
+    return labels;
+  };
+
+  // ========================================
+  // OPEN ASK AI FOR BLOCK (Entry Point)
+  // ========================================
+
+  /**
+   * Open Ask AI panel for a specific block
+   * @param {string} blockId - The block ID to open AI for
+   * @param {string} mode - 'text', 'chart', or 'block' (context-aware based on block content)
+   */
+  ERM.reportEditorAI.openAskAIForBlock = function(blockId, mode) {
+    var block = document.querySelector('[data-block-id="' + blockId + '"]');
+    if (!block) {
+      console.warn('[ReportEditorAI] openAskAIForBlock - block not found:', blockId);
+      return;
+    }
+
+    console.log('[ReportEditorAI] openAskAIForBlock - blockId:', blockId, 'mode:', mode);
+
+    // Set the active block
+    state.activeBlock = block;
+    state.aiMode = mode || 'text';
+
+    if (mode === 'chart') {
+      // Extract chart/embed context
+      state.chartContext = this.extractChartContext(block);
+      state.blockContext = null;
+
+      if (!state.chartContext) {
+        console.warn('[ReportEditorAI] Could not extract chart context');
+        state.chartContext = {
+          blockType: 'embed',
+          chartKind: block.getAttribute('data-embed-type') || 'unknown',
+          title: 'Embedded Content',
+          register: { id: 'all', title: 'All Registers' },
+          data: {},
+          insights: {}
+        };
+      }
+
+      // Clear text selection state since we're in chart mode
+      state.selection = null;
+      state.selectionRange = null;
+    } else if (mode === 'block') {
+      // Block mode - extract context from any block type
+      state.chartContext = null;
+      state.blockContext = this.extractBlockContext(block);
+
+      // Clear text selection state
+      state.selection = null;
+      state.selectionRange = null;
+    } else {
+      // Text mode - clear contexts
+      state.chartContext = null;
+      state.blockContext = null;
+    }
+
+    // Show the Ask AI panel
+    this.showAskAIPanelForChart();
+  };
+
+  /**
+   * Extract context from any block type (paragraph, heading, list, table, etc.)
+   * @param {HTMLElement} block - The block element
+   * @returns {Object} Block context for AI
+   */
+  ERM.reportEditorAI.extractBlockContext = function(block) {
+    if (!block) return null;
+
+    var blockId = block.getAttribute('data-block-id');
+    var blockType = block.getAttribute('data-block-type') || 'paragraph';
+    var contentEl = block.querySelector('.block-content, [contenteditable="true"]');
+
+    // Get the text content
+    var textContent = '';
+    var htmlContent = '';
+    if (contentEl) {
+      textContent = contentEl.textContent || '';
+      htmlContent = contentEl.innerHTML || '';
+    }
+
+    // Build context object
+    var context = {
+      blockType: blockType,
+      blockId: blockId,
+      title: this.getBlockTypeLabel(blockType),
+      textContent: textContent.trim(),
+      htmlContent: htmlContent,
+      wordCount: textContent.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length,
+      hasContent: textContent.trim().length > 0
+    };
+
+    // Extract additional context based on block type
+    if (blockType === 'table' || htmlContent.indexOf('<table') > -1) {
+      context.isTable = true;
+      context.tableData = this.extractTableData(contentEl);
+    }
+
+    if (blockType === 'bullet' || blockType === 'number') {
+      context.isList = true;
+      context.listItems = this.extractListItems(block);
+    }
+
+    console.log('[ReportEditorAI] Block context extracted:', {
+      blockType: context.blockType,
+      wordCount: context.wordCount,
+      hasContent: context.hasContent,
+      isTable: context.isTable || false,
+      isList: context.isList || false
+    });
+
+    return context;
+  };
+
+  /**
+   * Get human-readable label for block type
+   */
+  ERM.reportEditorAI.getBlockTypeLabel = function(blockType) {
+    var labels = {
+      'paragraph': 'Paragraph',
+      'heading1': 'Heading 1',
+      'heading2': 'Heading 2',
+      'heading3': 'Heading 3',
+      'bullet': 'Bullet List',
+      'number': 'Numbered List',
+      'quote': 'Quote',
+      'callout': 'Callout',
+      'table': 'Table',
+      'divider': 'Divider'
+    };
+    return labels[blockType] || 'Content Block';
+  };
+
+  /**
+   * Extract table data from a table element
+   */
+  ERM.reportEditorAI.extractTableData = function(contentEl) {
+    if (!contentEl) return null;
+
+    var table = contentEl.querySelector('table') || (contentEl.tagName === 'TABLE' ? contentEl : null);
+    if (!table) return null;
+
+    var data = { headers: [], rows: [] };
+
+    // Extract headers
+    var headerRow = table.querySelector('thead tr, tr:first-child');
+    if (headerRow) {
+      var headerCells = headerRow.querySelectorAll('th, td');
+      for (var i = 0; i < headerCells.length; i++) {
+        data.headers.push(headerCells[i].textContent.trim());
+      }
+    }
+
+    // Extract rows
+    var rows = table.querySelectorAll('tbody tr, tr');
+    for (var r = 0; r < rows.length; r++) {
+      // Skip header row if we already processed it
+      if (rows[r] === headerRow) continue;
+
+      var rowData = [];
+      var cells = rows[r].querySelectorAll('td, th');
+      for (var c = 0; c < cells.length; c++) {
+        rowData.push(cells[c].textContent.trim());
+      }
+      if (rowData.length > 0) {
+        data.rows.push(rowData);
+      }
+    }
+
+    return data;
+  };
+
+  /**
+   * Extract list items from a list block
+   */
+  ERM.reportEditorAI.extractListItems = function(block) {
+    var items = [];
+    var contentEl = block.querySelector('.block-content, [contenteditable="true"]');
+    if (contentEl) {
+      items.push(contentEl.textContent.trim());
+    }
+
+    // Also check for sibling list blocks
+    var nextBlock = block.nextElementSibling;
+    var blockType = block.getAttribute('data-block-type');
+    while (nextBlock && nextBlock.getAttribute('data-block-type') === blockType) {
+      var nextContent = nextBlock.querySelector('.block-content, [contenteditable="true"]');
+      if (nextContent) {
+        items.push(nextContent.textContent.trim());
+      }
+      nextBlock = nextBlock.nextElementSibling;
+    }
+
+    return items;
+  };
+
+  /**
+   * Show Ask AI panel with chart context
+   */
+  ERM.reportEditorAI.showAskAIPanelForChart = function() {
+    var self = this;
+
+    // Close all other panels first
+    this.closeAllPanels(true);
+
+    var panel = document.getElementById('ask-ai-panel');
+
+    if (!panel) {
+      panel = this.createAskAIPanel();
+      document.body.appendChild(panel);
+    }
+
+    // Update context for chart mode
+    this.updateAskAIContextForChart(panel);
+
+    // Position panel near the chart block
+    var panelWidth = 380;
+    var margin = 16;
+    var viewportHeight = window.innerHeight;
+    var viewportWidth = window.innerWidth;
+
+    var left, top;
+
+    if (state.activeBlock) {
+      var blockRect = state.activeBlock.getBoundingClientRect();
+      var spaceOnRight = viewportWidth - blockRect.right - margin;
+
+      if (spaceOnRight >= panelWidth) {
+        left = blockRect.right + 12;
+        top = blockRect.top;
+      } else {
+        left = Math.max(margin, blockRect.left);
+        top = blockRect.bottom + 12;
+      }
+    } else {
+      left = (viewportWidth - panelWidth) / 2;
+      top = viewportHeight * 0.15;
+    }
+
+    // Ensure panel stays in viewport
+    if (left < margin) left = margin;
+    if (left + panelWidth > viewportWidth - margin) {
+      left = viewportWidth - panelWidth - margin;
+    }
+    if (top < margin) top = margin;
+
+    var maxPanelHeight = Math.floor(viewportHeight * 0.70);
+    var availableHeight = viewportHeight - top - margin;
+    var finalMaxHeight = Math.min(maxPanelHeight, availableHeight);
+
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+    panel.style.right = 'auto';
+    panel.style.width = panelWidth + 'px';
+    panel.style.maxHeight = finalMaxHeight + 'px';
+
+    panel.classList.add('visible');
+    state.aiPanelVisible = true;
+
+    document.body.classList.add('ask-ai-panel-open');
+
+    // Focus input
+    var input = panel.querySelector('#ask-ai-input');
+    if (input) input.focus();
+  };
+
+  /**
+   * Update Ask AI panel context display for chart or block mode
+   */
+  ERM.reportEditorAI.updateAskAIContextForChart = function(panel) {
+    var titleEl = panel.querySelector('.ask-ai-title');
+    var chipsContainer = panel.querySelector('.ask-ai-context-chips');
+    var suggestionsArea = panel.querySelector('.ask-ai-suggestions');
+    var self = this;
+
+    if (state.aiMode === 'chart' && state.chartContext) {
+      var ctx = state.chartContext;
+
+      // Update title to show chart context
+      if (titleEl) {
+        titleEl.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+          '  <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/>' +
+          '</svg>' +
+          'Ask AI about: ' + this.escapeHtml(ctx.title);
+      }
+
+      // Update context chips
+      if (chipsContainer) {
+        var chips = [];
+        chips.push('<span class="context-chip context-chip-chart">' + this.escapeHtml(ctx.title) + '</span>');
+        if (ctx.register && ctx.register.title !== 'All Registers') {
+          chips.push('<span class="context-chip context-chip-register">' + this.escapeHtml(ctx.register.title) + '</span>');
+        }
+        if (ctx.insights && ctx.insights.totalRisks !== undefined) {
+          chips.push('<span class="context-chip context-chip-data">' + ctx.insights.totalRisks + ' risks</span>');
+        }
+        chipsContainer.innerHTML = chips.join('');
+      }
+
+      // Update suggestions for chart type
+      if (suggestionsArea) {
+        var suggestions = this.getChartSuggestions(ctx.chartKind);
+        this.updateSuggestionsUI(panel, suggestionsArea, suggestions);
+      }
+    } else if (state.aiMode === 'block' && state.blockContext) {
+      var ctx = state.blockContext;
+
+      // Update title to show block context
+      if (titleEl) {
+        var titleText = ctx.hasContent ? 'Ask AI about this ' + ctx.title.toLowerCase() : 'Ask AI to write content';
+        titleEl.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+          '  <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/>' +
+          '</svg>' +
+          titleText;
+      }
+
+      // Update context chips
+      if (chipsContainer) {
+        var chips = [];
+        chips.push('<span class="context-chip context-chip-block">' + this.escapeHtml(ctx.title) + '</span>');
+        if (ctx.wordCount > 0) {
+          chips.push('<span class="context-chip context-chip-data">' + ctx.wordCount + ' words</span>');
+        }
+        if (ctx.isTable && ctx.tableData) {
+          chips.push('<span class="context-chip context-chip-table">' + ctx.tableData.rows.length + ' rows</span>');
+        }
+        if (ctx.isList && ctx.listItems) {
+          chips.push('<span class="context-chip context-chip-list">' + ctx.listItems.length + ' items</span>');
+        }
+        chipsContainer.innerHTML = chips.join('');
+      }
+
+      // Update suggestions for block type
+      if (suggestionsArea) {
+        var suggestions = this.getBlockSuggestions(ctx);
+        this.updateSuggestionsUI(panel, suggestionsArea, suggestions);
+      }
+    } else {
+      // Reset to default text mode
+      if (titleEl) {
+        titleEl.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+          '  <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z"/>' +
+          '</svg>' +
+          'Ask AI about this report';
+      }
+      this.updateAskAIContext(panel);
+    }
+  };
+
+  /**
+   * Helper to update suggestions UI with click handlers
+   */
+  ERM.reportEditorAI.updateSuggestionsUI = function(panel, suggestionsArea, suggestions) {
+    var self = this;
+    var html = '';
+    for (var i = 0; i < suggestions.length; i++) {
+      html += '<div class="suggestion-item" data-prompt="' + this.escapeHtml(suggestions[i]) + '">' + this.escapeHtml(suggestions[i]) + '</div>';
+    }
+    suggestionsArea.innerHTML = html;
+
+    // Re-bind suggestion click events
+    var items = suggestionsArea.querySelectorAll('.suggestion-item');
+    for (var i = 0; i < items.length; i++) {
+      items[i].addEventListener('click', function() {
+        var prompt = this.getAttribute('data-prompt');
+        panel.querySelector('#ask-ai-input').value = prompt;
+        self.submitAskAI();
+      });
+    }
+  };
+
+  /**
+   * Get suggested prompts for block context
+   */
+  ERM.reportEditorAI.getBlockSuggestions = function(ctx) {
+    if (!ctx.hasContent) {
+      // Empty block - suggest writing content
+      return [
+        'Write an executive summary',
+        'Draft a risk overview section',
+        'Create a recommendations list',
+        'Write a conclusion paragraph'
+      ];
+    }
+
+    if (ctx.isTable) {
+      return [
+        'Summarize this table data',
+        'Analyze trends in this table',
+        'Add commentary about these findings',
+        'Convert this table to bullet points'
+      ];
+    }
+
+    if (ctx.isList) {
+      return [
+        'Expand on these points',
+        'Summarize this list',
+        'Add more detail to each item',
+        'Convert to a narrative paragraph'
+      ];
+    }
+
+    // Default for text content
+    return [
+      'Improve this text',
+      'Summarize for executives',
+      'Expand with more detail',
+      'Rewrite more formally'
+    ];
+  };
+
+  /**
+   * Get suggested prompts for chart type
+   */
+  ERM.reportEditorAI.getChartSuggestions = function(chartKind) {
+    var suggestions = {
+      'heatmap': [
+        'Analyze the risk distribution in this heatmap',
+        'What are the highest priority risks shown?',
+        'Write a board-level summary of this heatmap',
+        'Suggest mitigation priorities based on this data'
+      ],
+      'risks': [
+        'Summarize the top risks and their impact',
+        'What controls could mitigate these risks?',
+        'Draft an executive summary of these risks',
+        'Which risk needs immediate attention?'
+      ],
+      'chart': [
+        'Analyze the risk concentration by category',
+        'What trends do you see in this data?',
+        'Which category needs the most attention?',
+        'Write commentary on this distribution'
+      ],
+      'kpi': [
+        'Interpret these KPI metrics for leadership',
+        'What do these numbers suggest about our risk posture?',
+        'What actions should we take based on these KPIs?',
+        'Write a summary of these key metrics'
+      ],
+      'controls': [
+        'Analyze the control coverage gaps',
+        'Which risks need additional controls?',
+        'Suggest improvements to our control framework',
+        'Write a control effectiveness summary'
+      ]
+    };
+    return suggestions[chartKind] || [
+      'Analyze this content',
+      'Summarize the key findings',
+      'What insights can you provide?',
+      'Write commentary for this section'
+    ];
+  };
+
+  /**
+   * Escape HTML helper
+   */
+  ERM.reportEditorAI.escapeHtml = function(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   };
 
   // ========================================
@@ -169,7 +958,19 @@
    * - Nested elements within the selection
    */
   ERM.reportEditorAI.highlightSelection = function() {
-    console.log('[AI] highlightSelection called, selection:', state.selection, 'range:', state.selectionRange);
+    console.log('[AI] highlightSelection called');
+
+    // Block selection mode uses .block-selected CSS class
+    if (state.selectedBlocks && state.selectedBlocks.length > 0) {
+      console.log('[AI] Using block selection mode - blocks already highlighted');
+      if (!state.selection && ERM.reportEditorV2 && ERM.reportEditorV2.getSelectedBlocksText) {
+        state.selection = ERM.reportEditorV2.getSelectedBlocksText();
+      }
+      state.originalSelectionText = state.selection;
+      return;
+    }
+
+    // Text selection mode - create blue border highlight spans
     if (!state.selectionRange || !state.selection) {
       console.log('[AI] highlightSelection early return - no selection/range');
       return;
@@ -185,8 +986,6 @@
       // Clone the range to work with
       var range = state.selectionRange.cloneRange();
 
-      // Get all text nodes within the selection range
-      var textNodes = [];
       var startContainer = range.startContainer;
       var endContainer = range.endContainer;
       var startOffset = range.startOffset;
@@ -197,43 +996,92 @@
         return node && node.nodeType === 3;
       }
 
-      // Helper to find common ancestor that contains both endpoints
+      // Helper to check if a node is within the selection range
+      function isNodeInRange(node, selRange) {
+        try {
+          var nodeRange = document.createRange();
+          nodeRange.selectNodeContents(node);
+          // Check if node range intersects with selection range
+          return selRange.compareBoundaryPoints(Range.START_TO_END, nodeRange) > 0 &&
+                 selRange.compareBoundaryPoints(Range.END_TO_START, nodeRange) < 0;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // Find the common ancestor - go up to editor content if needed
       var commonAncestor = range.commonAncestorContainer;
       if (commonAncestor.nodeType === 3) {
         commonAncestor = commonAncestor.parentNode;
       }
 
-      // Walk through all text nodes in the selection range
+      // For multi-block selections, go up to the editor content
+      var editorContent = document.querySelector('.editor-v2-content');
+      if (editorContent && editorContent.contains(commonAncestor)) {
+        // Check if selection spans multiple blocks
+        var startBlock = startContainer.nodeType === 3 ? startContainer.parentNode.closest('.editor-v2-block') : startContainer.closest('.editor-v2-block');
+        var endBlock = endContainer.nodeType === 3 ? endContainer.parentNode.closest('.editor-v2-block') : endContainer.closest('.editor-v2-block');
+
+        if (startBlock && endBlock && startBlock !== endBlock) {
+          // Multi-block selection - use editor content as ancestor
+          commonAncestor = editorContent;
+          console.log('[AI] Multi-block selection detected');
+        }
+      }
+
+      // Collect all text nodes that are within the selection
+      var textNodes = [];
       var walker = document.createTreeWalker(
         commonAncestor,
         NodeFilter.SHOW_TEXT,
-        null,
+        {
+          acceptNode: function(node) {
+            // Skip empty text nodes
+            if (!node.nodeValue || node.nodeValue.trim() === '') {
+              // But keep nodes with just whitespace if they're part of selection
+              if (node.nodeValue && isNodeInRange(node, range)) {
+                return NodeFilter.FILTER_ACCEPT;
+              }
+              return NodeFilter.FILTER_REJECT;
+            }
+            // Check if this node is within the selection range
+            if (isNodeInRange(node, range)) {
+              return NodeFilter.FILTER_ACCEPT;
+            }
+            return NodeFilter.FILTER_REJECT;
+          }
+        },
         false
       );
 
-      var foundStart = false;
       var node;
       while ((node = walker.nextNode())) {
-        // Check if we've reached the start of selection
-        if (node === startContainer) {
-          foundStart = true;
-        }
+        textNodes.push(node);
+      }
 
-        // Add text nodes that are within the selection
-        if (foundStart) {
-          textNodes.push(node);
-        }
+      // If no text nodes found with filter, try without filter
+      if (textNodes.length === 0) {
+        var simpleWalker = document.createTreeWalker(
+          commonAncestor,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
 
-        // Check if we've reached the end
-        if (node === endContainer) {
-          break;
+        var foundStart = false;
+        while ((node = simpleWalker.nextNode())) {
+          if (node === startContainer) foundStart = true;
+          if (foundStart) textNodes.push(node);
+          if (node === endContainer) break;
         }
       }
 
-      // If no text nodes found, try simple approach
+      // If still no text nodes found, try simple approach
       if (textNodes.length === 0 && isTextNode(startContainer)) {
         textNodes.push(startContainer);
       }
+
+      console.log('[AI] Found', textNodes.length, 'text nodes to highlight');
 
       // Wrap each text node (or portion) in highlight span
       var highlightElements = [];
@@ -245,6 +1093,9 @@
 
         // Skip if already inside a highlight
         if (parent.classList && parent.classList.contains('ai-selection-highlight')) continue;
+
+        // Skip if inside non-editable elements
+        if (parent.closest && parent.closest('.block-controls, .block-add, .block-drag')) continue;
 
         // Determine which portion of this text node to highlight
         var text = textNode.nodeValue || '';
@@ -264,6 +1115,10 @@
         // Only highlight if there's actual text to highlight
         if (highlightEnd <= highlightStart) continue;
 
+        // Skip if the text portion is empty or whitespace only (for non-edge nodes)
+        var highlightText = text.substring(highlightStart, highlightEnd);
+        if (textNode !== startContainer && textNode !== endContainer && !highlightText.trim()) continue;
+
         // Create highlight span
         var highlightSpan = document.createElement('span');
         highlightSpan.className = 'ai-selection-highlight';
@@ -271,7 +1126,6 @@
 
         // Split text node if needed and wrap the highlighted portion
         var beforeText = text.substring(0, highlightStart);
-        var highlightText = text.substring(highlightStart, highlightEnd);
         var afterText = text.substring(highlightEnd);
 
         // Create document fragment with the split parts
@@ -308,12 +1162,11 @@
       }
 
       console.log('[ReportEditorAI] Selection highlighted across', highlightElements.length, 'text nodes');
-      console.log('[ReportEditorAI] Highlight elements:', highlightElements);
       // Verify highlights are in DOM
       var inDOM = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
       console.log('[ReportEditorAI] Highlights found in DOM:', inDOM.length);
     } catch (e) {
-      console.log('[ReportEditorAI] Could not highlight selection:', e.message);
+      console.log('[ReportEditorAI] Could not highlight selection:', e.message, e.stack);
       // Fallback: try simple approach for single-node selections
       this.highlightSelectionSimple();
     }
@@ -323,6 +1176,7 @@
    * Simple fallback highlighting for single-node selections
    */
   ERM.reportEditorAI.highlightSelectionSimple = function() {
+    console.log('[AI] highlightSelectionSimple called');
     if (!state.selectionRange || !state.selection) return;
 
     try {
@@ -482,52 +1336,150 @@
     // Update context chips
     this.updateAskAIContext(panel);
 
-    // Position panel relative to toolbar or selection
-    // Simple approach: position below the floating toolbar
+    // Position panel to the RIGHT of the selection (like Notion)
+    // This ensures the selected text remains visible
     var panelWidth = 380;
     var margin = 16;
-    var gap = 8;
+    var gap = 12;
     var left, top;
 
-    // Try to position relative to the floating toolbar first (most reliable)
+    // Get selection/highlight bounds to avoid covering
+    var selectionRect = null;
     var toolbar = document.getElementById('report-floating-toolbar');
-    if (toolbar && toolbar.classList.contains('visible')) {
-      var toolbarRect = toolbar.getBoundingClientRect();
-      left = toolbarRect.left;
-      top = toolbarRect.bottom + gap;
+
+    // First try to get bounds from highlighted elements
+    var highlights = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
+    if (highlights.length > 0) {
+      var firstHighlight = highlights[0];
+      var lastHighlight = highlights[highlights.length - 1];
+      var firstRect = firstHighlight.getBoundingClientRect();
+      var lastRect = lastHighlight.getBoundingClientRect();
+      selectionRect = {
+        left: Math.min(firstRect.left, lastRect.left),
+        right: Math.max(firstRect.right, lastRect.right),
+        top: Math.min(firstRect.top, lastRect.top),
+        bottom: Math.max(firstRect.bottom, lastRect.bottom)
+      };
     }
-    // Fallback: use selectionRange
+    // Fallback to selection range
     else if (state.selectionRange) {
       var rangeRect = state.selectionRange.getBoundingClientRect();
       if (rangeRect.width > 0 || rangeRect.height > 0) {
-        left = rangeRect.left;
-        top = rangeRect.bottom + gap;
+        selectionRect = rangeRect;
       }
     }
 
-    // Final fallback: center horizontally, position in upper third
-    if (left === undefined || top === undefined) {
-      left = (window.innerWidth - panelWidth) / 2;
-      top = window.innerHeight * 0.2;
+    // VIEWPORT-AWARE POSITIONING
+    // Panel must NEVER extend beyond viewport - actions must always be accessible
+    var viewportHeight = window.innerHeight;
+    var viewportWidth = window.innerWidth;
+
+    // Cap panel height at 70% of viewport to ensure it always fits
+    var maxPanelHeight = Math.floor(viewportHeight * 0.70);
+    var estimatedPanelHeight = Math.min(380, maxPanelHeight); // Initial estimate
+
+    // Position to the RIGHT of the selection if there's space
+    if (selectionRect) {
+      var spaceOnRight = viewportWidth - selectionRect.right - margin;
+      var spaceOnLeft = selectionRect.left - margin;
+      var spaceBelow = viewportHeight - selectionRect.bottom - margin;
+      var spaceAbove = selectionRect.top - margin;
+
+      if (spaceOnRight >= panelWidth) {
+        // Plenty of space on right - position there
+        left = selectionRect.right + gap;
+        top = selectionRect.top;
+      } else if (spaceOnLeft >= panelWidth) {
+        // Space on left - position there
+        left = selectionRect.left - panelWidth - gap;
+        top = selectionRect.top;
+      } else {
+        // Not enough space on either side - position below or above
+        if (toolbar && toolbar.classList.contains('visible')) {
+          var toolbarRect = toolbar.getBoundingClientRect();
+          left = Math.max(margin, toolbarRect.left);
+
+          // Check if there's more space above or below
+          if (spaceBelow >= estimatedPanelHeight) {
+            top = toolbarRect.bottom + gap;
+          } else if (spaceAbove >= estimatedPanelHeight) {
+            // Position above the toolbar
+            top = toolbarRect.top - estimatedPanelHeight - gap;
+          } else {
+            // Neither fits - use whatever space is larger
+            if (spaceBelow >= spaceAbove) {
+              top = toolbarRect.bottom + gap;
+            } else {
+              top = Math.max(margin, toolbarRect.top - estimatedPanelHeight - gap);
+            }
+          }
+        } else {
+          left = Math.max(margin, selectionRect.left);
+
+          // Check if there's more space above or below
+          if (spaceBelow >= estimatedPanelHeight) {
+            top = selectionRect.bottom + gap;
+          } else if (spaceAbove >= estimatedPanelHeight) {
+            // Position above the selection
+            top = selectionRect.top - estimatedPanelHeight - gap;
+          } else {
+            // Neither fits - use whatever space is larger
+            if (spaceBelow >= spaceAbove) {
+              top = selectionRect.bottom + gap;
+            } else {
+              top = Math.max(margin, selectionRect.top - estimatedPanelHeight - gap);
+            }
+          }
+        }
+      }
+    } else {
+      // No selection rect - center the panel vertically in upper portion of viewport
+      left = (viewportWidth - panelWidth) / 2;
+      top = viewportHeight * 0.15;
     }
 
-    // Ensure panel stays in viewport
-    var actualPanelWidth = Math.min(panelWidth, window.innerWidth - margin * 2);
+    // CRITICAL: Ensure panel stays FULLY in viewport
+    var actualPanelWidth = Math.min(panelWidth, viewportWidth - margin * 2);
+
+    // Horizontal bounds
     if (left < margin) left = margin;
-    if (left + actualPanelWidth > window.innerWidth - margin) {
-      left = window.innerWidth - actualPanelWidth - margin;
+    if (left + actualPanelWidth > viewportWidth - margin) {
+      left = viewportWidth - actualPanelWidth - margin;
     }
+
+    // Vertical bounds - this is the key fix
     if (top < margin) top = margin;
+
+    // Calculate maximum height that can fit from this top position
+    var availableHeight = viewportHeight - top - margin;
+    var finalMaxHeight = Math.min(maxPanelHeight, availableHeight);
+
+    // If panel would be too short, try repositioning higher
+    if (finalMaxHeight < 250 && top > margin) {
+      // Move panel up to give more room
+      var idealTop = viewportHeight - maxPanelHeight - margin;
+      if (idealTop >= margin) {
+        top = idealTop;
+        finalMaxHeight = maxPanelHeight;
+      } else {
+        top = margin;
+        finalMaxHeight = viewportHeight - margin * 2;
+      }
+    }
 
     panel.style.left = left + 'px';
     panel.style.top = top + 'px';
     panel.style.right = 'auto';
     panel.style.width = actualPanelWidth + 'px';
-    panel.style.maxHeight = (window.innerHeight - margin * 2) + 'px';
+    panel.style.maxHeight = finalMaxHeight + 'px';
 
     panel.classList.add('visible');
     panel.classList.remove('dropdown-above', 'dropdown-below');
     state.aiPanelVisible = true;
+
+    // LOCK PAGE SCROLL - Single scroll context
+    // When panel is open, only the panel content scrolls
+    document.body.classList.add('ask-ai-panel-open');
 
     // Note: highlightSelection is now called BEFORE showAskAIPanel (in button handler)
     // This ensures the highlight is applied before focus changes
@@ -541,6 +1493,10 @@
     var panel = document.getElementById('ask-ai-panel');
     if (panel) {
       panel.classList.remove('visible');
+
+      // UNLOCK PAGE SCROLL
+      document.body.classList.remove('ask-ai-panel-open');
+
       // Reset response area
       var responseArea = panel.querySelector('#ask-ai-response');
       if (responseArea) {
@@ -579,6 +1535,10 @@
     if (!aiResponseVisible) {
       console.log('[AI] hideAskAIPanel - removing highlight');
       this.unhighlightSelection();
+      // Also clear the selection lock
+      if (ERM.reportEditorV2 && ERM.reportEditorV2.selectionLock) {
+        ERM.reportEditorV2.selectionLock.clear();
+      }
     } else {
       console.log('[AI] hideAskAIPanel - keeping highlight (AI response is visible)');
     }
@@ -638,9 +1598,10 @@
       '</div>' +
       '<div class="ask-ai-response" id="ask-ai-response"></div>' +
       '<div class="ask-ai-suggestions">' +
-      '  <div class="suggestion-item" data-prompt="Summarise this section for the Board">Summarise this section for the Board</div>' +
-      '  <div class="suggestion-item" data-prompt="Explain why residual risk is still high">Explain why residual risk is still high</div>' +
-      '  <div class="suggestion-item" data-prompt="Write management commentary for this category">Write management commentary</div>' +
+      '  <div class="suggestion-item" data-prompt="Summarise for Board">Summarise for Board</div>' +
+      '  <div class="suggestion-item" data-prompt="Explain high risk">Explain high risk</div>' +
+      '  <div class="suggestion-item" data-prompt="Write management commentary">Management commentary</div>' +
+      '  <div class="suggestion-item" data-prompt="Convert the selected text into a clean table with headers">Convert to table</div>' +
       '</div>' +
       '<div class="ask-ai-input-area">' +
       '  <textarea id="ask-ai-input" placeholder="Ask a question or describe what you need..." rows="3"></textarea>' +
@@ -747,14 +1708,48 @@
       '  <div class="ai-loading-spinner"></div>' +
       '  <span>Thinking...</span>' +
       '</div>';
-    responseArea.style.display = 'block';
+    // Use flex display for proper scroll context
+    responseArea.style.display = 'flex';
+
+    // Add pulsing animation to highlights during AI processing
+    var processingHighlights = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
+    for (var ph = 0; ph < processingHighlights.length; ph++) {
+      processingHighlights[ph].classList.add('ai-processing');
+    }
 
     // Build context for the AI
     var context = this.getReportContext();
     context.selectedText = state.selection || '';
 
+    // Add chart context if in chart mode
+    if (state.aiMode === 'chart' && state.chartContext) {
+      context.chartContext = state.chartContext;
+      context.isChartMode = true;
+      console.log('[ReportEditorAI] Submitting with chart context:', {
+        chartKind: state.chartContext.chartKind,
+        register: state.chartContext.register.title,
+        dataKeys: Object.keys(state.chartContext.data || {})
+      });
+    }
+
+    // Add block context if in block mode
+    if (state.aiMode === 'block' && state.blockContext) {
+      context.blockContext = state.blockContext;
+      context.isBlockMode = true;
+      console.log('[ReportEditorAI] Submitting with block context:', {
+        blockType: state.blockContext.blockType,
+        wordCount: state.blockContext.wordCount,
+        hasContent: state.blockContext.hasContent
+      });
+    }
+
     // Call the real AI service
     ERM.aiService.askQuestion(question, context, function(result) {
+      // Remove pulsing animation from highlights (AI is done)
+      var doneHighlights = document.querySelectorAll('.ai-selection-highlight.ai-processing');
+      for (var dh = 0; dh < doneHighlights.length; dh++) {
+        doneHighlights[dh].classList.remove('ai-processing');
+      }
       if (result.error) {
         // Determine if this is a connection error (can retry)
         var isConnectionError = result.error.indexOf('proxy') > -1 ||
@@ -805,22 +1800,22 @@
       // Check if there's selected text - if so, show Replace button
       var hasSelection = state.selection && state.selection.trim().length > 0;
 
-      // Build action buttons - Only Insert, Replace (if selection), Clear
+      // Build action buttons - Use SAME classes as AI Action panel (ai-inline-btn)
       var actionButtons =
-        '    <button class="btn btn-sm btn-primary" data-action="insert">Insert below</button>';
+        '    <button class="ai-inline-btn ai-inline-insert" data-action="insert">Insert below</button>';
 
       if (hasSelection) {
         actionButtons +=
-          '    <button class="btn btn-sm btn-danger" data-action="replace">Replace</button>';
+          '    <button class="ai-inline-btn ai-inline-replace" data-action="replace">Replace</button>';
       }
 
       actionButtons +=
-        '    <button class="btn btn-sm btn-ghost ask-ai-clear-result">Clear</button>';
+        '    <button class="ai-inline-btn ai-inline-retry ask-ai-clear-result">Clear</button>';
 
       responseArea.innerHTML =
         '<div class="ask-ai-result">' +
         '  <div class="result-text">' + formattedText + '</div>' +
-        '  <div class="result-actions">' + actionButtons + '</div>' +
+        '  <div class="ai-inline-actions">' + actionButtons + '</div>' +
         '</div>';
 
       // Bind clear button for success result
@@ -1057,16 +2052,33 @@
   // ========================================
 
   ERM.reportEditorAI.applyAIResult = function(mode) {
-    if (!state.pendingAIResult || !state.activeBlock) {
-      console.log('[ReportEditorAI] Cannot apply AI result - missing pendingAIResult or activeBlock');
+    // For block selection mode, we can proceed if we have selectedBlocks even without activeBlock
+    var hasBlockSelection = state.selectedBlocks && state.selectedBlocks.length > 0;
+
+    if (!state.pendingAIResult) {
+      console.log('[ReportEditorAI] Cannot apply AI result - missing pendingAIResult');
+      return;
+    }
+
+    if (!state.activeBlock && !hasBlockSelection) {
+      console.log('[ReportEditorAI] Cannot apply AI result - missing activeBlock and no block selection');
       return;
     }
 
     var newText = state.pendingAIResult.text;
     var originalText = state.pendingAIResult.originalText || state.selection;
+
+    // Use activeBlock if available, otherwise get first selected block
     var block = state.activeBlock;
+    if (!block && hasBlockSelection) {
+      block = document.querySelector('[data-block-id="' + state.selectedBlocks[0] + '"]');
+    }
 
     console.log('[ReportEditorAI] Applying AI result:', mode);
+    console.log('[ReportEditorAI] AI Mode:', state.aiMode, 'Block type:', block ? block.getAttribute('data-block-type') : 'none');
+    if (state.aiMode === 'chart' && block) {
+      console.log('[ReportEditorAI] Insert Below for chart block:', block.getAttribute('data-block-id'), 'embed-type:', block.getAttribute('data-embed-type'));
+    }
 
     // Save state BEFORE applying changes for undo support
     if (ERM.reportEditorV2 && typeof ERM.reportEditorV2.saveState === 'function') {
@@ -1082,6 +2094,12 @@
       // Old editor fallback - clean up highlight after
       this.applyAIResultLegacy(mode, newText, originalText, block);
       this.unhighlightSelection();
+    }
+
+    // CLEAR SELECTION LOCK after applying result
+    // This cleans up the persistent highlight spans
+    if (ERM.reportEditorV2 && ERM.reportEditorV2.selectionLock) {
+      ERM.reportEditorV2.selectionLock.clear();
     }
 
     ERM.toast.success('Text updated');
@@ -1102,10 +2120,107 @@
 
     var lastBlock = block;
 
+    // Check if we're in BLOCK SELECTION MODE (checkbox multi-select)
+    // This is different from text selection - whole blocks are selected
+    console.log('[ReportEditorAI] applyAIResultV2 - selectedBlocks:', state.selectedBlocks, 'length:', state.selectedBlocks ? state.selectedBlocks.length : 0);
+
+    if (state.selectedBlocks && state.selectedBlocks.length > 0) {
+      console.log('[ReportEditorAI] Block selection mode - replacing', state.selectedBlocks.length, 'blocks');
+      console.log('[ReportEditorAI] Block IDs:', state.selectedBlocks);
+      console.log('[ReportEditorAI] Parsed blocks count:', parsedBlocks.length);
+
+      // Get all selected block elements in DOM order
+      var selectedBlockEls = [];
+      for (var sb = 0; sb < state.selectedBlocks.length; sb++) {
+        var blockEl = document.querySelector('[data-block-id="' + state.selectedBlocks[sb] + '"]');
+        if (blockEl) {
+          selectedBlockEls.push(blockEl);
+          console.log('[ReportEditorAI] Found block element for ID:', state.selectedBlocks[sb]);
+        } else {
+          console.log('[ReportEditorAI] WARNING: Block element NOT found for ID:', state.selectedBlocks[sb]);
+        }
+      }
+
+      if (selectedBlockEls.length > 0) {
+        // Find the block BEFORE the first selected block (insertion point)
+        var firstSelectedBlock = selectedBlockEls[0];
+        var insertionPoint = firstSelectedBlock.previousElementSibling;
+        var editorContent = firstSelectedBlock.closest('.editor-v2-content');
+
+        if (mode === 'replace') {
+          // REPLACE: Remove all selected blocks and insert new content
+
+          // If no block before first selected, we need to keep one block as reference
+          // Strategy: Keep the first selected block temporarily, insert after it, then remove it
+          if (!insertionPoint || !insertionPoint.classList.contains('editor-v2-block')) {
+            // Use first selected block as temporary insertion point
+            lastBlock = firstSelectedBlock;
+
+            // Insert all new blocks after the first selected block
+            for (var i = 0; i < parsedBlocks.length; i++) {
+              lastBlock = this.insertFormattedBlock(lastBlock, parsedBlocks[i]);
+            }
+
+            // Now remove all originally selected blocks (including the temporary reference)
+            for (var r = 0; r < selectedBlockEls.length; r++) {
+              if (selectedBlockEls[r].parentNode) {
+                selectedBlockEls[r].parentNode.removeChild(selectedBlockEls[r]);
+              }
+            }
+          } else {
+            // There's a block before - remove all selected first, then insert after that block
+            for (var r = 0; r < selectedBlockEls.length; r++) {
+              if (selectedBlockEls[r].parentNode) {
+                selectedBlockEls[r].parentNode.removeChild(selectedBlockEls[r]);
+              }
+            }
+
+            // Insert new blocks after the insertion point
+            lastBlock = insertionPoint;
+            for (var i = 0; i < parsedBlocks.length; i++) {
+              lastBlock = this.insertFormattedBlock(lastBlock, parsedBlocks[i]);
+            }
+          }
+
+        } else if (mode === 'insert') {
+          // INSERT: Keep selected blocks, add new content after last selected
+          lastBlock = selectedBlockEls[selectedBlockEls.length - 1];
+          for (var i = 0; i < parsedBlocks.length; i++) {
+            lastBlock = this.insertFormattedBlock(lastBlock, parsedBlocks[i]);
+          }
+        } else {
+          // APPEND: Same as insert for block selection
+          lastBlock = selectedBlockEls[selectedBlockEls.length - 1];
+          for (var i = 0; i < parsedBlocks.length; i++) {
+            lastBlock = this.insertFormattedBlock(lastBlock, parsedBlocks[i]);
+          }
+        }
+
+        // Clear block selection state
+        state.selectedBlocks = [];
+        if (ERM.reportEditorV2 && ERM.reportEditorV2.clearBlockSelection) {
+          ERM.reportEditorV2.clearBlockSelection();
+        }
+
+        // Focus the last inserted block
+        if (lastBlock) {
+          setTimeout(function() {
+            var editable = lastBlock.querySelector('[contenteditable="true"]');
+            if (editable) editable.focus();
+          }, 100);
+        }
+
+        return; // Early return - block selection handled
+      }
+    }
+
     if (mode === 'replace') {
       // REPLACE: Remove ALL highlighted text spans and insert new content
-      // Get all highlight elements (multi-selection support)
-      var allHighlights = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
+      // Check for selection lock highlights first, then fall back to ai-selection-highlight
+      var allHighlights = document.querySelectorAll('.selection-lock[data-selection-lock]');
+      if (allHighlights.length === 0) {
+        allHighlights = document.querySelectorAll('.ai-selection-highlight[data-ai-highlight]');
+      }
 
       if (allHighlights.length > 0) {
         // Get the parent of the first highlight for reference
@@ -1143,6 +2258,11 @@
           if (highlight.parentNode) {
             highlight.parentNode.removeChild(highlight);
           }
+        }
+
+        // Also clear selection lock if it was used
+        if (ERM.reportEditorV2 && ERM.reportEditorV2.selectionLock) {
+          ERM.reportEditorV2.selectionLock.clear();
         }
 
         state.highlightElement = null;
@@ -1577,40 +2697,6 @@
 
     console.log('[parseAIToBlocks] Created', blocks.length, 'blocks');
     return blocks;
-  };
-
-  // Legacy functions kept for backwards compatibility
-  ERM.reportEditorAI.preprocessTables = function(text) {
-    // Deprecated - use parseAIToBlocks instead
-    return text;
-  };
-
-  ERM.reportEditorAI.detectBlockType = function(line) {
-    line = line.trim();
-    if (/^\d+\.\s/.test(line)) return 'number';
-    if (/^[-*•]\s/.test(line)) return 'bullet';
-    if (/^###\s/.test(line)) return 'heading3';
-    if (/^##\s/.test(line)) return 'heading2';
-    if (/^#\s/.test(line)) return 'heading1';
-    return 'paragraph';
-  };
-
-  ERM.reportEditorAI.stripBlockPrefix = function(line, blockType) {
-    line = line.trim();
-    switch (blockType) {
-      case 'number':
-        return line.replace(/^\d+\.\s*/, '');
-      case 'bullet':
-        return line.replace(/^[-*•]\s*/, '');
-      case 'heading1':
-        return line.replace(/^#\s*/, '');
-      case 'heading2':
-        return line.replace(/^##\s*/, '');
-      case 'heading3':
-        return line.replace(/^###\s*/, '');
-      default:
-        return line;
-    }
   };
 
 })();

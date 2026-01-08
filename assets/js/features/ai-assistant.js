@@ -484,28 +484,21 @@ ERM.ai.generateEntireRisk = function () {
 
 /**
  * Review entire risk for completeness
+ * No paywall - review is free feature
  */
 ERM.ai.reviewEntireRisk = function () {
   var self = this;
 
-  // Check AI limit before proceeding
-  if (typeof ERM.enforcement !== 'undefined' && ERM.enforcement.canUseAI) {
-    var aiCheck = ERM.enforcement.canUseAI();
-    if (!aiCheck.allowed && typeof ERM.upgradeModal !== 'undefined') {
-      // Show upgrade modal for AI limit
-      ERM.upgradeModal.show({
-        title: 'AI Limit Reached',
-        message: aiCheck.message,
-        feature: 'AI Risk Review',
-        upgradeMessage: aiCheck.upgradeMessage
-      });
-      return;
-    }
-  }
+  // Start button animation using unified module
+  var btn = document.getElementById("ai-review-risk");
+  var thinkingState = ERM.aiSuggestions.startButtonThinking(btn, "Reviewing risk");
 
-  // Show thinking animation first
-  this.showRiskReviewThinking(function () {
-    self.performRiskReview();
+  // Show thinking animation, then perform review when animation completes
+  this.showRiskReviewThinking(function() {
+    self.performRiskReview(function() {
+      // Stop button animation when done
+      ERM.aiSuggestions.stopButtonThinking(thinkingState);
+    });
   });
 };
 
@@ -639,26 +632,19 @@ ERM.ai.showRiskReviewThinking = function (onComplete) {
 };
 
 /**
- * Perform the actual risk review - comprehensive validation
+ * Perform the actual risk review - AI-only analysis via DeepSeek
+ * @param {Function} callback - Optional callback when review is complete
  */
-ERM.ai.performRiskReview = function () {
+ERM.ai.performRiskReview = function (callback) {
   console.log("performRiskReview called");
 
   try {
-    var issues = []; // Critical - should fix
-    var warnings = []; // Recommendations - nice to fix
-    var strengths = []; // What's good
-
-    // Get all form values
+    // Get all form values for AI context
     var title = this.getFieldValue("risk-title");
     var description = this.getFieldValue("risk-description");
     var category = this.getFieldValue("risk-category");
     var owner = this.getFieldValue("risk-owner");
-    var actionOwner = this.getFieldValue("risk-action-owner");
     var treatment = this.getFieldValue("risk-treatment");
-    var status = this.getFieldValue("risk-status");
-    var targetDate = this.getFieldValue("risk-target-date");
-    var reviewDate = this.getFieldValue("risk-review-date");
 
     var inhL = parseInt(this.getFieldValue("inherent-likelihood")) || 0;
     var inhI = parseInt(this.getFieldValue("inherent-impact")) || 0;
@@ -670,436 +656,7 @@ ERM.ai.performRiskReview = function () {
     // Get list items
     var rootCauses = this.getListItems("rootCauses-list");
     var consequences = this.getListItems("consequences-list");
-    var actionPlan = this.getListItems("actionPlan-list");
     var linkedControls = this.getLinkedControls();
-
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // ========================================
-    // 1. SCORE LOGIC VALIDATION
-    // ========================================
-    if (inhScore === 0) {
-      issues.push(
-        "Inherent risk not assessed - set likelihood and impact scores"
-      );
-    }
-    if (resL > inhL) {
-      issues.push(
-        "Residual likelihood (" +
-          resL +
-          ") exceeds inherent (" +
-          inhL +
-          ") - controls should not increase likelihood"
-      );
-    }
-    if (resI > inhI) {
-      warnings.push(
-        "Residual impact (" +
-          resI +
-          ") exceeds inherent (" +
-          inhI +
-          ") - impact rarely increases after controls"
-      );
-    }
-    if (inhScore > 0 && resScore >= inhScore && linkedControls.length > 0) {
-      warnings.push(
-        "Residual score (" +
-          resScore +
-          ") not lower than inherent (" +
-          inhScore +
-          ") despite linked controls"
-      );
-    }
-    if (inhScore >= 15 && linkedControls.length === 0) {
-      issues.push(
-        "Critical/High inherent risk with no linked controls - unmitigated exposure"
-      );
-    }
-    if (inhScore > 0 && resScore < inhScore) {
-      strengths.push("Controls effectively reducing risk score");
-    }
-
-    // ========================================
-    // 2. TREATMENT LOGIC VALIDATION
-    // ========================================
-    if (treatment === "accept") {
-      if (inhScore >= 15) {
-        warnings.push(
-          "Accepting a Critical risk - ensure management approval is documented"
-        );
-      } else if (inhScore >= 10) {
-        warnings.push(
-          "Accepting a High risk - confirm this is within risk appetite"
-        );
-      }
-      if (actionPlan.length > 0) {
-        strengths.push("Action plan documented even for accepted risk");
-      }
-    }
-    if (treatment === "mitigate") {
-      if (actionPlan.length === 0) {
-        issues.push("Treatment is 'Mitigate' but no action plan defined");
-      }
-      if (linkedControls.length === 0) {
-        warnings.push(
-          "Treatment is 'Mitigate' but no controls linked - how will risk be reduced?"
-        );
-      }
-      if (resScore >= inhScore && inhScore > 0) {
-        warnings.push("Treatment is 'Mitigate' but residual risk not reduced");
-      }
-      if (actionPlan.length > 0 && linkedControls.length > 0) {
-        strengths.push(
-          "Mitigation strategy well-defined with actions and controls"
-        );
-      }
-    }
-    if (treatment === "transfer") {
-      var transferKeywords = [
-        "insurance",
-        "outsource",
-        "third party",
-        "vendor",
-        "contract",
-        "indemnity",
-      ];
-      var hasTransferRef = false;
-      var descLower = (description || "").toLowerCase();
-      var actionsLower = actionPlan.join(" ").toLowerCase();
-      for (var t = 0; t < transferKeywords.length; t++) {
-        if (
-          descLower.indexOf(transferKeywords[t]) !== -1 ||
-          actionsLower.indexOf(transferKeywords[t]) !== -1
-        ) {
-          hasTransferRef = true;
-          break;
-        }
-      }
-      if (!hasTransferRef) {
-        warnings.push(
-          "Treatment is 'Transfer' - consider documenting insurance, outsourcing, or third-party arrangements"
-        );
-      }
-    }
-    if (treatment === "avoid") {
-      if (actionPlan.length === 0) {
-        warnings.push(
-          "Treatment is 'Avoid' - document how the risk-generating activity will be eliminated"
-        );
-      }
-    }
-    if (treatment) {
-      strengths.push("Treatment decision documented");
-    }
-
-    // ========================================
-    // 3. OWNERSHIP & ACCOUNTABILITY
-    // ========================================
-    if (!owner) {
-      issues.push("No Risk Owner assigned - who is accountable for this risk?");
-    } else {
-      strengths.push("Risk Owner assigned");
-    }
-    if (actionPlan.length > 0 && !actionOwner) {
-      warnings.push(
-        "Action plan exists but no Action Owner - who will implement?"
-      );
-    }
-    if (owner && actionOwner && owner === actionOwner) {
-      warnings.push(
-        "Risk Owner and Action Owner are the same - consider separation for oversight"
-      );
-    }
-    if (targetDate) {
-      var target = new Date(targetDate);
-      if (target < today) {
-        issues.push("Target date is in the past - action may be overdue");
-      } else if (inhScore >= 15) {
-        var threeMonths = new Date();
-        threeMonths.setMonth(threeMonths.getMonth() + 3);
-        if (target > threeMonths) {
-          warnings.push(
-            "Target date is over 3 months away for a Critical/High risk"
-          );
-        }
-      }
-      strengths.push("Target date set for action completion");
-    } else if (actionPlan.length > 0) {
-      warnings.push(
-        "Action plan exists but no target date - when should actions be completed?"
-      );
-    }
-    if (reviewDate) {
-      var review = new Date(reviewDate);
-      if (review < today) {
-        warnings.push(
-          "Review date is in the past - risk may need reassessment"
-        );
-      }
-      strengths.push("Review date scheduled");
-    } else {
-      warnings.push("No review date set - when will this risk be reassessed?");
-    }
-
-    // ========================================
-    // 4. CONTENT QUALITY
-    // ========================================
-    if (!title) {
-      issues.push("Risk title is required");
-    } else if (title.length < 10) {
-      warnings.push("Risk title may be too vague (less than 10 characters)");
-    } else if (title.length > 100) {
-      warnings.push(
-        "Risk title is very long - consider making it more concise"
-      );
-    } else {
-      strengths.push("Clear risk title");
-    }
-
-    if (!description) {
-      warnings.push("No description provided - add context about the risk");
-    } else if (description.length < 50) {
-      warnings.push("Description is brief - consider adding more detail");
-    } else {
-      strengths.push("Detailed description provided");
-    }
-
-    if (rootCauses.length === 0) {
-      warnings.push("No root causes identified - why does this risk exist?");
-    } else if (rootCauses.length === 1) {
-      warnings.push(
-        "Only 1 root cause - consider if there are contributing factors"
-      );
-    } else {
-      strengths.push(
-        "Multiple root causes identified (" + rootCauses.length + ")"
-      );
-    }
-
-    if (consequences.length === 0) {
-      warnings.push("No consequences defined - what is the potential impact?");
-    } else if (consequences.length === 1) {
-      warnings.push(
-        "Only 1 consequence - consider broader impacts (financial, reputational, operational)"
-      );
-    } else {
-      strengths.push(
-        "Multiple consequences identified (" + consequences.length + ")"
-      );
-    }
-
-    // ========================================
-    // 5. ISO 31000 BEST PRACTICES
-    // ========================================
-    // Title format check (should suggest cause + effect pattern)
-    var titleLower = (title || "").toLowerCase();
-    var hasEventPattern =
-      titleLower.indexOf(" due to ") !== -1 ||
-      titleLower.indexOf(" caused by ") !== -1 ||
-      titleLower.indexOf(" leading to ") !== -1 ||
-      titleLower.indexOf(" resulting in ") !== -1 ||
-      titleLower.indexOf(" from ") !== -1;
-    if (title && !hasEventPattern && title.length > 15) {
-      warnings.push(
-        "Consider ISO 31000 title format: 'Event + cause' or 'Event leading to impact'"
-      );
-    }
-
-    // Status progression check
-    if (status === "identified" && inhScore > 0) {
-      warnings.push(
-        "Status is 'Identified' but scores are set - consider updating to 'Assessed'"
-      );
-    }
-    if (
-      status === "treated" &&
-      actionPlan.length === 0 &&
-      linkedControls.length === 0
-    ) {
-      warnings.push(
-        "Status is 'Treated' but no actions or controls documented"
-      );
-    }
-    if (status === "monitoring" && !reviewDate) {
-      warnings.push("Status is 'Monitoring' but no review date scheduled");
-    }
-    if (status === "closed" && resScore >= 10) {
-      warnings.push(
-        "Status is 'Closed' but residual risk is still High/Critical"
-      );
-    }
-
-    // Category-Owner alignment
-    var categoryOwnerMap = {
-      technology: [
-        "cio",
-        "ciso",
-        "it ",
-        "information",
-        "security",
-        "technology",
-        "cyber",
-        "digital",
-      ],
-      financial: ["cfo", "finance", "treasury", "financial", "accountant"],
-      compliance: ["cco", "compliance", "legal", "regulatory", "counsel"],
-      operational: ["coo", "operations", "process", "manager"],
-      strategic: ["ceo", "strategy", "director", "executive", "managing"],
-      reputational: [
-        "cmo",
-        "marketing",
-        "communications",
-        "brand",
-        "pr ",
-        "public relations",
-      ],
-      "health-safety": ["hse", "safety", "health", "occupational"],
-      environmental: ["environmental", "sustainability", "hse"],
-    };
-    if (category && owner) {
-      var ownerLower = owner.toLowerCase();
-      var expectedTerms = categoryOwnerMap[category] || [];
-      var ownerMatchesCategory = false;
-      for (var o = 0; o < expectedTerms.length; o++) {
-        if (ownerLower.indexOf(expectedTerms[o]) !== -1) {
-          ownerMatchesCategory = true;
-          break;
-        }
-      }
-      if (!ownerMatchesCategory && expectedTerms.length > 0) {
-        var categoryLabel = this.formatCategory
-          ? this.formatCategory(category)
-          : category;
-        warnings.push(
-          "Risk Owner may not align with " +
-            categoryLabel +
-            " category - verify appropriate ownership"
-        );
-      }
-    }
-
-    // ========================================
-    // 6. CROSS-FIELD RELATIONSHIPS
-    // ========================================
-    // High risk + Accept + No controls
-    if (
-      inhScore >= 10 &&
-      treatment === "accept" &&
-      linkedControls.length === 0
-    ) {
-      warnings.push(
-        "Accepting High/Critical risk with no controls - ensure this is deliberate"
-      );
-    }
-
-    // Target date vs Review date
-    if (targetDate && reviewDate) {
-      var targetD = new Date(targetDate);
-      var reviewD = new Date(reviewDate);
-      if (reviewD < targetD) {
-        warnings.push(
-          "Review date is before target date - review should typically follow action completion"
-        );
-      }
-    }
-
-    // Keyword-category mismatch
-    var allText = (
-      title +
-      " " +
-      description +
-      " " +
-      rootCauses.join(" ") +
-      " " +
-      consequences.join(" ")
-    ).toLowerCase();
-    var categoryKeywords = {
-      financial: [
-        "financial",
-        "money",
-        "cost",
-        "revenue",
-        "profit",
-        "loss",
-        "budget",
-        "cash",
-        "funding",
-      ],
-      compliance: [
-        "compliance",
-        "regulatory",
-        "regulation",
-        "legal",
-        "law",
-        "fine",
-        "penalty",
-        "license",
-      ],
-      technology: [
-        "cyber",
-        "system",
-        "data",
-        "software",
-        "hardware",
-        "network",
-        "IT",
-        "digital",
-        "breach",
-      ],
-      reputational: [
-        "reputation",
-        "brand",
-        "media",
-        "public",
-        "customer trust",
-        "image",
-      ],
-      "health-safety": [
-        "safety",
-        "injury",
-        "health",
-        "accident",
-        "incident",
-        "hazard",
-        "harm",
-      ],
-      environmental: [
-        "environment",
-        "pollution",
-        "emission",
-        "waste",
-        "climate",
-        "carbon",
-      ],
-    };
-    for (var cat in categoryKeywords) {
-      if (cat !== category) {
-        var keywords = categoryKeywords[cat];
-        var matchCount = 0;
-        for (var k = 0; k < keywords.length; k++) {
-          if (allText.indexOf(keywords[k]) !== -1) matchCount++;
-        }
-        if (matchCount >= 2) {
-          var suggestedLabel = this.formatCategory
-            ? this.formatCategory(cat)
-            : cat;
-          warnings.push(
-            "Content mentions " +
-              suggestedLabel +
-              " themes - verify category is correct"
-          );
-          break;
-        }
-      }
-    }
-
-    // Category assigned check
-    if (category) {
-      strengths.push("Risk category assigned");
-    } else {
-      issues.push("Risk category not selected");
-    }
 
     // Build context for AI analysis
     var riskContext = {
@@ -1115,22 +672,12 @@ ERM.ai.performRiskReview = function () {
       linkedControls: linkedControls.length
     };
 
-    // Show local validation results first, then enhance with DeepSeek
+    // Call DeepSeek for AI-only analysis
     var self = this;
-    this.showReviewResults(issues, warnings, strengths, null, function(contentDiv) {
-      // Call DeepSeek for AI-enhanced analysis
-      self.callDeepSeekReview("risk", riskContext, function(aiInsight) {
-        if (aiInsight && contentDiv) {
-          var aiSection = document.createElement("div");
-          aiSection.className = "ai-review-section ai-insight";
-          aiSection.innerHTML =
-            '<div class="ai-insight-header">' +
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>' +
-            "<h5>AI Analysis</h5>" +
-            "</div>" +
-            '<div class="ai-insight-content">' + self.escapeHtml(aiInsight) + '</div>';
-          contentDiv.appendChild(aiSection);
-        }
+    this.callDeepSeekReview("risk", riskContext, function(aiInsight) {
+      // Show AI-only results
+      self.showAIOnlyReviewResults("risk", aiInsight, function() {
+        if (callback) callback();
       });
     });
   } catch (e) {
@@ -1138,6 +685,7 @@ ERM.ai.performRiskReview = function () {
     if (typeof ERM.toast !== "undefined") {
       ERM.toast.error("Error reviewing risk: " + e.message);
     }
+    if (callback) callback();
   }
 };
 
@@ -1147,28 +695,21 @@ ERM.ai.performRiskReview = function () {
 
 /**
  * Review entire control - main entry point
+ * No paywall - review is free feature
  */
 ERM.ai.reviewEntireControl = function () {
   var self = this;
 
-  // Check AI limit before proceeding
-  if (typeof ERM.enforcement !== 'undefined' && ERM.enforcement.canUseAI) {
-    var aiCheck = ERM.enforcement.canUseAI();
-    if (!aiCheck.allowed && typeof ERM.upgradeModal !== 'undefined') {
-      // Show upgrade modal for AI limit
-      ERM.upgradeModal.show({
-        title: 'AI Limit Reached',
-        message: aiCheck.message,
-        feature: 'AI Control Review',
-        upgradeMessage: aiCheck.upgradeMessage
-      });
-      return;
-    }
-  }
+  // Start button animation using unified module
+  var btn = document.getElementById("ai-review-control");
+  var thinkingState = ERM.aiSuggestions.startButtonThinking(btn, "Reviewing control");
 
-  // Show thinking animation first
-  this.showControlReviewThinking(function () {
-    self.performControlReview();
+  // Show thinking animation, then perform review when animation completes
+  this.showControlReviewThinking(function() {
+    self.performControlReview(function() {
+      // Stop button animation when done
+      ERM.aiSuggestions.stopButtonThinking(thinkingState);
+    });
   });
 };
 
@@ -1302,17 +843,14 @@ ERM.ai.showControlReviewThinking = function (onComplete) {
 };
 
 /**
- * Perform the actual control review - comprehensive validation
+ * Perform the actual control review - AI-only analysis via DeepSeek
+ * @param {Function} callback - Optional callback when review is complete
  */
-ERM.ai.performControlReview = function () {
+ERM.ai.performControlReview = function (callback) {
   console.log("performControlReview called");
 
   try {
-    var issues = []; // Critical - should fix
-    var warnings = []; // Recommendations - nice to fix
-    var strengths = []; // What's good
-
-    // Get all form values
+    // Get all form values for AI context
     var name = this.getFieldValue("control-name");
     var type = this.getFieldValue("control-type");
     var category = this.getFieldValue("control-category");
@@ -1333,227 +871,6 @@ ERM.ai.performControlReview = function () {
       linkedRisks.push(checkboxes[i].value);
     }
 
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // ========================================
-    // 1. BASIC COMPLETENESS
-    // ========================================
-    if (!name) {
-      issues.push("Control name is required");
-    } else if (name.length < 10) {
-      warnings.push("Control name may be too vague (less than 10 characters)");
-    } else if (name.length > 100) {
-      warnings.push("Control name is very long - consider making it more concise");
-    } else {
-      strengths.push("Clear control name");
-    }
-
-    if (!type) {
-      issues.push("Control type not selected - specify preventive, detective, corrective, or directive");
-    } else {
-      strengths.push("Control type defined (" + type + ")");
-    }
-
-    if (!category) {
-      issues.push("Control category not selected");
-    } else {
-      strengths.push("Control category assigned");
-    }
-
-    if (!owner) {
-      warnings.push("No control owner assigned - who is responsible for this control?");
-    } else {
-      strengths.push("Control owner assigned");
-    }
-
-    if (descriptions.length === 0) {
-      warnings.push("No description provided - add context about how the control works");
-    } else if (descriptions.length === 1 && descriptions[0].length < 30) {
-      warnings.push("Description is brief - consider adding more detail about the control");
-    } else {
-      strengths.push("Detailed description provided");
-    }
-
-    // ========================================
-    // 2. EFFECTIVENESS & TESTING
-    // ========================================
-    if (!effectiveness || effectiveness === "not-tested") {
-      warnings.push("Control effectiveness not tested - consider scheduling a test");
-    } else if (effectiveness === "ineffective") {
-      issues.push("Control marked as ineffective - requires remediation or replacement");
-    } else if (effectiveness === "partially-effective") {
-      warnings.push("Control is only partially effective - identify and address gaps");
-    } else if (effectiveness === "effective") {
-      strengths.push("Control tested and confirmed effective");
-    }
-
-    // Review frequency checks
-    if (lastReviewDate) {
-      var lastReview = new Date(lastReviewDate);
-      var sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-      if (lastReview < sixMonthsAgo) {
-        warnings.push("Last review was over 6 months ago - control may need retesting");
-      } else {
-        strengths.push("Control recently reviewed");
-      }
-    } else {
-      warnings.push("No last review date recorded");
-    }
-
-    if (nextReviewDate) {
-      var nextReview = new Date(nextReviewDate);
-      if (nextReview < today) {
-        issues.push("Next review date is in the past - review is overdue");
-      } else {
-        strengths.push("Next review date scheduled");
-      }
-    } else {
-      warnings.push("No next review date set - when will this control be reassessed?");
-    }
-
-    // ========================================
-    // 3. CONTROL TYPE & DESIGN
-    // ========================================
-    if (type === "preventive") {
-      if (effectiveness === "effective" && linkedRisks.length > 0) {
-        strengths.push("Effective preventive control linked to risks - strong risk mitigation");
-      }
-      if (!frequency || frequency === "triggered") {
-        warnings.push("Preventive controls typically operate continuously or periodically - verify frequency");
-      }
-    }
-
-    if (type === "detective") {
-      if (!frequency || frequency === "continuous") {
-        warnings.push("Detective controls typically operate periodically - verify frequency");
-      }
-      if (effectiveness === "effective") {
-        strengths.push("Effective detective control - provides early warning");
-      }
-    }
-
-    if (type === "corrective") {
-      if (linkedRisks.length === 0) {
-        warnings.push("Corrective control should be linked to risks it addresses");
-      }
-    }
-
-    // Automation considerations
-    if (category === "manual" && type === "detective") {
-      warnings.push("Manual detective controls may be less reliable - consider automation where possible");
-    }
-
-    if (category === "automated" && effectiveness === "not-tested") {
-      warnings.push("Automated controls should be tested to ensure they function as designed");
-    }
-
-    if (category === "automated") {
-      strengths.push("Automated control - typically more reliable than manual controls");
-    }
-
-    // ========================================
-    // 4. FREQUENCY & OPERATING RHYTHM
-    // ========================================
-    if (!frequency) {
-      warnings.push("Control frequency not specified - how often does this control operate?");
-    } else {
-      strengths.push("Control frequency defined (" + frequency + ")");
-
-      // Frequency-effectiveness relationship
-      if (type === "preventive" && frequency === "annual" && effectiveness === "effective") {
-        warnings.push("Annual preventive control - consider if more frequent execution would improve effectiveness");
-      }
-
-      if (type === "detective" && frequency === "continuous" && category !== "automated") {
-        warnings.push("Continuous manual detective control may be resource-intensive");
-      }
-    }
-
-    // ========================================
-    // 5. LINKED RISKS
-    // ========================================
-    if (linkedRisks.length === 0) {
-      warnings.push("No linked risks - which risks does this control mitigate?");
-    } else if (linkedRisks.length === 1) {
-      strengths.push("Control linked to 1 risk");
-    } else {
-      strengths.push("Control linked to " + linkedRisks.length + " risks");
-    }
-
-    // ========================================
-    // 6. STATUS VALIDATION
-    // ========================================
-    if (!status) {
-      warnings.push("Control status not selected");
-    } else if (status === "inactive") {
-      if (linkedRisks.length > 0) {
-        issues.push("Control is inactive but linked to risks - risks may be unmitigated");
-      }
-      warnings.push("Inactive control - consider removing links to risks or reactivating");
-    } else if (status === "under-review") {
-      warnings.push("Control under review - ensure review is completed promptly");
-    } else if (status === "planned") {
-      warnings.push("Control is planned but not active - risks may be unmitigated until implemented");
-    } else if (status === "active") {
-      strengths.push("Control is active");
-    }
-
-    // ========================================
-    // 7. CROSS-FIELD RELATIONSHIPS
-    // ========================================
-    // Ineffective + Active
-    if (status === "active" && effectiveness === "ineffective") {
-      issues.push("Active control marked as ineffective - should be under review or inactive");
-    }
-
-    // Not tested + Active + Linked to risks
-    if (status === "active" && effectiveness === "not-tested" && linkedRisks.length > 0) {
-      warnings.push("Active control linked to risks but not tested - effectiveness unknown");
-    }
-
-    // Last review after next review (illogical dates)
-    if (lastReviewDate && nextReviewDate) {
-      var lastRev = new Date(lastReviewDate);
-      var nextRev = new Date(nextReviewDate);
-      if (lastRev > nextRev) {
-        issues.push("Last review date is after next review date - check dates for accuracy");
-      }
-    }
-
-    // ========================================
-    // 8. BEST PRACTICES
-    // ========================================
-    // SOC 2 / ISO 27001 alignment
-    if (type && category && effectiveness && frequency && owner) {
-      strengths.push("Control documentation meets compliance frameworks (SOC 2, ISO 27001)");
-    }
-
-    // Review interval recommendations
-    if (nextReviewDate && lastReviewDate) {
-      var lastR = new Date(lastReviewDate);
-      var nextR = new Date(nextReviewDate);
-      var daysDiff = Math.floor((nextR - lastR) / (1000 * 60 * 60 * 24));
-
-      if (daysDiff > 365 && effectiveness === "effective") {
-        warnings.push("Review interval over 12 months - consider more frequent reviews for effective controls");
-      }
-    }
-
-    // Owner-category alignment
-    var nameLower = (name || "").toLowerCase();
-    var descLower = descriptions.join(" ").toLowerCase();
-
-    if ((nameLower.indexOf("access") !== -1 || descLower.indexOf("access") !== -1) && category !== "policy" && category !== "automated") {
-      warnings.push("Access control - verify category is appropriate (typically policy or automated)");
-    }
-
-    if ((nameLower.indexOf("segregation") !== -1 || descLower.indexOf("segregation") !== -1) && category !== "segregation") {
-      warnings.push("Appears to be a segregation of duties control - verify category");
-    }
-
     // Build context for AI analysis
     var controlContext = {
       name: name,
@@ -1569,22 +886,12 @@ ERM.ai.performControlReview = function () {
       nextReviewDate: nextReviewDate
     };
 
-    // Show local validation results first, then enhance with DeepSeek
+    // Call DeepSeek for AI-only analysis
     var self = this;
-    this.showControlReviewResults(issues, warnings, strengths, null, function(contentDiv) {
-      // Call DeepSeek for AI-enhanced analysis
-      self.callDeepSeekReview("control", controlContext, function(aiInsight) {
-        if (aiInsight && contentDiv) {
-          var aiSection = document.createElement("div");
-          aiSection.className = "ai-review-section ai-insight";
-          aiSection.innerHTML =
-            '<div class="ai-insight-header">' +
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>' +
-            "<h5>AI Analysis</h5>" +
-            "</div>" +
-            '<div class="ai-insight-content">' + self.escapeHtml(aiInsight) + '</div>';
-          contentDiv.appendChild(aiSection);
-        }
+    this.callDeepSeekReview("control", controlContext, function(aiInsight) {
+      // Show AI-only results
+      self.showAIOnlyReviewResults("control", aiInsight, function() {
+        if (callback) callback();
       });
     });
   } catch (e) {
@@ -1592,18 +899,119 @@ ERM.ai.performControlReview = function () {
     if (typeof ERM.toast !== "undefined") {
       ERM.toast.error("Error reviewing control: " + e.message);
     }
+    if (callback) callback();
   }
 };
 
 /**
- * Show control review results modal
+ * Show AI-only review results modal - clean DeepSeek analysis only
+ * @param {string} type - "risk" or "control"
+ * @param {string} aiInsight - AI-generated analysis from DeepSeek
+ * @param {function} callback - Optional callback when modal opens
+ */
+ERM.ai.showAIOnlyReviewResults = function (type, aiInsight, callback) {
+  var typeLabel = type === "risk" ? "Risk" : "Control";
+  var self = this;
+
+  // Format the AI insight text with proper HTML
+  var formattedInsight = "";
+  if (aiInsight) {
+    // Convert line breaks to paragraphs and format headers
+    var lines = aiInsight.split("\n");
+    var inList = false;
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) {
+        if (inList) {
+          formattedInsight += "</ul>";
+          inList = false;
+        }
+        continue;
+      }
+
+      // Check for numbered headers like "1. DOCUMENTATION QUALITY:"
+      if (/^\d+\.\s+[A-Z]/.test(line)) {
+        if (inList) {
+          formattedInsight += "</ul>";
+          inList = false;
+        }
+        var headerText = line.replace(/^\d+\.\s+/, "").replace(/:$/, "");
+        formattedInsight += '<h5 class="ai-section-header">' + self.escapeHtml(headerText) + "</h5>";
+      }
+      // Check for bullet points
+      else if (/^[-•*]\s+/.test(line)) {
+        if (!inList) {
+          formattedInsight += "<ul>";
+          inList = true;
+        }
+        formattedInsight += "<li>" + self.escapeHtml(line.replace(/^[-•*]\s+/, "")) + "</li>";
+      }
+      // Regular paragraph
+      else {
+        if (inList) {
+          formattedInsight += "</ul>";
+          inList = false;
+        }
+        formattedInsight += "<p>" + self.escapeHtml(line) + "</p>";
+      }
+    }
+    if (inList) {
+      formattedInsight += "</ul>";
+    }
+  } else {
+    formattedInsight = "<p>Unable to generate AI analysis. Please try again.</p>";
+  }
+
+  var content =
+    '<div class="ai-review-results-simple">' +
+    '<div class="ai-review-header-simple">' +
+    '<div class="ai-sparkle-icon">' +
+    '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>' +
+    "</div>" +
+    "<h4>AI " + typeLabel + " Analysis</h4>" +
+    "</div>" +
+    '<div class="ai-insight-body">' +
+    formattedInsight +
+    "</div>" +
+    "</div>";
+
+  if (typeof ERM.components !== "undefined" && ERM.components.showSecondaryModal) {
+    ERM.components.showSecondaryModal({
+      title: "",
+      content: content,
+      buttons: [{ label: "Got It", type: "primary", action: "close" }],
+      size: "medium",
+      onOpen: function () {
+        // Style the modal
+        var modal = document.querySelector(".secondary-overlay .modal");
+        var modalHeader = document.querySelector(".secondary-overlay .modal-header");
+
+        if (modal) {
+          modal.classList.add("ai-review-modal-simple");
+        }
+        if (modalHeader) {
+          modalHeader.style.display = "none";
+        }
+
+        if (callback) callback();
+      }
+    });
+  } else {
+    console.error("Secondary modal not available");
+    if (callback) callback();
+  }
+};
+
+/**
+ * Show control review results modal (LEGACY - kept for backwards compatibility)
  * @param {array} issues - Critical issues found
  * @param {array} warnings - Warnings/recommendations
  * @param {array} strengths - Positive aspects
- * @param {object} unused - Unused parameter for backwards compatibility
+ * @param {string} aiInsight - AI-generated analysis from DeepSeek
  * @param {function} callback - Optional callback called with content div after modal opens
  */
-ERM.ai.showControlReviewResults = function (issues, warnings, strengths, unused, callback) {
+ERM.ai.showControlReviewResults = function (issues, warnings, strengths, aiInsight, callback) {
   var score = 100 - issues.length * 15 - warnings.length * 5;
   score = Math.max(0, Math.min(100, score));
 
@@ -1733,6 +1141,18 @@ ERM.ai.showControlReviewResults = function (issues, warnings, strengths, unused,
     content += "</ul></div>";
   }
 
+  // Show AI Analysis if available
+  if (aiInsight) {
+    content +=
+      '<div class="ai-review-section ai-insight">' +
+      '<div class="ai-insight-header">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>' +
+      "<h5>AI Analysis</h5>" +
+      "</div>" +
+      '<div class="ai-insight-content">' + this.escapeHtml(aiInsight) + '</div>' +
+      "</div>";
+  }
+
   // Add recommendation note at bottom
   content +=
     '<div class="ai-review-note">' +
@@ -1836,10 +1256,10 @@ ERM.ai.formatCategory = function (category) {
  * @param {array} issues - Critical issues found
  * @param {array} warnings - Warnings/recommendations
  * @param {array} strengths - Positive aspects
- * @param {object} unused - Unused parameter for backwards compatibility
+ * @param {string} aiInsight - AI-generated analysis from DeepSeek
  * @param {function} callback - Optional callback called with content div after modal opens
  */
-ERM.ai.showReviewResults = function (issues, warnings, strengths, unused, callback) {
+ERM.ai.showReviewResults = function (issues, warnings, strengths, aiInsight, callback) {
   var score = 100 - issues.length * 15 - warnings.length * 5;
   score = Math.max(0, Math.min(100, score));
 
@@ -1972,6 +1392,18 @@ ERM.ai.showReviewResults = function (issues, warnings, strengths, unused, callba
     content += "</ul></div>";
   }
 
+  // Show AI Analysis if available
+  if (aiInsight) {
+    content +=
+      '<div class="ai-review-section ai-insight">' +
+      '<div class="ai-insight-header">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>' +
+      "<h5>AI Analysis</h5>" +
+      "</div>" +
+      '<div class="ai-insight-content">' + this.escapeHtml(aiInsight) + '</div>' +
+      "</div>";
+  }
+
   // Add recommendation note at bottom
   content +=
     '<div class="ai-review-note">' +
@@ -1988,7 +1420,8 @@ ERM.ai.showReviewResults = function (issues, warnings, strengths, unused, callba
     warnings.length,
     "warnings,",
     strengths.length,
-    "strengths"
+    "strengths,",
+    aiInsight ? "with AI insight" : "no AI insight"
   );
 
   if (

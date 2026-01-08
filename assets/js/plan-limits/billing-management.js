@@ -512,7 +512,7 @@
         var initials = ERM.utils.getInitials(member.name);
         var roleBadge = member.isOwner ? '<span class="role-badge owner">Owner</span>' : '<span class="role-badge member">Member</span>';
         var youBadge = member.isCurrentUser ? ' <span class="team-member-you">(You)</span>' : '';
-        var color = typeof ERM.utils.getColorForName === 'function' ? ERM.utils.getColorForName(member.name) : '#6366f1';
+        var color = typeof ERM.utils.getColorForName === 'function' ? ERM.utils.getColorForName(member.name) : '#3b82f6';
 
         html += '<div class="billing-team-member">' +
           '<div class="billing-member-info">' +
@@ -632,7 +632,7 @@
         '</div>' +
         '<div style="display: flex; justify-content: space-between;">' +
         '<span style="color: #64748b;">New monthly cost:</span>' +
-        '<span style="font-weight: 600; color: #6366f1;" id="new-cost">$' + this.calculateMonthlyCost(planDetails.teamSize + 1) + '/mo</span>' +
+        '<span style="font-weight: 600; color: #3b82f6;" id="new-cost">$' + this.calculateMonthlyCost(planDetails.teamSize + 1) + '/mo</span>' +
         '</div>' +
         '</div>' +
         '</div>';

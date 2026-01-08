@@ -8,8 +8,8 @@
 :root {
   --onboarding-primary: #c41e3a;
   --onboarding-primary-dark: #a01830;
-  --onboarding-purple: #8b5cf6;
-  --onboarding-purple-dark: #7c3aed;
+  --onboarding-blue: var(--blue-500);
+  --onboarding-blue-dark: var(--blue-600);
   --onboarding-text-dark: #1a1a2e;
   --onboarding-text-medium: #5a5a72;
   --onboarding-text-light: #8a8aa0;
@@ -126,13 +126,13 @@ body.onboarding-page {
   color: white;
 }
 
-.step-icon-purple {
+.step-icon-blue {
   background: linear-gradient(
     135deg,
-    var(--onboarding-purple) 0%,
-    var(--onboarding-purple-dark) 100%
+    var(--onboarding-blue) 0%,
+    var(--onboarding-blue-dark) 100%
   );
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
 .step-icon-success {
@@ -207,11 +207,11 @@ body.onboarding-page {
 }
 
 .feature-icon-ai {
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
 }
 
 .feature-icon-ai svg {
-  color: var(--onboarding-purple);
+  color: var(--onboarding-blue);
 }
 
 .feature-card span {

@@ -244,8 +244,8 @@ ERM.floatingAI.createFloatingUI = function() {
   container.className = 'floating-ai-container';
   container.style.display = 'none';
 
-  // Get AI counter text
-  var counterText = ERM.aiCounter ? ERM.aiCounter.getDisplayText() : '0 of 50';
+  // Get AI counter text (positive framing - shows remaining)
+  var counterText = ERM.aiCounter ? ERM.aiCounter.getDisplayText() : '50 left';
 
   container.innerHTML =
     '<button id="floating-ai-btn" class="floating-ai-btn" type="button" title="AI Assistant">' +

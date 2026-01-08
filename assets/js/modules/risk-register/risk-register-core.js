@@ -12,6 +12,16 @@ var ERM = window.ERM || {};
 ERM.riskRegister = ERM.riskRegister || {};
 
 /* ========================================
+   IDEMPOTENCY GUARDS
+   Prevent duplicate event binding on view re-entry
+   ======================================== */
+ERM.riskRegister._initialized = false;
+ERM.riskRegister._listEventsBound = false;
+ERM.riskRegister._detailEventsBound = false;
+ERM.riskRegister._modalsEventsBound = false;
+ERM.riskRegister._aiUIEventsBound = false;
+
+/* ========================================
    STATE
    ======================================== */
 ERM.riskRegister.state = {
@@ -73,262 +83,35 @@ ERM.riskRegister.categories = [
 ];
 
 /**
- * Get industry name for display
- * @returns {string} Industry name or "Enterprise"
+ * Get industry name for display (templates removed - returns "Enterprise")
  */
 ERM.riskRegister.getIndustryName = function () {
-  if (typeof ERM_TEMPLATES !== "undefined" && ERM_TEMPLATES.loader) {
-    return ERM_TEMPLATES.loader.getIndustryName() || "Enterprise";
-  }
   return "Enterprise";
 };
 
 /**
- * Search industry-specific categories (for AI suggestions)
- * Searches the full 200+ category list from templates by keywords
- * @param {string} searchTerm - Term to search (title text)
- * @returns {Array} Matching categories with department info
+ * Search categories (templates removed - searches generic categories only)
  */
 ERM.riskRegister.searchCategories = function (searchTerm) {
   var results = [];
   if (!searchTerm) return results;
 
-  // Stop words to filter out
-  var stopWords = [
-    "the",
-    "a",
-    "an",
-    "of",
-    "to",
-    "in",
-    "for",
-    "and",
-    "or",
-    "is",
-    "are",
-    "be",
-    "was",
-    "were",
-    "risk",
-    "risks",
-    "our",
-    "we",
-    "might",
-    "could",
-    "may",
-    "would",
-    "should",
-    "can",
-    "will",
-    "that",
-    "this",
-    "with",
-    "from",
-    "about",
-    "poor",
-    "bad",
-    "good",
-  ];
+  var searchLower = searchTerm.toLowerCase();
 
-  // Split search term into individual words (include 2+ char words, filter stop words)
-  var words = searchTerm
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(function (w) {
-      return w.length >= 2 && stopWords.indexOf(w) === -1;
-    });
-
-  if (words.length === 0) return results;
-
-  // Get categories from templates
-  var cats = null;
-  var industry = null;
-
-  // Get industry from localStorage (set during onboarding)
-  industry = localStorage.getItem("ERM_industry");
-
-  if (typeof ERM_TEMPLATES !== "undefined") {
-    // Try loader first
-    if (!industry && ERM_TEMPLATES.loader && ERM_TEMPLATES.loader.getIndustry) {
-      industry = ERM_TEMPLATES.loader.getIndustry();
-    }
-
-    // Use detected industry
-    if (
-      industry &&
-      ERM_TEMPLATES[industry] &&
-      ERM_TEMPLATES[industry].categories
-    ) {
-      cats = ERM_TEMPLATES[industry].categories;
-    }
-  }
-
-  if (cats) {
-    // Iterate through all departments and search categories
-    for (var deptId in cats) {
-      if (!cats.hasOwnProperty(deptId)) continue;
-      if (typeof cats[deptId] === "function") continue;
-      if (!Array.isArray(cats[deptId])) continue;
-
-      var deptCats = cats[deptId];
-      for (var i = 0; i < deptCats.length; i++) {
-        var cat = deptCats[i];
-        var score = 0;
-        var matchedTerms = 0;
-
-        // For each search term
-        for (var w = 0; w < words.length; w++) {
-          var term = words[w];
-          var isShortTerm = term.length <= 3;
-          var termMatched = false;
-
-          // Search by name - split into words
-          if (cat.name) {
-            var nameWords = cat.name.toLowerCase().split(/\s+/);
-            for (var nw = 0; nw < nameWords.length; nw++) {
-              var nameWord = nameWords[nw];
-              if (isShortTerm) {
-                // Short term: exact word match only
-                if (nameWord === term) {
-                  score += 5;
-                  termMatched = true;
-                  break;
-                }
-              } else {
-                // Longer term: exact or partial word match
-                if (nameWord === term) {
-                  score += 5;
-                  termMatched = true;
-                  break;
-                } else if (nameWord.indexOf(term) !== -1) {
-                  score += 3;
-                  termMatched = true;
-                }
-              }
-            }
-          }
-
-          // Search by id - split by hyphen
-          if (cat.id) {
-            var idParts = cat.id.toLowerCase().split("-");
-            for (var idp = 0; idp < idParts.length; idp++) {
-              if (isShortTerm) {
-                if (idParts[idp] === term) {
-                  score += 4;
-                  termMatched = true;
-                  break;
-                }
-              } else {
-                if (
-                  idParts[idp] === term ||
-                  idParts[idp].indexOf(term) !== -1
-                ) {
-                  score += 3;
-                  termMatched = true;
-                }
-              }
-            }
-          }
-
-          // Search by keywords - split each keyword into words
-          if (cat.keywords) {
-            var keywordList;
-            if (Array.isArray(cat.keywords)) {
-              keywordList = cat.keywords;
-            } else if (typeof cat.keywords === "string") {
-              // Split comma-separated string into array
-              keywordList = cat.keywords.split(",").map(function (k) {
-                return k.trim().toLowerCase();
-              });
-            } else {
-              keywordList = [];
-            }
-
-            for (var k = 0; k < keywordList.length; k++) {
-              var keywordPhrase = keywordList[k].toLowerCase();
-              var keywordWords = keywordPhrase.split(/\s+/);
-
-              for (var kw = 0; kw < keywordWords.length; kw++) {
-                var kwWord = keywordWords[kw];
-                if (isShortTerm) {
-                  // Short term: exact word match only
-                  if (kwWord === term) {
-                    score += 4;
-                    termMatched = true;
-                    break;
-                  }
-                } else {
-                  // Longer term: exact or partial word match
-                  if (kwWord === term) {
-                    score += 4;
-                    termMatched = true;
-                    break;
-                  } else if (kwWord.length > 3 && kwWord.indexOf(term) !== -1) {
-                    score += 2;
-                    termMatched = true;
-                  }
-                }
-              }
-            }
-          }
-
-          if (termMatched) matchedTerms++;
-        }
-
-        // Multi-term bonus: if multiple search terms matched, boost score
-        if (matchedTerms >= 2) {
-          score += matchedTerms * 5;
-        }
-
-        if (score > 0) {
-          results.push({
-            category: cat,
-            departmentId: deptId,
-            score: score,
-            matchedTerms: matchedTerms,
-          });
-        }
-      }
-    }
-
-    // Sort by matchedTerms first (more words matched = better), then by score
-    results.sort(function (a, b) {
-      if (b.matchedTerms !== a.matchedTerms) return b.matchedTerms - a.matchedTerms;
-      return b.score - a.score;
-    });
-
-    return results;
-  }
-
-  // Fallback: search generic categories
+  // Search generic categories
   for (var j = 0; j < this.categories.length; j++) {
     var genCat = this.categories[j];
-    for (var gw = 0; gw < words.length; gw++) {
-      if (genCat.label.toLowerCase().indexOf(words[gw]) !== -1) {
-        results.push({ category: genCat, departmentId: null, score: 1 });
-        break;
-      }
+    if (genCat.label.toLowerCase().indexOf(searchLower) !== -1) {
+      results.push({ category: genCat, departmentId: null, score: 1 });
     }
   }
   return results;
 };
 
 /**
- * Get all industry-specific categories
- * @returns {Array} All categories from industry templates
+ * Get all industry categories (templates removed - returns empty array)
  */
 ERM.riskRegister.getAllIndustryCategories = function () {
-  if (typeof ERM_TEMPLATES !== "undefined" && ERM_TEMPLATES.loader) {
-    var industry = ERM_TEMPLATES.loader.getIndustry();
-    if (
-      industry &&
-      ERM_TEMPLATES[industry] &&
-      ERM_TEMPLATES[industry].categories &&
-      typeof ERM_TEMPLATES[industry].categories.getAll === "function"
-    ) {
-      return ERM_TEMPLATES[industry].categories.getAll();
-    }
-  }
   return [];
 };
 
@@ -424,26 +207,10 @@ ERM.riskRegister.getRiskHeatmapCoords = function (risk, type) {
 ERM.riskRegister.formatCategory = function (value) {
   if (!value) return "-";
 
-  // First check generic categories (quick lookup)
+  // Check generic categories
   for (var i = 0; i < this.categories.length; i++) {
     if (this.categories[i].value === value) {
       return this.categories[i].label;
-    }
-  }
-
-  // Search industry-specific category list from templates
-  if (typeof ERM_TEMPLATES !== "undefined" && ERM_TEMPLATES.loader) {
-    var industry = ERM_TEMPLATES.loader.getIndustry();
-    if (
-      industry &&
-      ERM_TEMPLATES[industry] &&
-      ERM_TEMPLATES[industry].categories &&
-      typeof ERM_TEMPLATES[industry].categories.findById === "function"
-    ) {
-      var result = ERM_TEMPLATES[industry].categories.findById(value);
-      if (result && result.category) {
-        return result.category.name;
-      }
     }
   }
 
@@ -478,7 +245,16 @@ ERM.riskRegister.findRegisterForHeatmap = function (heatmapFilter) {
    INITIALIZATION
    ======================================== */
 ERM.riskRegister.init = function () {
-  console.log("Initializing Risk Register module...");
+  // Guard: only run full init once per session, re-entry just re-renders
+  var isFirstInit = !ERM.riskRegister._initialized;
+  ERM.riskRegister._initialized = true;
+
+  if (isFirstInit) {
+    console.log("Initializing Risk Register module (first time)...");
+  } else {
+    console.log("Risk Register re-entry (skipping event rebind)...");
+  }
+
   this.state.viewMode = "list";
   this.state.currentRegister = null;
   this.state.editingRiskId = null;

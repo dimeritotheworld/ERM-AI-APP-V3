@@ -321,7 +321,7 @@ ERM.settings = {
 
         membersHtml += '<div class="team-member-row" data-member-id="' + member.id + '">' +
           '<div class="team-member-info">' +
-          '<div class="team-member-avatar" style="background: ' + (member.color || '#6366f1') + ';">' + initials + '</div>' +
+          '<div class="team-member-avatar" style="background: ' + (member.color || '#3b82f6') + ';">' + initials + '</div>' +
           '<div class="team-member-details">' +
           '<div class="team-member-name">' + ERM.utils.escapeHtml(member.name || member.email) + '</div>' +
           '<div class="team-member-email">' + ERM.utils.escapeHtml(member.email) + '</div>' +
@@ -630,9 +630,12 @@ ERM.settings = {
   },
 
   /**
-   * Bind event handlers
+   * Bind event handlers (guarded - runs once per session)
    */
   bindEvents: function() {
+    if (ERM.settings._eventsBound) return;
+    ERM.settings._eventsBound = true;
+
     var self = this;
 
     setTimeout(function() {

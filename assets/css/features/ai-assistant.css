@@ -8,6 +8,7 @@
 /* ============================================
    FLOATING AI BUTTON
    ============================================ */
+/* Enterprise blue - no glow, no gradient */
 #ai-float-btn {
   position: fixed;
   bottom: 24px;
@@ -15,21 +16,22 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: var(--ai-accent);
   border: none;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 12px var(--ai-shadow);
   transition: all 0.3s ease;
   z-index: 1000;
 }
 
 #ai-float-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  background: var(--ai-accent-hover);
+  box-shadow: 0 6px 20px var(--ai-shadow-hover);
 }
 
 #ai-float-btn.processing {
@@ -52,21 +54,7 @@
   animation: ai-spin 0.8s linear infinite;
 }
 
-@keyframes ai-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes ai-pulse {
-  0%,
-  100% {
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-  }
-  50% {
-    box-shadow: 0 4px 24px rgba(139, 92, 246, 0.6);
-  }
-}
+/* @keyframes ai-spin, ai-pulse MOVED TO features/ai-ui.css (Canonical) */
 
 /* ============================================
    AI PANEL (Slide-out)
@@ -99,7 +87,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  background: var(--ai-accent);
   color: white;
 }
 
@@ -143,8 +131,8 @@
 }
 
 #ai-panel-context.ai-form-context {
-  background: rgba(139, 92, 246, 0.08);
-  color: #7c3aed;
+  background: var(--c-ai-soft);
+  color: var(--ai-accent-hover);
   font-weight: 500;
 }
 
@@ -175,14 +163,14 @@
 }
 
 .ai-action-btn:hover {
-  background: rgba(139, 92, 246, 0.08);
-  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .ai-action-btn .ai-icon {
   width: 18px;
   height: 18px;
-  color: #8b5cf6;
+  color: var(--ai-accent);
   flex-shrink: 0;
 }
 
@@ -332,10 +320,10 @@
   color: #15803d;
 }
 
-/* AI Insight section (DeepSeek analysis) */
+/* AI Insight section (DeepSeek analysis) - Enterprise blue */
 .ai-review-section.ai-insight {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   margin-top: 16px;
 }
 
@@ -347,13 +335,13 @@
 }
 
 .ai-review-section.ai-insight .ai-insight-header svg {
-  color: #8b5cf6;
+  color: var(--ai-accent);
   flex-shrink: 0;
 }
 
 .ai-review-section.ai-insight .ai-insight-header h5 {
   margin: 0;
-  color: #7c3aed;
+  color: var(--ai-accent-hover);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -361,7 +349,7 @@
 .ai-review-section.ai-insight .ai-insight-content {
   font-size: 0.875rem;
   line-height: 1.6;
-  color: #4c1d95;
+  color: var(--blue-800);
   white-space: pre-wrap;
 }
 
@@ -490,50 +478,8 @@
   line-height: 1.5;
 }
 
-/* ============================================
-   AI SUGGESTIONS LIST (For View Actions)
-   ============================================ */
-.ai-suggestions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.ai-suggestion-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  transition: all 0.2s ease;
-}
-
-.ai-suggestion-item:hover {
-  border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.05);
-}
-
-.ai-suggestion-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.ai-suggestion-text {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.ai-suggestion-desc {
-  font-size: 0.8125rem;
-  color: #64748b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* .ai-suggestions-list, .ai-suggestion-item, .ai-suggestion-content,
+   .ai-suggestion-text, .ai-suggestion-desc MOVED TO features/ai-ui.css (Canonical) */
 
 /* ============================================
    AI GAP ANALYSIS
@@ -616,23 +562,7 @@
   margin: 0;
 }
 
-/* ============================================
-   AI FILL ANIMATION
-   ============================================ */
-.ai-filled {
-  animation: ai-fill-pulse 0.6s ease-out;
-}
-
-@keyframes ai-fill-pulse {
-  0% {
-    background-color: rgba(139, 92, 246, 0.3);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-  }
-  100% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-}
+/* .ai-filled, @keyframes ai-fill-pulse MOVED TO features/ai-ui.css (Canonical) */
 
 /* ============================================
    BADGE TYPE VARIANTS (Control Types)
@@ -664,149 +594,9 @@
   font-weight: 500;
 }
 
-/* ============================================
-   AI BUTTON VARIANTS (For Forms)
-   ============================================ */
-.btn-ai-suggest {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 6px;
-  color: #8b5cf6;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-ai-suggest:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-ai-suggest .ai-icon {
-  width: 14px;
-  height: 14px;
-}
-
-.btn-ai-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 6px;
-  color: #8b5cf6;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-ai-icon:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.4);
-  transform: scale(1.05);
-}
-
-.btn-ai-icon .ai-icon {
-  width: 16px;
-  height: 16px;
-}
-
-/* ============================================
-   AI CHECK BAR (Bottom of Forms)
-   ============================================ */
-.ai-check-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: linear-gradient(
-    135deg,
-    rgba(139, 92, 246, 0.08),
-    rgba(99, 102, 241, 0.08)
-  );
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 10px;
-  margin-top: 16px;
-}
-
-.ai-check-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ai-check-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  border-radius: 8px;
-  color: white;
-}
-
-.ai-check-icon .ai-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.ai-check-text {
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.ai-check-actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* ============================================
-   FORM LABEL ROW (With AI Button)
-   ============================================ */
-.form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.form-label-row .form-label {
-  margin-bottom: 0;
-}
-
-/* ============================================
-   AI LOADING STATE
-   ============================================ */
-.ai-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 24px;
-}
-
-.ai-loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(139, 92, 246, 0.2);
-  border-top-color: #8b5cf6;
-  border-radius: 50%;
-  animation: ai-spin 0.8s linear infinite;
-}
-
-.ai-loading-text {
-  font-size: 0.875rem;
-  color: #64748b;
-}
+/* .btn-ai-suggest, .btn-ai-icon, .ai-check-bar, .ai-check-content,
+   .ai-check-icon, .ai-check-text, .ai-check-actions, .ai-loading,
+   .ai-loading-spinner, .ai-loading-text MOVED TO features/ai-ui.css (Canonical) */
 
 /* ============================================
    UTILITY
@@ -1195,11 +985,8 @@
   max-height: 50vh;
 }
 
-/* Override for AI thinking animation - needs full height to show all steps */
-.modal-overlay.secondary .modal-body:has(.ai-thinking-container) {
-  max-height: none !important;
-  overflow-y: visible !important;
-}
+/* AI thinking animation - use variant: 'thinking' in showModal() options
+   See base-modal.css .modal-overlay.modal-thinking */
 
 .modal-overlay.secondary .modal-footer {
   margin-top: 20px !important;
@@ -1215,36 +1002,91 @@
   max-height: 85vh !important;
 }
 
-/* Compact suggestions list */
+/* Module-specific: Compact suggestions list override */
 .ai-suggestions-list {
   max-height: 280px !important;
   overflow-y: auto !important;
 }
 
+/* .ai-suggestions-loading MOVED TO features/ai-ui.css (Canonical) */
+
 /* ============================================
-   AI SUGGESTIONS LOADING STATE
+   AI-ONLY REVIEW RESULTS (Simple Modal)
+   Clean DeepSeek-only analysis display
    ============================================ */
-.ai-suggestions-loading {
+
+.ai-review-results-simple {
+  padding: 0;
+}
+
+.ai-review-header-simple {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.ai-review-header-simple .ai-sparkle-icon {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.ai-suggestions-loading .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #8b5cf6;
-  border-radius: 50%;
-  animation: ai-spin 0.8s linear infinite;
-  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
 
-.ai-suggestions-loading p {
-  font-size: 0.9375rem;
-  color: #64748b;
+.ai-review-header-simple .ai-sparkle-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+}
+
+.ai-review-header-simple h4 {
   margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ai-insight-body {
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.ai-insight-body h5.ai-section-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 20px 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ai-insight-body h5.ai-section-header:first-child {
+  margin-top: 0;
+}
+
+.ai-insight-body p {
+  margin: 0 0 12px 0;
+}
+
+.ai-insight-body ul {
+  margin: 0 0 16px 0;
+  padding-left: 20px;
+}
+
+.ai-insight-body ul li {
+  margin-bottom: 8px;
+  color: #4b5563;
+}
+
+.ai-review-modal-simple .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
 }

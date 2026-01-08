@@ -508,9 +508,12 @@ ERM.help = {
   },
 
   /**
-   * Bind event handlers
+   * Bind event handlers (guarded - runs once per session)
    */
   bindEvents: function() {
+    if (ERM.help._eventsBound) return;
+    ERM.help._eventsBound = true;
+
     var self = this;
 
     setTimeout(function() {
@@ -806,14 +809,14 @@ ERM.help = {
           '</ul>' +
 
           // AI Features Section
-          '<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #e9d5ff;">' +
-          '<h4 style="color: #7c3aed; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
+          '<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #bfdbfe;">' +
+          '<h4 style="color: #2563eb; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
           '<span style="font-size: 20px;">✨</span> AI-Powered Features</h4>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🤖 AI Chat Assistant</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
-          '<li>Click the <strong>purple "✨ AI" button</strong> in the bottom-right corner</li>' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🤖 AI Chat Assistant</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
+          '<li>Click the <strong>blue "✨ AI" button</strong> in the bottom-right corner</li>' +
           '<li>The AI is <strong>context-aware</strong> – it knows your risks, controls, and dashboard data</li>' +
           '<li>Ask questions like: "What are my highest risks?", "Suggest controls for IT risks"</li>' +
           '<li>Get tailored recommendations based on your actual data</li>' +
@@ -821,8 +824,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Look for <strong>✨ sparkle icons</strong> next to form fields</li>' +
           '<li>Click to get AI-generated suggestions for root causes, consequences, treatments</li>' +
           '<li>AI analyzes your risk context and provides relevant recommendations</li>' +
@@ -830,8 +833,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">📝 Describe with AI</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">📝 Describe with AI</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>When creating risks/controls, choose <strong>"Describe with AI"</strong> mode</li>' +
           '<li>Simply describe the risk in plain language</li>' +
           '<li>AI automatically generates title, category, likelihood, impact, and more</li>' +
@@ -839,8 +842,8 @@ ERM.help = {
           '</div>' +
 
           '<div>' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🔍 Review Risk</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🔍 Review Risk</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Click <strong>"✨ Review Risk"</strong> at the bottom of any risk form</li>' +
           '<li>Get a comprehensive AI analysis of your entire risk entry</li>' +
           '<li>Receive suggestions for improvements and missing information</li>' +
@@ -934,13 +937,13 @@ ERM.help = {
           '</ul>' +
 
           // AI Features for Risk Register
-          '<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #e9d5ff;">' +
-          '<h4 style="color: #7c3aed; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
+          '<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #bfdbfe;">' +
+          '<h4 style="color: #2563eb; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
           '<span style="font-size: 20px;">✨</span> AI Features in Risk Register</h4>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">📝 Describe with AI (Risk Creation)</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">📝 Describe with AI (Risk Creation)</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Click <strong>"Add New Risk"</strong> and select <strong>"Describe with AI"</strong></li>' +
           '<li>Type a natural language description of your risk concern</li>' +
           '<li>AI automatically generates: title, category, description, root causes, consequences, likelihood, and impact scores</li>' +
@@ -949,8 +952,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Look for <strong>✨ sparkle buttons</strong> next to form fields</li>' +
           '<li><strong>Root Causes:</strong> AI suggests potential causes based on risk description</li>' +
           '<li><strong>Consequences:</strong> AI identifies potential impacts and outcomes</li>' +
@@ -960,8 +963,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🔍 Review Risk (Full Analysis)</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🔍 Review Risk (Full Analysis)</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Click <strong>"✨ Review Risk"</strong> button at the bottom of the risk form</li>' +
           '<li>AI performs a comprehensive analysis of your entire risk entry</li>' +
           '<li>Get feedback on completeness, scoring accuracy, and missing information</li>' +
@@ -970,8 +973,8 @@ ERM.help = {
           '</div>' +
 
           '<div>' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🤖 AI Chat for Risk Analysis</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🤖 AI Chat for Risk Analysis</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Open the <strong>AI Chat Assistant</strong> (purple button, bottom-right)</li>' +
           '<li>Ask: "What are my highest inherent risks?"</li>' +
           '<li>Ask: "Which risks need more controls?"</li>' +
@@ -1056,13 +1059,13 @@ ERM.help = {
           '</ul>' +
 
           // AI Features for Controls
-          '<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #e9d5ff;">' +
-          '<h4 style="color: #7c3aed; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
+          '<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #bfdbfe;">' +
+          '<h4 style="color: #2563eb; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
           '<span style="font-size: 20px;">✨</span> AI Features for Controls</h4>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">📝 Describe with AI (Control Creation)</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">📝 Describe with AI (Control Creation)</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Click <strong>"Add Control"</strong> and select <strong>"Describe with AI"</strong></li>' +
           '<li>Type a description like: "quarterly audit of user access rights"</li>' +
           '<li>AI generates: control name, description, type (Preventive/Detective/etc.), category, and more</li>' +
@@ -1071,8 +1074,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🔗 AI-Suggested Controls for Risks</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🔗 AI-Suggested Controls for Risks</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>When editing a risk, scroll to <strong>"Linked Controls"</strong> section</li>' +
           '<li>Click the <strong>+ button</strong> to see AI-suggested controls</li>' +
           '<li>AI analyzes the risk and recommends relevant controls</li>' +
@@ -1081,8 +1084,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">✨ Field-Level AI Suggestions</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Look for <strong>✨ sparkle buttons</strong> next to control form fields</li>' +
           '<li>Get AI suggestions for control descriptions and implementation details</li>' +
           '<li>AI considers the control type and category for relevant recommendations</li>' +
@@ -1090,8 +1093,8 @@ ERM.help = {
           '</div>' +
 
           '<div>' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🤖 AI Chat for Control Analysis</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🤖 AI Chat for Control Analysis</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Open the <strong>AI Chat Assistant</strong> (purple button, bottom-right)</li>' +
           '<li>Ask: "What controls should I add for IT security risks?"</li>' +
           '<li>Ask: "How effective are my current controls?"</li>' +
@@ -1117,14 +1120,14 @@ ERM.help = {
         title: '🔐 Account & Security Guide',
         content: '<div style="padding: 8px;">' +
           // Purple gradient header
-          '<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid #a855f7;">' +
-          '<h3 style="margin: 0 0 8px 0; color: #6b21a8; font-size: 18px;">Account & Security 🔐</h3>' +
+          '<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">' +
+          '<h3 style="margin: 0 0 8px 0; color: #1e40af; font-size: 18px;">Account & Security 🔐</h3>' +
           '<p style="margin: 0; color: #475569; font-size: 14px;">Manage your account, protect your data, and maintain privacy compliance.</p>' +
           '</div>' +
 
           // Step 1: Account Settings
           '<h4 style="color: #0f172a; font-size: 16px; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;">' +
-          '<span style="background: #f3e8ff; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">1</span>' +
+          '<span style="background: #dbeafe; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">1</span>' +
           'Managing Your Account</h4>' +
           '<ul style="margin: 0 0 20px 0; padding-left: 24px; line-height: 1.8; color: #475569;">' +
           '<li>Click the <strong>Settings</strong> icon in the sidebar</li>' +
@@ -1135,7 +1138,7 @@ ERM.help = {
 
           // Step 2: Data Privacy & Backups
           '<h4 style="color: #0f172a; font-size: 16px; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;">' +
-          '<span style="background: #f3e8ff; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">2</span>' +
+          '<span style="background: #dbeafe; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">2</span>' +
           'Data Privacy & Backups</h4>' +
           '<ul style="margin: 0 0 20px 0; padding-left: 24px; line-height: 1.8; color: #475569;">' +
           '<li>All data is stored securely in your <strong>browser\'s local storage</strong> (not on external servers)</li>' +
@@ -1146,7 +1149,7 @@ ERM.help = {
 
           // Step 3: Activity Monitoring
           '<h4 style="color: #0f172a; font-size: 16px; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;">' +
-          '<span style="background: #f3e8ff; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">3</span>' +
+          '<span style="background: #dbeafe; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">3</span>' +
           'Audit Trail & Activity Monitoring</h4>' +
           '<ul style="margin: 0 0 20px 0; padding-left: 24px; line-height: 1.8; color: #475569;">' +
           '<li>View recent activity on the Dashboard (last 5 actions)</li>' +
@@ -1157,7 +1160,7 @@ ERM.help = {
 
           // Step 4: Notification Settings
           '<h4 style="color: #0f172a; font-size: 16px; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;">' +
-          '<span style="background: #f3e8ff; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">4</span>' +
+          '<span style="background: #dbeafe; width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">4</span>' +
           'Notification Preferences</h4>' +
           '<ul style="margin: 0 0 20px 0; padding-left: 24px; line-height: 1.8; color: #475569;">' +
           '<li>Customize alerts in <strong>Settings → Notifications</strong></li>' +
@@ -1167,13 +1170,13 @@ ERM.help = {
           '</ul>' +
 
           // AI & Data Privacy Section
-          '<div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #e9d5ff;">' +
-          '<h4 style="color: #7c3aed; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
+          '<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #bfdbfe;">' +
+          '<h4 style="color: #2563eb; font-size: 16px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px;">' +
           '<span style="font-size: 20px;">✨</span> AI Features & Data Privacy</h4>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🔒 How AI Uses Your Data</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🔒 How AI Uses Your Data</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>AI features analyze your risks and controls <strong>locally</strong> to provide personalized suggestions</li>' +
           '<li>The AI Chat Assistant reads your current data to give context-aware responses</li>' +
           '<li>AI suggestions are generated based on your risk descriptions, categories, and scores</li>' +
@@ -1182,8 +1185,8 @@ ERM.help = {
           '</div>' +
 
           '<div style="margin-bottom: 16px;">' +
-          '<strong style="color: #5b21b6; font-size: 14px;">🤖 AI Chat Assistant Privacy</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">🤖 AI Chat Assistant Privacy</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>Chat history is stored locally in your browser</li>' +
           '<li>The AI has read-only access to your risk register and controls</li>' +
           '<li>Conversations are not shared or stored on external servers</li>' +
@@ -1192,8 +1195,8 @@ ERM.help = {
           '</div>' +
 
           '<div>' +
-          '<strong style="color: #5b21b6; font-size: 14px;">✨ AI Audit Trail</strong>' +
-          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #6b21a8; font-size: 13px;">' +
+          '<strong style="color: #1d4ed8; font-size: 14px;">✨ AI Audit Trail</strong>' +
+          '<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7; color: #1e40af; font-size: 13px;">' +
           '<li>All AI-generated content is logged in the Activity Log</li>' +
           '<li>Track which risks/controls were created or modified using AI</li>' +
           '<li>AI suggestions are always reviewed by you before being saved</li>' +

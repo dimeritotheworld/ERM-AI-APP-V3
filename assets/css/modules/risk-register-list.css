@@ -1,82 +1,12 @@
 /**
  * Dimeri ERM - Risk Register List Styles
- * Styles for: info banner, bulk header, register cards
+ * Styles for: bulk header, register cards
+ *
+ * INFO BANNER MOVED TO core/components.css (Canonical)
+ * All modules use components.css .info-banner as single source
  *
  * @version 3.0.0
  */
-
-/* ========================================
-   INFO BANNER
-   ======================================== */
-.info-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.info-banner-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.info-banner-icon-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: #3b82f6;
-  color: white;
-  border-radius: 50%;
-  flex-shrink: 0;
-  font-weight: 700;
-  font-size: 14px;
-  font-style: italic;
-  font-family: Georgia, serif;
-}
-
-.info-banner-icon-circle svg {
-  stroke: white;
-  width: 14px;
-  height: 14px;
-}
-
-.info-banner-text {
-  font-size: 14px;
-  color: #1e40af;
-}
-
-.info-banner-text a {
-  color: #1d4ed8;
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-.info-banner-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.info-banner-close:hover {
-  background: #dbeafe;
-  color: #1e40af;
-}
 
 /* ========================================
    REGISTERS TOOLBAR
@@ -152,30 +82,9 @@
   color: #9ca3af;
 }
 
-/* Ghost button for sort/filter */
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #374151;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-ghost:hover {
-  background: #e5e7eb;
-}
-
-.btn-ghost svg {
-  width: 16px;
-  height: 16px;
-}
+/* Ghost button - MOVED TO core/components.css (Canonical)
+   Removed: .btn-ghost, .btn-ghost:hover, .btn-ghost svg
+   ~23 lines removed - use components.css as single source */
 
 /* ========================================
    REGISTERS BULK BAR
@@ -220,84 +129,10 @@
 
 /* ========================================
    RISK REGISTER EMPTY STATE
+   MOVED TO core/components.css as .module-empty-state (Canonical)
+   Use class="module-empty-state" in HTML
+   margin-top provided by .registers-list wrapper (16px)
    ======================================== */
-.risk-register-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 40px;
-  text-align: center;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  min-height: 400px;
-  margin-top: 16px;
-}
-
-.risk-register-empty-state .empty-illustration {
-  margin-bottom: 24px;
-}
-
-.risk-register-empty-state .empty-illustration svg {
-  width: 120px;
-  height: 120px;
-}
-
-.risk-register-empty-state .empty-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 12px 0;
-}
-
-.risk-register-empty-state .empty-description {
-  font-size: 15px;
-  color: #64748b;
-  margin: 0 0 28px 0;
-  max-width: 360px;
-  line-height: 1.6;
-}
-
-.risk-register-empty-state .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  background: #c41e3a;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.risk-register-empty-state .btn-primary:hover {
-  background: #a91830;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(196, 30, 58, 0.3);
-}
-
-.risk-register-empty-state .btn-primary svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Dark mode support */
-html.theme-dark .risk-register-empty-state {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-html.theme-dark .risk-register-empty-state .empty-title {
-  color: #f1f5f9;
-}
-
-html.theme-dark .risk-register-empty-state .empty-description {
-  color: #94a3b8;
-}
 
 /* ========================================
    VIEW TOGGLE
@@ -350,7 +185,7 @@ html.theme-dark .risk-register-empty-state .empty-description {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 16px;
+  /* No margin-top: spacing from info-banner (16px) is single source */
 }
 
 /* Grid view layout */
@@ -358,7 +193,7 @@ html.theme-dark .risk-register-empty-state .empty-description {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
-  margin-top: 16px;
+  /* No margin-top: spacing from info-banner (16px) is single source */
 }
 
 /* Base card styles (grid view default) */
@@ -630,25 +465,25 @@ html.theme-dark .register-card-owner {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: linear-gradient(135deg, #dbeafe, #eff6ff);
-  color: #1d4ed8;
+  background: linear-gradient(135deg, var(--blue-100), var(--blue-50));
+  color: var(--blue-700);
   font-size: 11px;
   font-weight: 500;
   border-radius: 4px;
-  border: 1px solid #93c5fd;
+  border: 1px solid var(--blue-300);
   margin-left: auto;
 }
 
 .invited-badge svg {
-  stroke: #1d4ed8;
+  stroke: var(--blue-700);
 }
 
 html.theme-dark .invited-badge {
   background: linear-gradient(135deg, rgba(30, 64, 175, 0.2), rgba(30, 64, 175, 0.1));
-  color: #93c5fd;
+  color: var(--blue-300);
   border-color: #1e40af;
 }
 
 html.theme-dark .invited-badge svg {
-  stroke: #93c5fd;
+  stroke: var(--blue-300);
 }

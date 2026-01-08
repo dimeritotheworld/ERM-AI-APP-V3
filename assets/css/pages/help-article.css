@@ -316,9 +316,9 @@
   border-left: 4px solid #f59e0b;
 }
 
-.info-box-purple {
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border-left: 4px solid #a855f7;
+.info-box-ai {
+  background: linear-gradient(135deg, var(--blue-50) 0%, var(--blue-100) 100%);
+  border-left: 4px solid var(--ai-accent);
 }
 
 .info-icon {

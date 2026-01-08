@@ -107,17 +107,19 @@
 
     /**
      * Get counter display text
-     * @returns {string} Display text like "5 of 50"
+     * Positive framing: shows remaining instead of used
+     * @returns {string} Display text like "45 left"
      */
     getDisplayText: function() {
       var count = this.getCount();
       var limit = this.getLimit();
 
       if (limit === -1) {
-        return count + ' calls';  // Unlimited
+        return 'Unlimited';  // Unlimited plan
       }
 
-      return count + ' of ' + limit;
+      var remaining = limit - count;
+      return remaining + ' left';
     },
 
     /**

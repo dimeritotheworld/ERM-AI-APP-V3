@@ -156,95 +156,56 @@ ERM.controlsAI.getCurrentIndustry = function() {
 };
 
 /**
- * Check if templates are available for current industry
+ * Check if templates are available (templates removed - always returns false)
  */
 ERM.controlsAI.hasTemplates = function() {
-  var industry = this.getCurrentIndustry();
-
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    console.warn("Control template loader not found");
-    return false;
-  }
-
-  var loader = window.ERM.controlTemplates.loader;
-  loader.setIndustry(industry);
-
-  var controls = loader.getAllControls();
-  return controls && controls.length > 0;
+  return false;
 };
 
 /**
- * Get all control templates - starts with current industry, silently expands to all industries
- * User requested: "eventually must go to the next closest industry/keywords/title/description etc"
- * But do it behind the scene (don't tell user)
+ * Get all control templates (templates removed - returns empty array)
  */
 ERM.controlsAI.getAllTemplateControls = function() {
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    return [];
-  }
-
-  var loader = window.ERM.controlTemplates.loader;
-  var currentIndustry = this.getCurrentIndustry();
-  var allControls = [];
-
-  // Start with current industry
-  loader.setIndustry(currentIndustry);
-  var currentIndustryControls = loader.getAllControls() || [];
-  allControls = allControls.concat(currentIndustryControls);
-
-  // Silently expand to other industries for comprehensive search
-  var availableIndustries = loader.getAvailableIndustries();
-  for (var i = 0; i < availableIndustries.length; i++) {
-    var industryId = availableIndustries[i].id;
-    if (industryId !== currentIndustry) {
-      loader.setIndustry(industryId);
-      var industryControls = loader.getAllControls() || [];
-      allControls = allControls.concat(industryControls);
-    }
-  }
-
-  // Reset back to current industry
-  loader.setIndustry(currentIndustry);
-
-  return allControls;
+  return [];
 };
 
 /**
- * Match user input to control templates
+ * Match user input to control templates (templates removed - returns empty array)
  */
 ERM.controlsAI.matchUserInput = function(userInput) {
-  if (!userInput || !userInput.trim()) {
-    return [];
-  }
-
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    return [];
-  }
-
-  var industry = this.getCurrentIndustry();
-  var loader = window.ERM.controlTemplates.loader;
-  loader.setIndustry(industry);
-
-  return loader.matchUserInput(userInput) || [];
+  return [];
 };
 
 /**
- * Suggest controls for a risk description
+ * Apply suggestion to a field
+ * Delegates to unified ERM.aiSuggestions module
+ */
+ERM.controlsAI.applyToField = function(fieldId, value) {
+  // Build options based on field type
+  var options = {
+    scheduleDraftSave: function() {
+      if (ERM.controls && ERM.controls.scheduleControlDraftSave) {
+        ERM.controls.scheduleControlDraftSave(ERM.controls._editingControlId || null);
+      }
+    }
+  };
+
+  // Special handling for category field
+  if (fieldId === "control-category") {
+    options.type = 'category';
+    options.hiddenFieldId = 'control-category-id';
+    options.toastMessage = 'Category applied';
+  }
+
+  // Use unified applyToField
+  ERM.aiSuggestions.applyToField(fieldId, value, options);
+};
+
+/**
+ * Suggest controls for a risk description (templates removed - returns empty array)
  */
 ERM.controlsAI.suggestControlsForRisk = function(riskDescription) {
-  if (!riskDescription || !riskDescription.trim()) {
-    return [];
-  }
-
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    return [];
-  }
-
-  var industry = this.getCurrentIndustry();
-  var loader = window.ERM.controlTemplates.loader;
-  loader.setIndustry(industry);
-
-  return loader.suggestControlsForRisk(riskDescription) || [];
+  return [];
 };
 
 /* ========================================
@@ -259,12 +220,6 @@ ERM.controlsAI.showNaturalLanguageInput = function(options) {
   var self = this;
   options = options || {};
   var useSecondaryModal = options.useSecondaryModal || false;
-
-  // Check if templates available
-  if (!this.hasTemplates()) {
-    ERM.toast.warning("AI control suggestions not available for your industry");
-    return;
-  }
 
   var content =
     '<div class="nl-input-container">' +
@@ -357,7 +312,7 @@ ERM.controlsAI.showNaturalLanguageInput = function(options) {
 
   // Use secondary modal if requested (keeps risk form open)
   if (useSecondaryModal) {
-    ERM.components.showSecondaryModal(modalConfig);
+    ERM.components.modalManager.openSecondary(modalConfig);
   } else {
     ERM.components.showModal(modalConfig);
   }
@@ -365,123 +320,23 @@ ERM.controlsAI.showNaturalLanguageInput = function(options) {
 
 /**
  * Show AI thinking modal
- * Uses the same design pattern as "Describe with AI" thinking modal
+ * Uses unified thinking modal (secondary modal variant for overlay use)
  * @param {Boolean} useSecondaryModal - If true, use secondary modal (keeps risk form open)
  */
 ERM.controlsAI.showAIThinking = function(useSecondaryModal) {
-  var steps = [
-    { text: "Analyzing your description", delay: 600 },
-    { text: "Searching control database", delay: 600 },
-    { text: "Matching keywords", delay: 600 },
-    { text: "Generating suggestions", delay: 600 }
-  ];
-
-  // Sparkles icon for header
-  var sparklesIcon = '<svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>';
-
-  var stepsHtml = "";
-  for (var i = 0; i < steps.length; i++) {
-    stepsHtml +=
-      '<div class="ai-step" data-step="' + i + '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-      "</div>" +
-      '<span class="ai-step-text">' + steps[i].text + "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-      "</div>";
-  }
-
-  var content =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    sparklesIcon +
-    "</div>" +
-    "<h3>AI is finding controls</h3>" +
-    "</div>" +
-    '<div class="ai-steps-container">' +
-    stepsHtml +
-    "</div>" +
-    "</div>";
-
-  var modalConfig = {
-    title: "",
-    content: content,
-    size: "sm",
-    buttons: [],
-    showCloseButton: false,
-    onOpen: function() {
-      // Style the modal to match ai-thinking-modal pattern
-      var modalSelector = useSecondaryModal ? ".secondary-overlay .modal" : ".modal";
-      var modal = document.querySelector(modalSelector);
-      var modalHeader = document.querySelector(modalSelector.replace(".modal", ".modal-header"));
-      var modalBody = document.querySelector(modalSelector.replace(".modal", ".modal-body"));
-      var modalFooter = document.querySelector(modalSelector.replace(".modal", ".modal-footer"));
-      var modalContent = document.querySelector(modalSelector.replace(".modal", ".modal-content"));
-
-      if (modal) {
-        modal.classList.add("ai-thinking-modal");
-      }
-
-      // Hide header
-      if (modalHeader) {
-        modalHeader.style.display = "none";
-      }
-
-      // Hide footer
-      if (modalFooter) {
-        modalFooter.style.display = "none";
-      }
-
-      // Fix body styling
-      if (modalBody) {
-        modalBody.style.cssText = "padding: 0 !important; max-height: none !important; overflow: visible !important;";
-      }
-
-      // Fix modal content wrapper
-      if (modalContent) {
-        modalContent.style.cssText = "max-height: none !important; overflow: visible !important;";
-      }
-
-      // Animate steps sequentially
-      var stepSelector = useSecondaryModal ? '.secondary-overlay .ai-step[data-step="' : '.ai-step[data-step="';
-
-      function animateStep(stepIndex) {
-        if (stepIndex >= steps.length) {
-          return; // Animation complete
-        }
-
-        var stepEl = document.querySelector(stepSelector + stepIndex + '"]');
-        if (stepEl) {
-          stepEl.classList.add("active");
-
-          setTimeout(function() {
-            stepEl.classList.remove("active");
-            stepEl.classList.add("complete");
-            animateStep(stepIndex + 1);
-          }, steps[stepIndex].delay);
-        } else {
-          animateStep(stepIndex + 1);
-        }
-      }
-
-      // Start animation after brief delay
-      setTimeout(function() {
-        animateStep(0);
-      }, 300);
-    }
-  };
-
-  // Use secondary modal if requested (keeps risk form open)
-  if (useSecondaryModal) {
-    ERM.components.showSecondaryModal(modalConfig);
-  } else {
-    ERM.components.showModal(modalConfig);
-  }
+  // For secondary modal, we need custom handling since unified component uses primary modal
+  // This is a simplified version - just show in primary modal for now
+  ERM.components.showThinkingModal({
+    input: "Control search",
+    title: "AI is finding controls",
+    steps: [
+      { text: "Analyzing your description", delay: 600 },
+      { text: "Searching control database", delay: 600 },
+      { text: "Matching keywords", delay: 600 },
+      { text: "Generating suggestions", delay: 600 }
+    ],
+    namespace: ERM.controlsAI
+  });
 };
 
 /**
@@ -506,6 +361,7 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
           reference: ERM.controls.getNextControlNumber(),
           name: "",
           description: [],
+          describeRisk: "",
           type: "",
           category: "",
           owner: "",
@@ -598,15 +454,6 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
       "</div>";
   }
 
-  var generateMoreBtn = matches.length > 3
-    ? '<div class="generate-more-container">' +
-      '<button type="button" class="btn btn-sm btn-secondary" id="generate-more-controls">Generate More Suggestions</button>' +
-      '<p class="generate-more-hint">' +
-      (matches.length - 3) +
-      ' more control templates available</p>' +
-      "</div>"
-    : "";
-
   var content =
     '<div class="ai-suggestions-container">' +
     '<div class="suggestions-intro">' +
@@ -623,7 +470,6 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
     '<div class="ai-suggestions-list" id="ai-suggestions-list">' +
     suggestionsHtml +
     "</div>" +
-    generateMoreBtn +
     "</div>";
 
   var modalConfig = {
@@ -657,13 +503,6 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
         });
       }
 
-      // Bind generate more button
-      var generateMoreBtn = document.getElementById("generate-more-controls");
-      if (generateMoreBtn) {
-        generateMoreBtn.addEventListener("click", function() {
-          self.generateMoreSuggestions(matches, onSelectCallback, useSecondaryModal);
-        });
-      }
     },
     onAction: function(action) {
       if (action === "manual") {
@@ -681,6 +520,7 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
               reference: ERM.controls.getNextControlNumber(),
               name: "",
               description: [],
+              describeRisk: "",
               type: "",
               category: "",
               owner: "",
@@ -701,7 +541,7 @@ ERM.controlsAI.showSuggestions = function(userInput, onSelectCallback, useSecond
 
   // Use secondary modal if requested (keeps risk form open)
   if (useSecondaryModal) {
-    ERM.components.showSecondaryModal(modalConfig);
+    ERM.components.modalManager.openSecondary(modalConfig);
   } else {
     ERM.components.showModal(modalConfig);
   }
@@ -790,7 +630,7 @@ ERM.controlsAI.showTemplateDetails = function(match) {
     "</div>" +
     "</div>";
 
-  ERM.components.showSecondaryModal({
+  ERM.components.modalManager.openSecondary({
     title: "Template Details",
     content: content,
     buttons: [{ label: "Close", type: "secondary", action: "close" }]
@@ -804,45 +644,39 @@ ERM.controlsAI.showTemplateDetails = function(match) {
  * @param {Boolean} useSecondaryModal - If true, use secondary modal (keeps risk form open)
  */
 ERM.controlsAI.useTemplate = function(template, onSelectCallback, useSecondaryModal) {
-  // Close appropriate modals
-  if (useSecondaryModal) {
-    ERM.components.closeSecondaryModal();
-  } else {
-    ERM.components.closeModal();
-    ERM.components.closeSecondaryModal();
-  }
+  ERM.components.applyAfterModalClose(function() {
+    // Create control from template
+    var newControl = {
+      reference: ERM.controls.getNextControlNumber(),
+      name: template.name,
+      description: template.description,
+      type: template.type,
+      category: template.category,
+      owner: template.owner || "",
+      effectiveness: template.effectiveness || "notTested",
+      status: "planned",
+      lastReviewDate: "",
+      nextReviewDate: "",
+      linkedRisks: []
+    };
 
-  // Create control from template
-  var newControl = {
-    reference: ERM.controls.getNextControlNumber(),
-    name: template.name,
-    description: template.description,
-    type: template.type,
-    category: template.category,
-    owner: template.owner || "",
-    effectiveness: template.effectiveness || "notTested",
-    status: "planned",
-    lastReviewDate: "",
-    nextReviewDate: "",
-    linkedRisks: []
-  };
-
-  // Add pending risk link if exists
-  if (this.pendingRiskLink) {
-    newControl.linkedRisks = [this.pendingRiskLink];
-  }
-
-  // If callback provided, use it
-  if (typeof onSelectCallback === "function") {
-    onSelectCallback(newControl);
-  } else {
-    // Otherwise show control form
-    if (typeof ERM.controls !== "undefined") {
-      ERM.controls.showControlForm(newControl, false, useSecondaryModal);
+    // Add pending risk link if exists
+    if (ERM.controlsAI.pendingRiskLink) {
+      newControl.linkedRisks = [ERM.controlsAI.pendingRiskLink];
     }
-  }
 
-  ERM.toast.success("AI suggestion loaded - review and save");
+    // If callback provided, use it
+    if (typeof onSelectCallback === "function") {
+      onSelectCallback(newControl);
+    } else {
+      // Otherwise show control form
+      if (typeof ERM.controls !== "undefined") {
+        ERM.controls.showControlForm(newControl, false, useSecondaryModal);
+      }
+    }
+
+    ERM.toast.success("AI suggestion loaded - review and save");
+  });
 };
 
 /**
@@ -925,7 +759,7 @@ ERM.controlsAI.showQuickSuggestionsList = function(suggestions, onSelectCallback
     "</div>" +
     "</div>";
 
-  ERM.components.showSecondaryModal({
+  ERM.components.modalManager.openSecondary({
     title: ERM.icons.sparkles + " AI Control Suggestions",
     content: content,
     buttons: [{ label: "Close", type: "secondary", action: "close" }],
@@ -939,152 +773,6 @@ ERM.controlsAI.showQuickSuggestionsList = function(suggestions, onSelectCallback
       }
     }
   });
-};
-
-/**
- * Generate more suggestions
- * Shows next 3 controls from the match list
- */
-/**
- * Generate more suggestions (show next batch)
- * @param {Array} matches - All matched controls
- * @param {Function} onSelectCallback - Callback when template is selected
- * @param {Boolean} useSecondaryModal - If true, use secondary modal (keeps risk form open)
- */
-ERM.controlsAI.generateMoreSuggestions = function(matches, onSelectCallback, useSecondaryModal) {
-  var self = this;
-  var currentCount = this.currentShownCount || 3;
-  var nextCount = Math.min(currentCount + 3, matches.length);
-
-  // Build HTML for new suggestions
-  var newSuggestionsHtml = "";
-  for (var i = currentCount; i < nextCount; i++) {
-    var match = matches[i];
-    var control = match.control;
-    var score = match.score;
-    var matchPercent = Math.min(95, Math.max(60, score));
-
-    // Get type label
-    var typeLabel = control.type || "N/A";
-    var typeMap = {
-      preventive: "Preventive",
-      detective: "Detective",
-      corrective: "Corrective",
-      directive: "Directive"
-    };
-    if (typeMap[control.type]) {
-      typeLabel = typeMap[control.type];
-    }
-
-    // Truncate description
-    var desc = control.description || "";
-    if (desc.length > 150) {
-      desc = desc.substring(0, 150) + "...";
-    }
-
-    newSuggestionsHtml +=
-      '<div class="ai-control-suggestion" data-control-index="' +
-      i +
-      '" style="opacity:0;">' +
-      '<div class="suggestion-header">' +
-      '<div class="suggestion-title-row">' +
-      '<h4 class="suggestion-title">' +
-      ERM.utils.escapeHtml(self.getControlName(control)) +
-      "</h4>" +
-      '<span class="match-badge">' +
-      matchPercent +
-      "% match</span>" +
-      "</div>" +
-      '<div class="suggestion-meta">' +
-      '<span class="badge badge-type-' +
-      (control.type || "default") +
-      '">' +
-      typeLabel +
-      "</span>" +
-      '<span class="suggestion-dept">' +
-      ERM.utils.escapeHtml(control.department || "General") +
-      "</span>" +
-      "</div>" +
-      "</div>" +
-      '<p class="suggestion-desc">' +
-      ERM.utils.escapeHtml(desc) +
-      "</p>" +
-      '<div class="suggestion-keywords">' +
-      '<span class="keywords-label">Matched keywords:</span>' +
-      (match.matchedKeywords || [])
-        .slice(0, 4)
-        .map(function(kw) {
-          return '<span class="keyword-tag">' + ERM.utils.escapeHtml(kw) + "</span>";
-        })
-        .join("") +
-      "</div>" +
-      '<div class="suggestion-actions">' +
-      '<button type="button" class="btn btn-sm btn-secondary view-full-btn" data-control-index="' +
-      i +
-      '">View Full Details</button>' +
-      '<button type="button" class="btn btn-sm btn-primary use-template-btn" data-control-index="' +
-      i +
-      '">Use This Template</button>' +
-      "</div>" +
-      "</div>";
-  }
-
-  // Append to list
-  var listContainer = document.getElementById("ai-suggestions-list");
-  if (listContainer) {
-    var tempDiv = document.createElement("div");
-    tempDiv.innerHTML = newSuggestionsHtml;
-
-    while (tempDiv.firstChild) {
-      var newItem = tempDiv.firstChild;
-      listContainer.appendChild(newItem);
-
-      // Animate in
-      setTimeout((function(item) {
-        return function() {
-          item.style.transition = "opacity 0.3s ease";
-          item.style.opacity = "1";
-        };
-      })(newItem), 50);
-
-      // Bind events for new items
-      var viewBtn = newItem.querySelector(".view-full-btn");
-      if (viewBtn) {
-        viewBtn.addEventListener("click", function() {
-          var index = parseInt(this.getAttribute("data-control-index"), 10);
-          self.showTemplateDetails(matches[index], useSecondaryModal);
-        });
-      }
-
-      var useBtn = newItem.querySelector(".use-template-btn");
-      if (useBtn) {
-        useBtn.addEventListener("click", function() {
-          var index = parseInt(this.getAttribute("data-control-index"), 10);
-          self.useTemplate(matches[index].control, onSelectCallback, useSecondaryModal);
-        });
-      }
-    }
-  }
-
-  // Update counter
-  this.currentShownCount = nextCount;
-
-  // Update or remove generate more button
-  var generateMoreContainer = document.querySelector(".generate-more-container");
-  if (generateMoreContainer) {
-    if (nextCount >= matches.length) {
-      // Remove button - all shown
-      generateMoreContainer.remove();
-    } else {
-      // Update count
-      var hint = generateMoreContainer.querySelector(".generate-more-hint");
-      if (hint) {
-        hint.textContent = (matches.length - nextCount) + " more control templates available";
-      }
-    }
-  }
-
-  ERM.toast.success("Loaded " + (nextCount - currentCount) + " more suggestions");
 };
 
 /* ========================================
@@ -1228,99 +916,11 @@ ERM.controlsAI.getLinkedControls = function(riskId) {
    ======================================== */
 
 /**
- * Find controls that mitigate a specific risk
- * Called when user is on Risk form and wants control suggestions
- *
- * @param {string} riskTitle - The risk title
- * @param {string} riskCategory - The risk category (e.g., "ground-control")
- * @param {array} riskKeywords - Keywords from the risk
- * @returns {array} Sorted array of matching controls with scores
+ * Find controls for risk (templates removed - returns empty array)
+ * Note: Overwritten by later definition, kept for backwards compatibility
  */
 ERM.controlsAI.findControlsForRisk = function(riskTitle, riskCategory, riskKeywords) {
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    console.warn("Control templates not loaded");
-    return [];
-  }
-
-  var loader = window.ERM.controlTemplates.loader;
-  var allControls = loader.getAllControls();
-  var matches = [];
-
-  if (!riskKeywords) riskKeywords = [];
-
-  // Normalize inputs
-  var riskTitleLower = riskTitle ? riskTitle.toLowerCase() : "";
-  var riskCategoryLower = riskCategory ? riskCategory.toLowerCase() : "";
-
-  // Score each control template
-  for (var i = 0; i < allControls.length; i++) {
-    var control = allControls[i];
-    var score = 0;
-    var matchReasons = [];
-
-    // Category matching: +20 if control mitigates this risk category
-    if (control.mitigatesRiskCategories && riskCategoryLower) {
-      for (var j = 0; j < control.mitigatesRiskCategories.length; j++) {
-        if (control.mitigatesRiskCategories[j].toLowerCase() === riskCategoryLower) {
-          score += 20;
-          matchReasons.push("Category match: " + riskCategory);
-          break;
-        }
-      }
-    }
-
-    // Keyword matching: +10 for each keyword match
-    if (control.mitigatesRiskKeywords && riskKeywords.length > 0) {
-      for (var k = 0; k < control.mitigatesRiskKeywords.length; k++) {
-        var controlKeyword = control.mitigatesRiskKeywords[k].toLowerCase();
-        for (var m = 0; m < riskKeywords.length; m++) {
-          if (riskKeywords[m].toLowerCase() === controlKeyword) {
-            score += 10;
-            matchReasons.push("Keyword: " + riskKeywords[m]);
-            break;
-          }
-        }
-      }
-    }
-
-    // Title word matching: +5 for each word match
-    if (riskTitleLower) {
-      var titleWords = riskTitleLower.split(/\s+/);
-      var controlNames = self.getAllControlNames(control);
-      var controlNamesLower = controlNames.map(function(n) { return n.toLowerCase(); }).join(" ");
-      var controlDescLower = self.getControlDescription(control).toLowerCase();
-
-      for (var n = 0; n < titleWords.length; n++) {
-        var word = titleWords[n];
-        if (word.length > 3) {
-          // Skip short words
-          if (controlNamesLower.indexOf(word) !== -1) {
-            score += 5;
-            matchReasons.push("Title word: " + word);
-          } else if (controlDescLower.indexOf(word) !== -1) {
-            score += 3;
-          }
-        }
-      }
-    }
-
-    // Only include controls with some relevance
-    if (score > 0) {
-      matches.push({
-        control: control,
-        score: score,
-        matchReasons: matchReasons,
-        matchType: "risk-mitigation"
-      });
-    }
-  }
-
-  // Sort by score descending
-  matches.sort(function(a, b) {
-    return b.score - a.score;
-  });
-
-  return matches;
+  return [];
 };
 
 /**
@@ -1609,11 +1209,7 @@ ERM.controlsAI.suggestControlName = function() {
   }
 
   this.showFieldSuggestions("Control Name", suggestions, function(selected) {
-    document.getElementById("control-name").value = selected;
-    document.getElementById("control-name").classList.add("ai-filled");
-    setTimeout(function() {
-      document.getElementById("control-name").classList.remove("ai-filled");
-    }, 500);
+    ERM.controlsAI.applyToField("control-name", selected);
   });
 };
 
@@ -1681,39 +1277,8 @@ ERM.controlsAI.suggestControlType = function() {
     return;
   }
 
-  if (!window.ERM.controlTemplates || !window.ERM.controlTemplates.loader) {
-    ERM.toast.warning("AI suggestions not available");
-    return;
-  }
-
-  var loader = window.ERM.controlTemplates.loader;
-  var typeSuggestion = loader.suggestControlType(text);
-
-  if (!typeSuggestion || !typeSuggestion.type) {
-    ERM.toast.info("No type suggestion available");
-    return;
-  }
-
-  var typeMap = {
-    preventive: "Preventive",
-    detective: "Detective",
-    corrective: "Corrective",
-    directive: "Directive"
-  };
-
-  var typeName = typeMap[typeSuggestion.type] || typeSuggestion.type;
-  var confidence = typeSuggestion.confidence || 0;
-
-  ERM.toast.success("Suggested: " + typeName + " (" + confidence + "% confidence)");
-
-  var typeSelect = document.getElementById("control-type");
-  if (typeSelect) {
-    typeSelect.value = typeSuggestion.type;
-    typeSelect.classList.add("ai-filled");
-    setTimeout(function() {
-      typeSelect.classList.remove("ai-filled");
-    }, 500);
-  }
+  // Templates removed - show message
+  ERM.toast.info("AI type suggestions use DeepSeek - check the Type field");
 };
 
 /**
@@ -1820,57 +1385,19 @@ ERM.controlsAI.suggestControlOwner = function() {
   }
 
   this.showFieldSuggestions("Control Owner", owners.slice(0, 3), function(selected) {
-    document.getElementById("control-owner").value = selected;
-    document.getElementById("control-owner").classList.add("ai-filled");
-    setTimeout(function() {
-      document.getElementById("control-owner").classList.remove("ai-filled");
-    }, 500);
+    self.applyToField("control-owner", selected);
   });
 };
 
 /**
  * Show field suggestions modal
+ * Uses unified ERM.components.showFieldSuggestions
  */
 ERM.controlsAI.showFieldSuggestions = function(fieldName, suggestions, onSelect) {
-  var suggestionsHtml = "";
-  for (var i = 0; i < suggestions.length; i++) {
-    suggestionsHtml +=
-      '<div class="field-suggestion-item" data-index="' +
-      i +
-      '">' +
-      '<div class="field-suggestion-text">' +
-      ERM.utils.escapeHtml(suggestions[i].length > 200 ? suggestions[i].substring(0, 200) + "..." : suggestions[i]) +
-      "</div>" +
-      '<button type="button" class="btn btn-sm btn-primary use-suggestion-btn" data-index="' +
-      i +
-      '">Use This</button>' +
-      "</div>";
-  }
-
-  var content =
-    '<div class="field-suggestions-container">' +
-    '<p class="field-suggestions-intro">Select a suggestion for <strong>' +
-    ERM.utils.escapeHtml(fieldName) +
-    "</strong>:</p>" +
-    '<div class="field-suggestions-list">' +
-    suggestionsHtml +
-    "</div>" +
-    "</div>";
-
-  ERM.components.showSecondaryModal({
-    title: ERM.icons.sparkles + " AI Suggestions",
-    content: content,
-    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var useBtns = document.querySelectorAll(".use-suggestion-btn");
-      for (var i = 0; i < useBtns.length; i++) {
-        useBtns[i].addEventListener("click", function() {
-          var index = parseInt(this.getAttribute("data-index"), 10);
-          ERM.components.closeSecondaryModal();
-          onSelect(suggestions[index]);
-        });
-      }
-    }
+  ERM.components.showFieldSuggestions({
+    fieldName: fieldName,
+    suggestions: suggestions,
+    onSelect: onSelect
   });
 };
 
@@ -1910,33 +1437,26 @@ ERM.controlsAI.handleFieldSuggest = function (fieldType) {
 
   // Define thinking messages for each field - MATCHES RISK REGISTER
   var thinkingMessages = {
-    name: "Generating titles...",
-    description: "Crafting description...",
-    type: "Detecting control type...",
-    category: "Suggesting category...",
-    owner: "Matching roles...",
-    linkedRisks: "Analyzing risks...",
-    effectiveness: "Assessing effectiveness...",
-    status: "Determining status...",
-    nextReviewDate: "Calculating review schedule...",
-    frequency: "Determining frequency...",
-    evidence: "Suggesting documents..."
+    name: "Loading suggestions",
+    description: "Loading suggestions",
+    type: "Loading suggestions",
+    category: "Loading suggestions",
+    owner: "Loading suggestions",
+    linkedRisks: "Loading suggestions",
+    effectiveness: "Loading suggestions",
+    status: "Loading suggestions",
+    nextReviewDate: "Loading suggestions",
+    frequency: "Loading suggestions",
+    evidence: "Loading suggestions"
   };
 
-  var message = thinkingMessages[fieldType] || "Thinking...";
-  var btn = document.querySelector('.btn-ai-suggest[data-field="' + fieldType + '"]');
+  var message = thinkingMessages[fieldType] || "Loading suggestions";
 
-  // Start persistent spinner (will be cleared when DeepSeek responds or fallback completes)
-  if (btn) {
-    self.currentThinkingButton = btn;
-    self.currentThinkingOriginalHtml = btn.innerHTML;
-    btn.classList.add("ai-thinking-btn");
-    btn.innerHTML = '<span class="ai-thinking-content">' + this.icons.sparkles + " " + message + "</span>";
-    btn.disabled = true;
-  }
+  // Start thinking animation using unified module
+  self.currentThinkingState = ERM.aiSuggestions.startFieldThinking(fieldType, message);
 
   // Show field suggestions (spinner stays until async operation completes)
-  self.showFieldSuggestions(fieldType);
+  self.showFieldSuggestionsByType(fieldType);
 };
 
 /**
@@ -1944,19 +1464,18 @@ ERM.controlsAI.handleFieldSuggest = function (fieldType) {
  * Called when DeepSeek responds or fallback completes
  */
 ERM.controlsAI.clearThinkingButton = function() {
-  if (this.currentThinkingButton) {
-    this.currentThinkingButton.classList.remove("ai-thinking-btn");
-    this.currentThinkingButton.innerHTML = this.currentThinkingOriginalHtml || (ERM.controlsAI.icons.sparkles + " AI");
-    this.currentThinkingButton.disabled = false;
-    this.currentThinkingButton = null;
-    this.currentThinkingOriginalHtml = null;
+  // Clear button spinner using unified module
+  if (this.currentThinkingState) {
+    ERM.aiSuggestions.stopButtonThinking(this.currentThinkingState);
+    this.currentThinkingState = null;
   }
 };
 
 /**
- * Show field suggestions (called after thinking animation)
+ * Show field suggestions by type (called after thinking animation)
+ * Dispatcher to specific suggestion methods based on fieldType
  */
-ERM.controlsAI.showFieldSuggestions = function (fieldType) {
+ERM.controlsAI.showFieldSuggestionsByType = function (fieldType) {
   var controlName = this.getFormValue("control-name");
   var controlType = this.getFormValue("control-type");
   var controlCategory = this.getFormValue("control-category");
@@ -2438,7 +1957,7 @@ ERM.controlsAI._showNameSuggestionsFromTemplates = function(userText, type, cate
   var allSuggestions = this.getControlNameSuggestions(userText, type, category);
 
   if (allSuggestions.length === 0) {
-    ERM.components.showSecondaryModal({
+    ERM.components.modalManager.openSecondary({
       title: this.icons.sparkles + " Control Name Suggestions",
       content:
         '<div class="ai-suggestions-container">' +
@@ -2459,287 +1978,26 @@ ERM.controlsAI._showNameSuggestionsFromTemplates = function(userText, type, cate
 ERM.controlsAI._renderNameSuggestionsModal = function(allSuggestions, recommendedIndex, userText) {
   var self = this;
 
-  // First is best match (recommended), then 2 random others
-  var recommended = allSuggestions[recommendedIndex] || allSuggestions[0];
-  var others = [];
-  for (var i = 0; i < allSuggestions.length; i++) {
-    if (i !== recommendedIndex) {
-      others.push(allSuggestions[i]);
-    }
-  }
-  others = this.shuffleArray(others);
-  var displayOthers = others.slice(0, 2);
-  var hasMore = allSuggestions.length > 3;
-
-  var introText = userText
-    ? 'Matching "<strong>' + ERM.utils.escapeHtml(userText) + '</strong>":'
-    : "AI-generated suggestions:";
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">' +
-    introText +
-    "</p>" +
-    '<div class="ai-suggestions-list ai-stagger-container">';
-
-  // Recommended control name first
-  content +=
-    '<div class="ai-suggestion-item ai-recommended ai-stagger-item clickable" data-value="' +
-    ERM.utils.escapeHtml(recommended) +
-    '" style="animation-delay: 0.1s">' +
-    '<div class="ai-suggestion-content">' +
-    '<span class="ai-recommended-badge">⭐ Best Match</span>' +
-    '<span class="ai-suggestion-text">' +
-    ERM.utils.escapeHtml(recommended) +
-    "</span>" +
-    "</div>" +
-    '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-    "</div>";
-
-  // Other suggestions with stagger
-  for (var k = 0; k < displayOthers.length; k++) {
-    var delay = (k + 2) * 0.12;
-    content +=
-      '<div class="ai-suggestion-item ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(displayOthers[k]) +
-      '" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<span class="ai-suggestion-text">' +
-      ERM.utils.escapeHtml(displayOthers[k]) +
-      "</span>" +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      "</div>";
-  }
-
-  content += "</div>";
-
-  // Discover more button if more available
-  if (hasMore) {
-    content +=
-      '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-discover-more-names">✨ Generate More</button>';
-  }
-
-  content += "</div>";
-
-  ERM.components.showSecondaryModal({
-    title: this.icons.sparkles + " AI Control Name Suggestions",
-    content: content,
-    size: "md",
-    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
-    onOpen: function () {
-      // Use buttons
-      var useBtns = document.querySelectorAll(".btn-use");
-      for (var i = 0; i < useBtns.length; i++) {
-        useBtns[i].addEventListener("click", function () {
-          var item = this.closest(".ai-suggestion-item");
-          var value = item.getAttribute("data-value");
-          document.getElementById("control-name").value = value;
-          // Count AI usage
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Control name applied");
-        });
-      }
-
-      // Clickable items
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var j = 0; j < items.length; j++) {
-        items[j].addEventListener("click", function (e) {
-          // Don't trigger if clicking the Use button
-          if (e.target.classList.contains("btn-use")) return;
-
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-name").value = value;
-          // Count AI usage
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Control name applied");
-        });
-      }
-
-      // Generate more button - MATCHES RISK REGISTER EXACTLY
-      var moreBtn = document.getElementById("btn-discover-more-names");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function () {
-          self.showMoreNameSuggestions();
-        });
-      }
-
-      // Store for potential later use
-      self.allNameSuggestions = allSuggestions;
-      self.shownNameSuggestions = [recommended].concat(displayOthers);
-    }
-  });
-};
-
-/**
- * Shuffle array helper - matching risk register
- */
-ERM.controlsAI.shuffleArray = function (array) {
-  var shuffled = array.slice();
-  for (var i = shuffled.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = shuffled[i];
-    shuffled[i] = shuffled[j];
-    shuffled[j] = temp;
-  }
-  return shuffled;
-};
-
-/**
- * Show thinking animation in the suggestion list, then call callback
- * EXACTLY matches risk register pattern
- */
-ERM.controlsAI.showMoreThinking = function (callback) {
-  var listContainer = document.querySelector(".ai-suggestions-list");
-  var discoverBtn = document.querySelector(".btn-ai-discover");
-
-  if (!listContainer) {
-    if (callback) callback();
-    return;
-  }
-
-  // Disable button and show thinking
-  if (discoverBtn) {
-    discoverBtn.disabled = true;
-    discoverBtn.innerHTML = "⏳ AI thinking...";
-  }
-
-  // Random thinking messages
-  var messages = [
-    "Analyzing patterns...",
-    "Finding alternatives...",
-    "Generating options...",
-    "Evaluating matches...",
-  ];
-  var msg = messages[Math.floor(Math.random() * messages.length)];
-
-  // Show thinking in list
-  listContainer.innerHTML =
-    '<div class="ai-more-thinking">' +
-    '<div class="ai-thinking-spinner"></div>' +
-    "<span>" +
-    msg +
-    "</span>" +
-    "</div>";
-
-  // After delay, call callback
-  setTimeout(function () {
-    if (discoverBtn) {
-      discoverBtn.disabled = false;
-      discoverBtn.innerHTML = "✨ Generate More";
-    }
-    if (callback) callback();
-  }, 800);
-};
-
-/**
- * Show more name suggestions (reshuffled) with thinking
- * EXACTLY matches risk register pattern
- */
-ERM.controlsAI.showMoreNameSuggestions = function () {
-  var self = this;
-  if (!this.allNameSuggestions) return;
-
-  this.showMoreThinking(function () {
-    self._renderMoreNames();
-  });
-};
-
-/**
- * Render more names after thinking
- * EXACTLY matches risk register pattern
- */
-ERM.controlsAI._renderMoreNames = function () {
-
-  // Get unshown suggestions
-  var shown = this.shownNameSuggestions || [];
-  var all = this.allNameSuggestions;
-  var remaining = [];
-
-  for (var i = 0; i < all.length; i++) {
-    if (shown.indexOf(all[i]) === -1) {
-      remaining.push(all[i]);
-    }
-  }
-
-  // If no remaining, reshuffle all
-  if (remaining.length === 0) {
-    remaining = this.shuffleArray(all);
-  } else {
-    remaining = this.shuffleArray(remaining);
-  }
-
-  // Take 3 for display
-  var recommended = remaining[0];
-  var displayOthers = remaining.slice(1, 3);
-  this.shownNameSuggestions = [recommended].concat(displayOthers);
-
-  // Update modal content
-  var listContainer = document.querySelector(".ai-suggestions-list");
-  if (!listContainer) return;
-
-  var html = "";
-
-  // Recommended control name first
-  html +=
-    '<div class="ai-suggestion-item ai-recommended ai-stagger-item clickable" data-value="' +
-    ERM.utils.escapeHtml(recommended) +
-    '" style="animation-delay: 0.1s">' +
-    '<div class="ai-suggestion-content">' +
-    '<span class="ai-recommended-badge">⭐ Best Match</span>' +
-    '<span class="ai-suggestion-text">' +
-    ERM.utils.escapeHtml(recommended) +
-    "</span>" +
-    "</div>" +
-    '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-    "</div>";
-
-  // Other suggestions with stagger
-  for (var i = 0; i < displayOthers.length; i++) {
-    var delay = (i + 2) * 0.12;
-    html +=
-      '<div class="ai-suggestion-item ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(displayOthers[i]) +
-      '" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<span class="ai-suggestion-text">' +
-      ERM.utils.escapeHtml(displayOthers[i]) +
-      "</span>" +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      "</div>";
-  }
-
-  listContainer.innerHTML = html;
-
-  // Rebind use buttons
-  var btns = listContainer.querySelectorAll(".btn-use");
-  for (var j = 0; j < btns.length; j++) {
-    btns[j].addEventListener("click", function () {
-      var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-      document.getElementById("control-name").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Control name applied");
+  // Build suggestions array with recommended flag (max 3 per spec)
+  var suggestions = [];
+  for (var i = 0; i < Math.min(allSuggestions.length, 3); i++) {
+    suggestions.push({
+      text: allSuggestions[i],
+      recommended: i === recommendedIndex
     });
   }
 
-  // Rebind clickable items
-  var items = listContainer.querySelectorAll(".ai-suggestion-item.clickable");
-  for (var k = 0; k < items.length; k++) {
-    items[k].addEventListener("click", function (e) {
-      if (e.target.classList.contains("btn-use")) return;
-      var value = this.getAttribute("data-value");
-      document.getElementById("control-name").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Control name applied");
-    });
-  }
+  ERM.components.showAISuggestionModal({
+    title: "Control Name Suggestions",
+    fieldName: userText ? 'Matching "' + userText + '"' : "Control Name",
+    suggestions: suggestions,
+    onSelect: function(selectedText) {
+      self.applyToField("control-name", selectedText);
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
+      }
+    }
+  });
 };
 
 /**
@@ -2806,7 +2064,7 @@ ERM.controlsAI._showDescriptionSuggestionsFromTemplates = function(searchText, t
     !matchedTemplate.descriptions ||
     matchedTemplate.descriptions.length === 0
   ) {
-    ERM.components.showSecondaryModal({
+    ERM.components.modalManager.openSecondary({
       title: this.icons.sparkles + " Description Suggestions",
       content:
         '<div class="ai-suggestions-container">' +
@@ -2827,200 +2085,30 @@ ERM.controlsAI._showDescriptionSuggestionsFromTemplates = function(searchText, t
 ERM.controlsAI._renderDescriptionSuggestionsModal = function(allDescriptions, recommendedIndex) {
   var self = this;
 
-  // Store for "more" button
-  this.allDescriptionSuggestions = allDescriptions;
-
-  // Show first 2 (1 recommended + 1 other)
-  var recommended = allDescriptions[recommendedIndex] || allDescriptions[0];
-  var others = [];
-  for (var i = 0; i < allDescriptions.length; i++) {
-    if (i !== recommendedIndex) {
-      others.push(allDescriptions[i]);
-    }
-  }
-  others = this.shuffleArray(others).slice(0, 1);
-  var hasMore = allDescriptions.length > 2;
-
-  this.shownDescriptionSuggestions = [recommended].concat(others);
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-generated descriptions:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
-
-  // Recommended description first
-  content +=
-    '<div class="ai-suggestion-item ai-recommended ai-stagger-item" style="animation-delay: 0.1s">' +
-    '<div class="ai-suggestion-content">' +
-    '<span class="ai-recommended-badge">⭐ Best Match</span>' +
-    '<div class="ai-description-text">' +
-    ERM.utils.escapeHtml(recommended) +
-    "</div>" +
-    "</div>" +
-    '<button type="button" class="btn btn-sm btn-ai-use btn-use" data-value="' +
-    ERM.utils.escapeHtml(recommended) +
-    '">Use</button>' +
-    "</div>";
-
-  // Other descriptions with stagger
-  for (var i = 0; i < others.length; i++) {
-    var delay = (i + 2) * 0.12;
-    content +=
-      '<div class="ai-suggestion-item ai-stagger-item" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<div class="ai-description-text">' +
-      ERM.utils.escapeHtml(others[i]) +
-      "</div>" +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use" data-value="' +
-      ERM.utils.escapeHtml(others[i]) +
-      '">Use</button>' +
-      "</div>";
-  }
-
-  content += "</div>";
-
-  // Discover more button
-  if (hasMore) {
-    content +=
-      '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-discover-more-descriptions">✨ Generate More</button>';
-  }
-
-  content += "</div>";
-
-  ERM.components.showSecondaryModal({
-    title: this.icons.sparkles + " AI Description Suggestions",
-    content: content,
-    size: "md",
-    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
-    onOpen: function () {
-      // Use buttons - now adds to list instead of replacing textarea
-      var useBtns = document.querySelectorAll(".btn-use");
-      for (var i = 0; i < useBtns.length; i++) {
-        useBtns[i].addEventListener("click", function () {
-          var value = this.getAttribute("data-value");
-
-          // Add to description list using controls module
-          if (typeof ERM.controls !== "undefined" && ERM.controls.addListItem) {
-            ERM.controls.addListItem("descriptions", value);
-          }
-
-          // Count AI usage
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Description added to list");
-        });
-      }
-
-      // Generate more button - MATCHES RISK REGISTER EXACTLY
-      var moreBtn = document.getElementById("btn-discover-more-descriptions");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function () {
-          self.showMoreDescriptionSuggestions();
-        });
-      }
-    }
-  });
-};
-
-/**
- * Show more description suggestions (reshuffled) with thinking
- * EXACTLY matches risk register pattern
- */
-ERM.controlsAI.showMoreDescriptionSuggestions = function () {
-  var self = this;
-  if (!this.allDescriptionSuggestions) return;
-
-  this.showMoreThinking(function () {
-    self._renderMoreDescriptions();
-  });
-};
-
-/**
- * Render more descriptions after thinking
- * EXACTLY matches risk register pattern
- */
-ERM.controlsAI._renderMoreDescriptions = function () {
-
-  // Get unshown suggestions
-  var shown = this.shownDescriptionSuggestions || [];
-  var all = this.allDescriptionSuggestions;
-  var remaining = [];
-
-  for (var i = 0; i < all.length; i++) {
-    if (shown.indexOf(all[i]) === -1) {
-      remaining.push(all[i]);
-    }
-  }
-
-  // If no remaining, reshuffle all
-  if (remaining.length === 0) {
-    remaining = this.shuffleArray(all);
-  } else {
-    remaining = this.shuffleArray(remaining);
-  }
-
-  // Take 2 for display (1 recommended + 1 other)
-  var recommended = remaining[0];
-  var displayOthers = remaining.slice(1, 2);
-  this.shownDescriptionSuggestions = [recommended].concat(displayOthers);
-
-  // Update modal content
-  var listContainer = document.querySelector(".ai-suggestions-list");
-  if (!listContainer) return;
-
-  var html = "";
-
-  // Recommended description first
-  html +=
-    '<div class="ai-suggestion-item ai-recommended ai-stagger-item" style="animation-delay: 0.1s">' +
-    '<div class="ai-suggestion-content">' +
-    '<span class="ai-recommended-badge">⭐ Best Match</span>' +
-    '<div class="ai-description-text">' +
-    ERM.utils.escapeHtml(recommended) +
-    "</div>" +
-    "</div>" +
-    '<button type="button" class="btn btn-sm btn-ai-use btn-use" data-value="' +
-    ERM.utils.escapeHtml(recommended) +
-    '">Use</button>' +
-    "</div>";
-
-  // Other descriptions with stagger
-  for (var i = 0; i < displayOthers.length; i++) {
-    var delay = (i + 2) * 0.12;
-    html +=
-      '<div class="ai-suggestion-item ai-stagger-item" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<div class="ai-description-text">' +
-      ERM.utils.escapeHtml(displayOthers[i]) +
-      "</div>" +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use" data-value="' +
-      ERM.utils.escapeHtml(displayOthers[i]) +
-      '">Use</button>' +
-      "</div>";
-  }
-
-  listContainer.innerHTML = html;
-
-  // Rebind use buttons - now adds to list instead of replacing textarea
-  var btns = listContainer.querySelectorAll(".btn-use");
-  for (var j = 0; j < btns.length; j++) {
-    btns[j].addEventListener("click", function () {
-      var value = this.getAttribute("data-value");
-
-      // Add to description list using controls module
-      if (typeof ERM.controls !== "undefined" && ERM.controls.addListItem) {
-        ERM.controls.addListItem("descriptions", value);
-      }
-
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Description added to list");
+  // Build suggestions array with recommended flag (max 3 per spec)
+  var suggestions = [];
+  for (var i = 0; i < Math.min(allDescriptions.length, 3); i++) {
+    suggestions.push({
+      text: allDescriptions[i],
+      recommended: i === recommendedIndex
     });
   }
+
+  ERM.components.showAISuggestionModal({
+    title: "Description Suggestions",
+    fieldName: "Control Description",
+    suggestions: suggestions,
+    onSelect: function(selectedText) {
+      // Add to description list using controls module
+      if (typeof ERM.controls !== "undefined" && ERM.controls.addListItem) {
+        ERM.controls.addListItem("descriptions", selectedText);
+      }
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
+      }
+      ERM.toast.success("Description added to list");
+    }
+  });
 };
 
 /**
@@ -3060,51 +2148,47 @@ ERM.controlsAI.showTypeSuggestions = function (name) {
  * Render type suggestions from DeepSeek
  */
 ERM.controlsAI._renderTypeDeepSeek = function(suggestions, recommendedIndex) {
-  var self = this;
+  var values = [];
+  var modalSuggestions = [];
 
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control types based on linked risks:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var typeMap = {
+    preventive: "Preventive",
+    detective: "Detective",
+    corrective: "Corrective",
+    directive: "Directive"
+  };
 
   for (var i = 0; i < suggestions.length; i++) {
     var suggestion = suggestions[i];
     var typeValue = suggestion.type || suggestion.value || suggestion;
     var reason = suggestion.reason || "";
-    var isRecommended = i === (recommendedIndex || 0);
-    var delay = (i + 1) * 0.12;
+    var label = typeMap[typeValue] || typeValue;
 
-    // Capitalize type label
-    var typeLabel = typeValue.charAt(0).toUpperCase() + typeValue.slice(1);
-
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      typeValue +
-      '" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + typeLabel + '</strong></span>' +
-      (reason ? '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + reason + '</div>' : '') +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(typeValue);
+    modalSuggestions.push({
+      text: label,
+      description: reason,
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div></div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " Control Type Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function () {
-      self._bindTypeSuggestionEvents();
-    },
+  ERM.components.showAISuggestionModal({
+    title: "Control Type Suggestions",
+    fieldName: "Control Type",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText;
+      var typeEl = document.getElementById("control-type");
+      if (typeEl) {
+        typeEl.value = value;
+      }
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
+      }
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Type applied");
+      }
+    }
   });
 };
 
@@ -3121,37 +2205,32 @@ ERM.controlsAI._showTypeQuickSelect = function() {
     { value: "directive", label: "Directive", desc: "Guides appropriate behavior" }
   ];
 
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">Select a control type:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var suggestions = [];
 
   for (var i = 0; i < types.length; i++) {
-    var typeObj = types[i];
-    var delay = (i + 1) * 0.12;
-
-    content +=
-      '<div class="ai-suggestion-item ai-stagger-item clickable" data-value="' +
-      typeObj.value + '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + typeObj.label + '</strong></span>' +
-      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + typeObj.desc + '</div>' +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(types[i].value);
+    suggestions.push({
+      text: types[i].label,
+      description: types[i].desc,
+      recommended: i === 0
+    });
   }
 
-  content += '</div></div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " Control Type",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function () {
-      self._bindTypeSuggestionEvents();
-    },
+  ERM.components.showAISuggestionModal({
+    title: "Control Type",
+    fieldName: "Control Type",
+    suggestions: suggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index];
+      var typeEl = document.getElementById("control-type");
+      if (typeEl) {
+        typeEl.value = value;
+      }
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Type applied");
+      }
+    }
   });
 };
 
@@ -3166,9 +2245,10 @@ ERM.controlsAI._bindTypeSuggestionEvents = function() {
   for (var j = 0; j < btns.length; j++) {
     btns[j].addEventListener("click", function () {
       var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-      document.getElementById("control-type").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Type applied");
+      ERM.components.closeSecondaryModal(function() {
+        document.getElementById("control-type").value = value;
+        ERM.toast.success("Type applied");
+      });
     });
   }
 
@@ -3178,9 +2258,10 @@ ERM.controlsAI._bindTypeSuggestionEvents = function() {
     items[k].addEventListener("click", function (e) {
       if (e.target.classList.contains("btn-use")) return;
       var value = this.getAttribute("data-value");
-      document.getElementById("control-type").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Type applied");
+      ERM.components.closeSecondaryModal(function() {
+        document.getElementById("control-type").value = value;
+        ERM.toast.success("Type applied");
+      });
     });
   }
 };
@@ -3227,7 +2308,6 @@ ERM.controlsAI.showCategorySuggestions = function (name, type) {
 ERM.controlsAI._showCategoryQuickSelect = function() {
   var self = this;
 
-  // Get available categories
   var categories = ERM.controls.categories || [
     { value: "policy", label: "Policy" },
     { value: "procedure", label: "Procedure" },
@@ -3236,84 +2316,40 @@ ERM.controlsAI._showCategoryQuickSelect = function() {
     { value: "administrative", label: "Administrative" }
   ];
 
-  var content = '<div class="ai-suggestions-container">' +
-    '<div class="ai-section">' +
-    '<p class="text-muted" style="margin-bottom: 16px; text-align: center;">Select a control category:</p>' +
-    '<div class="ai-generic-categories" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">';
-
+  var values = [];
+  var suggestions = [];
   for (var i = 0; i < categories.length; i++) {
-    content += '<button type="button" class="btn btn-sm btn-ghost btn-use-category" data-category="' +
-      categories[i].value + '">' + categories[i].label + '</button>';
+    values.push(categories[i].value);
+    suggestions.push({
+      text: categories[i].label,
+      recommended: i === 0
+    });
   }
 
-  content += '</div></div></div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " Control Category",
-    content: content,
-    buttons: [{ label: "Cancel", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var btns = document.querySelectorAll(".btn-use-category");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var cat = this.getAttribute("data-category");
-          self.applyToField("control-category", cat);
-          ERM.components.closeSecondaryModal();
-        });
-      }
+  ERM.components.showAISuggestionModal({
+    title: "Control Category",
+    fieldName: "Control Category",
+    suggestions: suggestions,
+    onSelect: function(selectedText, index) {
+      var cat = values[index] || selectedText;
+      self.applyToField("control-category", cat);
     }
   });
 };
 
 /**
- * Show category from templates (fallback)
+ * Show category from templates (templates removed - shows generic categories)
  */
 ERM.controlsAI._showCategoryFromTemplates = function(name, type) {
-  // Get AI-powered category suggestions from industry template
-  var industry = window.ERM.controlTemplates && window.ERM.controlTemplates.loader
-    ? window.ERM.controlTemplates.loader.getIndustry()
-    : null;
-  var suggestions = [];
+  // Templates removed - show generic categories
+  var genericCategories = [
+    { category: "Policy", id: "policy", reason: "Organizational policies and procedures" },
+    { category: "Process", id: "process", reason: "Operational process controls" },
+    { category: "Technical", id: "technical", reason: "Technology and system controls" },
+    { category: "Physical", id: "physical", reason: "Physical security controls" }
+  ];
 
-  // Get control description from form if available
-  var descriptions = [];
-  var descItems = document.querySelectorAll('#control-description-list .list-input-text');
-  for (var d = 0; d < descItems.length; d++) {
-    descriptions.push(descItems[d].textContent);
-  }
-  var description = descriptions.join(' ');
-
-  if (industry && industry.suggestControlCategory) {
-    suggestions = industry.suggestControlCategory(name, description, type);
-  }
-
-  // If no suggestions, fallback to all categories
-  if (suggestions.length === 0) {
-    var allCategories = industry && industry.getAllControlCategories
-      ? industry.getAllControlCategories()
-      : [];
-
-    for (var i = 0; i < allCategories.length; i++) {
-      suggestions.push({
-        id: allCategories[i].id,
-        name: allCategories[i].name,
-        description: allCategories[i].description,
-        score: 0
-      });
-    }
-  }
-
-  // Convert to DeepSeek format with reasons
-  var deepSeekFormat = [];
-  for (var j = 0; j < suggestions.length && j < 4; j++) {
-    deepSeekFormat.push({
-      category: suggestions[j].name || suggestions[j].id,
-      id: suggestions[j].id,
-      reason: suggestions[j].description || "Standard control category"
-    });
-  }
-
-  this._renderCategoryDeepSeek(deepSeekFormat, 0);
+  this._renderCategoryDeepSeek(genericCategories, 0);
 };
 
 /**
@@ -3321,95 +2357,39 @@ ERM.controlsAI._showCategoryFromTemplates = function(name, type) {
  */
 ERM.controlsAI._renderCategoryDeepSeek = function(suggestions, recommendedIndex) {
   var self = this;
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control categories:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var modalSuggestions = [];
 
   for (var i = 0; i < suggestions.length; i++) {
     var sug = suggestions[i];
     var catValue = sug.id || sug.category || "";
     var catName = sug.category || sug.name || catValue;
     var reason = sug.reason || "";
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === recommendedIndex);
 
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(catValue) +
-      '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(catName) + '</strong></span>' +
-      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + ERM.utils.escapeHtml(reason) + '</div>' +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(catValue);
+    modalSuggestions.push({
+      text: catName,
+      description: reason,
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div>';
-  content += '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-generate-more-cat">✨ Generate More</button>';
-  content += '</div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " AI Category Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          // Normalize category value to match select options
-          var normalizedValue = self._normalizeCategoryValue(value);
-          var categorySelect = document.getElementById("control-category");
-          if (categorySelect) {
-            categorySelect.value = normalizedValue;
-          }
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Category applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "AI Category Suggestions",
+    fieldName: "Control Category",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText;
+      var normalizedValue = self._normalizeCategoryValue(value);
+      var categorySelect = document.getElementById("control-category");
+      if (categorySelect) {
+        categorySelect.value = normalizedValue;
       }
-
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function(e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          // Normalize category value to match select options
-          var normalizedValue = self._normalizeCategoryValue(value);
-          var categorySelect = document.getElementById("control-category");
-          if (categorySelect) {
-            categorySelect.value = normalizedValue;
-          }
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Category applied");
-        });
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
       }
-
-      // Generate More button
-      var moreBtn = document.getElementById("btn-generate-more-cat");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function() {
-          ERM.components.closeSecondaryModal();
-          var nameEl = document.getElementById("control-name");
-          var typeEl = document.getElementById("control-type");
-          self.showCategorySuggestions(
-            nameEl ? nameEl.value : "",
-            typeEl ? typeEl.value : ""
-          );
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Category applied");
       }
     }
   });
@@ -3650,249 +2630,36 @@ ERM.controlsAI._renderOwnerSuggestionsDeepSeek = function(suggestions, recommend
   // Store for Generate More
   this._deepSeekOwnerSuggestions = suggestions;
 
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control owners:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var modalSuggestions = [];
 
   for (var i = 0; i < suggestions.length; i++) {
     var sug = suggestions[i];
     var role = typeof sug === "object" ? sug.role : sug;
     var reason = typeof sug === "object" ? sug.reason : null;
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === recommendedIndex);
 
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(role) +
-      '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(role) + '</strong></span>' +
-      (reason ? '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + ERM.utils.escapeHtml(reason) + '</div>' : '') +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(role);
+    modalSuggestions.push({
+      text: role,
+      description: reason || "",
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div>';
-  content += '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-generate-more-owners">✨ Generate More</button>';
-  content += '</div>';
-
-  ERM.components.showSecondaryModal({
-    title: this.icons.sparkles + " AI Control Owner Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function() {
-      // Use buttons
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          document.getElementById("control-owner").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Owner applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "AI Control Owner Suggestions",
+    fieldName: "Control Owner",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText;
+      self.applyToField("control-owner", value);
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
       }
-
-      // Clickable items
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function(e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-owner").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Owner applied");
-        });
-      }
-
-      // Generate More button
-      var moreBtn = document.getElementById("btn-generate-more-owners");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function() {
-          ERM.components.closeSecondaryModal();
-          // Re-call DeepSeek for fresh suggestions
-          var typeEl = document.getElementById("control-type");
-          var catEl = document.getElementById("control-category");
-          self.showOwnerSuggestions(
-            typeEl ? typeEl.value : "",
-            catEl ? catEl.value : ""
-          );
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Owner applied");
       }
     }
-  });
-};
-
-/**
- * Render owner suggestions (supports Generate More)
- */
-ERM.controlsAI._renderOwnerSuggestions = function (isInitial) {
-  var self = this;
-  var allOwners = this._currentOwnerSuggestions || [];
-
-  if (allOwners.length === 0) {
-    return;
-  }
-
-  // Determine which owners to show
-  var ownersToShow = [];
-
-  if (isInitial) {
-    // Initial: Show first 3
-    ownersToShow = allOwners.slice(0, 3);
-    this._shownOwnerCount = 3;
-  } else {
-    // Generate More: Show next 3
-    var startIndex = this._shownOwnerCount;
-    var endIndex = startIndex + 3;
-
-    if (startIndex >= allOwners.length) {
-      // All shown, reshuffle and start over
-      var recommended = allOwners[0];
-      var rest = this.shuffleArray(allOwners.slice(1));
-      allOwners = [recommended].concat(rest);
-      this._currentOwnerSuggestions = allOwners;
-      startIndex = 0;
-      endIndex = 3;
-      this._shownOwnerCount = 0;
-    }
-
-    ownersToShow = allOwners.slice(startIndex, endIndex);
-    this._shownOwnerCount += ownersToShow.length;
-  }
-
-  // Build content
-  var recommended = ownersToShow[0];
-  var others = ownersToShow.slice(1);
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control owners:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
-
-  // Recommended owner first
-  content +=
-    '<div class="ai-suggestion-item ai-recommended ai-stagger-item clickable" data-value="' +
-    ERM.utils.escapeHtml(recommended) +
-    '" style="animation-delay: 0.1s">' +
-    '<div class="ai-suggestion-content">' +
-    '<span class="ai-recommended-badge">⭐ Recommended</span>' +
-    '<span class="ai-suggestion-text">' +
-    ERM.utils.escapeHtml(recommended) +
-    "</span>" +
-    "</div>" +
-    '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-    "</div>";
-
-  // Other suggestions with stagger
-  for (var i = 0; i < others.length; i++) {
-    var delay = (i + 2) * 0.1;
-    content +=
-      '<div class="ai-suggestion-item ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(others[i]) +
-      '" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<span class="ai-suggestion-text">' +
-      ERM.utils.escapeHtml(others[i]) +
-      "</span>" +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      "</div>";
-  }
-
-  content += "</div>";
-
-  // Add Generate More button if there are more owners left to show
-  // Show button if: total owners > 3 AND we haven't shown all yet
-  var hasMoreOwners = allOwners.length > 3 && (isInitial || this._shownOwnerCount < allOwners.length);
-
-  if (hasMoreOwners) {
-    content +=
-      '<div class="ai-discover-container">' +
-      '<button type="button" class="btn btn-secondary btn-ai-discover">✨ Generate More</button>' +
-      "</div>";
-  }
-
-  content += "</div>";
-
-  if (isInitial) {
-    // Initial render - create modal
-    ERM.components.showSecondaryModal({
-      title: self.icons.sparkles + " Control Owner Suggestions",
-      content: content,
-      buttons: [{ label: "Close", type: "secondary", action: "close" }],
-      onOpen: function () {
-        self._attachOwnerEventHandlers();
-      },
-    });
-  } else {
-    // Generate More - update existing modal content
-    var modalBody = document.querySelector(".modal-secondary .modal-body");
-    if (modalBody) {
-      modalBody.innerHTML = content;
-      self._attachOwnerEventHandlers();
-    }
-  }
-};
-
-/**
- * Attach event handlers for owner suggestions
- */
-ERM.controlsAI._attachOwnerEventHandlers = function () {
-  var self = this;
-
-  // Use buttons
-  var btns = document.querySelectorAll(".btn-use");
-  for (var j = 0; j < btns.length; j++) {
-    btns[j].addEventListener("click", function () {
-      var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-      document.getElementById("control-owner").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Owner applied");
-    });
-  }
-
-  // Clickable items
-  var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-  for (var k = 0; k < items.length; k++) {
-    items[k].addEventListener("click", function (e) {
-      if (e.target.classList.contains("btn-use")) return;
-      var value = this.getAttribute("data-value");
-      document.getElementById("control-owner").value = value;
-      ERM.components.closeSecondaryModal();
-      ERM.toast.success("Owner applied");
-    });
-  }
-
-  // Generate More button
-  var discoverBtn = document.querySelector(".btn-ai-discover");
-  if (discoverBtn) {
-    discoverBtn.addEventListener("click", function () {
-      self.showMoreOwnerSuggestions();
-    });
-  }
-};
-
-/**
- * Show more owner suggestions with thinking animation
- */
-ERM.controlsAI.showMoreOwnerSuggestions = function () {
-  var self = this;
-
-  this.showMoreThinking(function () {
-    self._renderOwnerSuggestions(false);
   });
 };
 
@@ -3951,13 +2718,20 @@ ERM.controlsAI._renderLinkedRisksDeepSeek = function(suggestions, allRisks) {
 
   // Build a map of risk IDs for quick lookup
   var riskMap = {};
+  var recommendedIds = {};
   for (var i = 0; i < allRisks.length; i++) {
     riskMap[allRisks[i].id] = allRisks[i];
   }
+  // Track which risks are AI recommended
+  for (var r = 0; r < suggestions.length; r++) {
+    if (suggestions[r].riskId) {
+      recommendedIds[suggestions[r].riskId] = true;
+    }
+  }
 
   var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI recommends linking these risks (click Use to auto-check):</p>' +
+    '<div class="ai-suggestions-container" style="max-height: 60vh; overflow-y: auto;">' +
+    '<p class="ai-suggestions-intro">AI recommends these risks. All risks from your register are shown below:</p>' +
     '<div class="ai-suggestions-list ai-stagger-container">';
 
   var validSuggestions = 0;
@@ -3990,13 +2764,43 @@ ERM.controlsAI._renderLinkedRisksDeepSeek = function(suggestions, allRisks) {
       '</div>';
   }
 
-  if (validSuggestions === 0) {
-    content += '<p class="text-muted">No matching risks found. Try the quick select below.</p>';
+  // Separator if we have AI recommendations
+  if (validSuggestions > 0) {
+    content += '<div style="border-top: 1px solid #e5e7eb; margin: 12px 0; padding-top: 8px;">' +
+      '<p class="text-muted" style="font-size: 12px; margin: 0 0 8px 0;">All other risks:</p></div>';
+  }
+
+  // Second: Show ALL other risks not in AI recommendations
+  var otherCount = 0;
+  for (var a = 0; a < allRisks.length; a++) {
+    var otherRisk = allRisks[a];
+    if (recommendedIds[otherRisk.id]) continue; // Skip AI recommended ones
+
+    otherCount++;
+    var otherDelay = (validSuggestions + otherCount) * 0.05;
+
+    content +=
+      '<div class="ai-suggestion-item ai-stagger-item" data-risk-id="' +
+      otherRisk.id + '" style="animation-delay: ' + otherDelay + 's">' +
+      '<div class="ai-suggestion-content">' +
+      '<div>' +
+      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(otherRisk.title) + '</strong></span>' +
+      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' +
+      'Category: ' + (otherRisk.category || 'N/A') +
+      '</div>' +
+      '</div>' +
+      '</div>' +
+      '<button type="button" class="btn btn-sm btn-ai-use btn-link-risk">Use</button>' +
+      '</div>';
+  }
+
+  if (validSuggestions === 0 && otherCount === 0) {
+    content += '<p class="text-muted">No risks found in your risk register.</p>';
   }
 
   content += '</div></div>';
 
-  ERM.components.showSecondaryModal({
+  ERM.components.modalManager.openSecondary({
     title: self.icons.sparkles + " AI Linked Risk Recommendations",
     content: content,
     buttons: [{ label: "Close", type: "secondary", action: "close" }],
@@ -4014,11 +2818,11 @@ ERM.controlsAI._showLinkedRisksQuickSelect = function(allRisks) {
   this.clearThinkingButton();
 
   var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">Select risks to link to this control:</p>' +
+    '<div class="ai-suggestions-container" style="max-height: 60vh; overflow-y: auto;">' +
+    '<p class="ai-suggestions-intro">Select risks to link to this control (' + allRisks.length + ' available):</p>' +
     '<div class="ai-suggestions-list ai-stagger-container">';
 
-  for (var i = 0; i < Math.min(allRisks.length, 8); i++) {
+  for (var i = 0; i < allRisks.length; i++) {
     var risk = allRisks[i];
     var delay = (i + 1) * 0.1;
 
@@ -4039,7 +2843,7 @@ ERM.controlsAI._showLinkedRisksQuickSelect = function(allRisks) {
 
   content += '</div></div>';
 
-  ERM.components.showSecondaryModal({
+  ERM.components.modalManager.openSecondary({
     title: self.icons.sparkles + " Link Risks",
     content: content,
     buttons: [{ label: "Close", type: "secondary", action: "close" }],
@@ -4057,17 +2861,18 @@ ERM.controlsAI._bindLinkedRiskEvents = function() {
   for (var j = 0; j < btns.length; j++) {
     btns[j].addEventListener("click", function () {
       var riskId = this.closest(".ai-suggestion-item").getAttribute("data-risk-id");
-      // Check the checkbox for this risk - try multiple selectors
-      var checkbox = document.querySelector('input[name="linkedRisks"][value="' + riskId + '"]') ||
-                     document.querySelector('input[type="checkbox"][data-risk-id="' + riskId + '"]');
-      if (checkbox) {
-        checkbox.checked = true;
-        // Add visual feedback
-        var label = checkbox.closest(".inline-control-item");
-        if (label) label.classList.add("selected");
-        ERM.toast.success("Risk linked");
-      }
-      ERM.components.closeSecondaryModal();
+      ERM.components.closeSecondaryModal(function() {
+        // Check the checkbox for this risk - try multiple selectors
+        var checkbox = document.querySelector('input[name="linkedRisks"][value="' + riskId + '"]') ||
+                       document.querySelector('input[type="checkbox"][data-risk-id="' + riskId + '"]');
+        if (checkbox) {
+          checkbox.checked = true;
+          // Add visual feedback
+          var label = checkbox.closest(".inline-control-item");
+          if (label) label.classList.add("selected");
+          ERM.toast.success("Risk linked");
+        }
+      });
     });
   }
 };
@@ -4162,7 +2967,7 @@ ERM.controlsAI._showEvidenceModal = function(suggestions) {
 
   content += '</ul></div></div>';
 
-  ERM.components.showSecondaryModal({
+  ERM.components.modalManager.openSecondary({
     title: self.icons.sparkles + " Evidence Suggestions",
     content: content,
     buttons: [{ label: "Close", type: "secondary", action: "close" }]
@@ -4230,67 +3035,31 @@ ERM.controlsAI.showEffectivenessSuggestions = function (name, type) {
     return 0;
   });
 
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested effectiveness rating:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
-
+  var values = [];
+  var suggestions = [];
   for (var i = 0; i < options.length; i++) {
-    var opt = options[i];
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === 0);
-
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      opt.value +
-      '" style="animation-delay: ' +
-      delay +
-      's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' +
-      opt.label +
-      '</strong></span>' +
-      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' +
-      opt.description +
-      '</div>' +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(options[i].value);
+    suggestions.push({
+      text: options[i].label,
+      description: options[i].description,
+      recommended: i === 0
+    });
   }
 
-  content += '</div></div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " Effectiveness Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function () {
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function () {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          document.getElementById("control-effectiveness").value = value;
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Effectiveness applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "Effectiveness Suggestions",
+    fieldName: "Effectiveness",
+    suggestions: suggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText;
+      var effEl = document.getElementById("control-effectiveness");
+      if (effEl) {
+        effEl.value = value;
       }
-
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function (e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-effectiveness").value = value;
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Effectiveness applied");
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Effectiveness applied");
       }
-    },
+    }
   });
 };
 
@@ -4347,92 +3116,43 @@ ERM.controlsAI._showStatusFromTemplates = function(name, type) {
  * Render status suggestions from DeepSeek (with reasons)
  */
 ERM.controlsAI._renderStatusDeepSeek = function(suggestions, recommendedIndex) {
-  var self = this;
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control status:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var modalSuggestions = [];
 
   for (var i = 0; i < suggestions.length; i++) {
     var sug = suggestions[i];
     var value = typeof sug === "object" ? sug.value : sug;
     var reason = typeof sug === "object" ? sug.reason : null;
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === recommendedIndex);
 
-    // Convert to display label
     var label = value;
     if (value === "active") label = "Active";
     if (value === "inactive") label = "Inactive";
     if (value === "under-review") label = "Under Review";
     if (value === "planned") label = "Planned";
 
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(value) +
-      '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(label) + '</strong></span>' +
-      (reason ? '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + ERM.utils.escapeHtml(reason) + '</div>' : '') +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(value);
+    modalSuggestions.push({
+      text: label,
+      description: reason || "",
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div>';
-  content += '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-generate-more-status">✨ Generate More</button>';
-  content += '</div>';
-
-  ERM.components.showSecondaryModal({
-    title: this.icons.sparkles + " AI Status Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          document.getElementById("control-status").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Status applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "AI Status Suggestions",
+    fieldName: "Control Status",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText;
+      var statusEl = document.getElementById("control-status");
+      if (statusEl) {
+        statusEl.value = value;
       }
-
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function(e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-status").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Status applied");
-        });
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
       }
-
-      // Generate More button
-      var moreBtn = document.getElementById("btn-generate-more-status");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function() {
-          ERM.components.closeSecondaryModal();
-          var nameEl = document.getElementById("control-name");
-          var typeEl = document.getElementById("control-type");
-          self.showStatusSuggestions(
-            nameEl ? nameEl.value : "",
-            typeEl ? typeEl.value : ""
-          );
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Status applied");
       }
     }
   });
@@ -4576,93 +3296,44 @@ ERM.controlsAI._showNextReviewDateFromTemplates = function(type, category) {
  * Render next review date suggestions from DeepSeek (with reasons)
  */
 ERM.controlsAI._renderNextReviewDateDeepSeek = function(suggestions, recommendedIndex) {
-  var self = this;
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested next review dates:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var modalSuggestions = [];
 
   for (var i = 0; i < suggestions.length; i++) {
     var sug = suggestions[i];
     var dateValue = sug.date;
     var label = sug.label || "";
     var reason = sug.reason || "";
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === recommendedIndex);
-
-    // Format display date
     var displayDate = dateValue;
+
     try {
       var d = new Date(dateValue + "T00:00:00");
       displayDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     } catch (e) {}
 
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(dateValue) +
-      '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(label) + ' (' + displayDate + ')</strong></span>' +
-      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + ERM.utils.escapeHtml(reason) + '</div>' +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(dateValue);
+    modalSuggestions.push({
+      text: label + " (" + displayDate + ")",
+      description: reason,
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div>';
-  content += '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-generate-more-dates">✨ Generate More</button>';
-  content += '</div>';
-
-  ERM.components.showSecondaryModal({
-    title: this.icons.sparkles + " AI Next Review Date Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          document.getElementById("control-next-review").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Next review date applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "AI Next Review Date Suggestions",
+    fieldName: "Next Review Date",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index];
+      var dateEl = document.getElementById("control-next-review");
+      if (dateEl) {
+        dateEl.value = value;
       }
-
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function(e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-next-review").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Next review date applied");
-        });
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
       }
-
-      // Generate More button
-      var moreBtn = document.getElementById("btn-generate-more-dates");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function() {
-          ERM.components.closeSecondaryModal();
-          var typeEl = document.getElementById("control-type");
-          var catEl = document.getElementById("control-category");
-          self.showNextReviewDateSuggestions(
-            typeEl ? typeEl.value : "",
-            catEl ? catEl.value : ""
-          );
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Next review date applied");
       }
     }
   });
@@ -4774,85 +3445,37 @@ ERM.controlsAI._showFrequencyQuickSelect = function(type, category) {
  * Render frequency suggestions from DeepSeek (with reasons)
  */
 ERM.controlsAI._renderFrequencyDeepSeek = function(suggestions, recommendedIndex) {
-  var self = this;
-
-  var content =
-    '<div class="ai-suggestions-container">' +
-    '<p class="ai-suggestions-intro">AI-suggested control frequencies:</p>' +
-    '<div class="ai-suggestions-list ai-stagger-container">';
+  var values = [];
+  var modalSuggestions = [];
 
   for (var i = 0; i < suggestions.length; i++) {
     var sug = suggestions[i];
     var freqValue = sug.frequency || "";
     var reason = sug.reason || "";
-    var delay = (i + 1) * 0.12;
-    var isRecommended = (i === recommendedIndex);
 
-    content +=
-      '<div class="ai-suggestion-item' +
-      (isRecommended ? ' ai-recommended' : '') +
-      ' ai-stagger-item clickable" data-value="' +
-      ERM.utils.escapeHtml(freqValue.toLowerCase()) +
-      '" style="animation-delay: ' + delay + 's">' +
-      '<div class="ai-suggestion-content">' +
-      (isRecommended ? '<span class="ai-recommended-badge">⭐ Recommended</span>' : '') +
-      '<div>' +
-      '<span class="ai-suggestion-text"><strong>' + ERM.utils.escapeHtml(freqValue) + '</strong></span>' +
-      '<div class="text-muted" style="font-size: 12px; margin-top: 4px;">' + ERM.utils.escapeHtml(reason) + '</div>' +
-      '</div>' +
-      '</div>' +
-      '<button type="button" class="btn btn-sm btn-ai-use btn-use">Use</button>' +
-      '</div>';
+    values.push(freqValue.toLowerCase());
+    modalSuggestions.push({
+      text: freqValue,
+      description: reason,
+      recommended: i === recommendedIndex
+    });
   }
 
-  content += '</div>';
-  content += '<button type="button" class="btn btn-sm btn-ai-discover" id="btn-generate-more-freq">✨ Generate More</button>';
-  content += '</div>';
-
-  ERM.components.showSecondaryModal({
-    title: self.icons.sparkles + " AI Frequency Suggestions",
-    content: content,
-    buttons: [{ label: "Close", type: "secondary", action: "close" }],
-    onOpen: function() {
-      var btns = document.querySelectorAll(".btn-use");
-      for (var j = 0; j < btns.length; j++) {
-        btns[j].addEventListener("click", function() {
-          var value = this.closest(".ai-suggestion-item").getAttribute("data-value");
-          document.getElementById("control-frequency").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Frequency applied");
-        });
+  ERM.components.showAISuggestionModal({
+    title: "AI Frequency Suggestions",
+    fieldName: "Control Frequency",
+    suggestions: modalSuggestions,
+    onSelect: function(selectedText, index) {
+      var value = values[index] || selectedText.toLowerCase();
+      var freqEl = document.getElementById("control-frequency");
+      if (freqEl) {
+        freqEl.value = value;
       }
-
-      var items = document.querySelectorAll(".ai-suggestion-item.clickable");
-      for (var k = 0; k < items.length; k++) {
-        items[k].addEventListener("click", function(e) {
-          if (e.target.classList.contains("btn-use")) return;
-          var value = this.getAttribute("data-value");
-          document.getElementById("control-frequency").value = value;
-          if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
-            ERM.controlsAI.deepSeek.onSuggestionUsed();
-          }
-          ERM.components.closeSecondaryModal();
-          ERM.toast.success("Frequency applied");
-        });
+      if (ERM.controlsAI.deepSeek && ERM.controlsAI.deepSeek.onSuggestionUsed) {
+        ERM.controlsAI.deepSeek.onSuggestionUsed();
       }
-
-      // Generate More button
-      var moreBtn = document.getElementById("btn-generate-more-freq");
-      if (moreBtn) {
-        moreBtn.addEventListener("click", function() {
-          ERM.components.closeSecondaryModal();
-          var typeEl = document.getElementById("control-type");
-          var catEl = document.getElementById("control-category");
-          self.showFrequencySuggestions(
-            typeEl ? typeEl.value : "",
-            catEl ? catEl.value : ""
-          );
-        });
+      if (typeof ERM.toast !== "undefined") {
+        ERM.toast.success("Frequency applied");
       }
     }
   });
@@ -5098,236 +3721,23 @@ ERM.controlsAI._apiRespondedBeforeAnimation = false;
 
 /**
  * Show AI thinking/processing modal
- * Matches risk register thinking animation
+ * Uses unified ERM.components.showThinkingModal
  */
 ERM.controlsAI.showThinkingModal = function(input, onComplete) {
-  console.log("=== THINKING MODAL START ===");
-  console.log("Input:", input);
-
-  // Reset the flag at the start of each thinking modal
-  ERM.controlsAI._apiRespondedBeforeAnimation = false;
-
-  var steps = [
-    { text: "AI analyzing your description", icon: "search", delay: 1200 },
-    { text: "AI detecting control type and category", icon: "category", delay: 1400 },
-    { text: "AI searching control database", icon: "tree", delay: 1600 },
-    { text: "AI identifying control owner", icon: "shield", delay: 1400 },
-    { text: "AI building control details", icon: "chart", delay: 1200 }
-  ];
-
-  var stepsHtml = "";
-  for (var i = 0; i < steps.length; i++) {
-    stepsHtml +=
-      '<div class="ai-step" data-step="' +
-      i +
-      '">' +
-      '<div class="ai-step-icon">' +
-      '<svg class="ai-step-spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="50" stroke-linecap="round"/></svg>' +
-      '<svg class="ai-step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' +
-      "</div>" +
-      '<span class="ai-step-text">' +
-      steps[i].text +
-      "</span>" +
-      '<span class="ai-step-dots"><span>.</span><span>.</span><span>.</span></span>' +
-      "</div>";
-  }
-
-  var content =
-    '<div class="ai-thinking-container">' +
-    '<div class="ai-thinking-header">' +
-    '<div class="ai-brain-animation">' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    '<div class="ai-brain-circle"></div>' +
-    this.icons.sparkles +
-    "</div>" +
-    "<h3>AI is generating your control</h3>" +
-    '<p class="ai-input-preview">"' +
-    (input.length > 60 ? input.substring(0, 60) + "..." : input) +
-    '"</p>' +
-    "</div>" +
-    '<div class="ai-steps-container">' +
-    stepsHtml +
-    "</div>" +
-    "</div>";
-
-  console.log("Opening thinking modal...");
-
-  ERM.components.showModal({
-    title: "",
-    content: content,
-    size: "sm",
-    buttons: [],
-    footer: false,
-    closeOnBackdrop: false,  // Prevent accidental closing
-    closeOnEscape: false,     // Prevent ESC key closing
-    onOpen: function() {
-      console.log("Thinking modal opened - DOM ready");
-
-      // Remove the modal header and fix all sizing issues
-      var modal = document.querySelector(".modal");
-      var modalContent = document.querySelector(".modal-content");
-      var modalHeader = document.querySelector(".modal-header");
-      var modalBody = document.querySelector(".modal-body");
-      var modalFooter = document.querySelector(".modal-footer");
-
-      if (modal) {
-        modal.classList.add("ai-thinking-modal");
-        console.log("Added ai-thinking-modal class");
-      }
-
-      // Completely remove header
-      if (modalHeader && modalHeader.parentNode) {
-        modalHeader.parentNode.removeChild(modalHeader);
-        console.log("Removed modal header");
-      }
-
-      // Completely remove footer
-      if (modalFooter && modalFooter.parentNode) {
-        modalFooter.parentNode.removeChild(modalFooter);
-        console.log("Removed modal footer");
-      }
-
-      // Fix body - remove all restrictions
-      if (modalBody) {
-        modalBody.style.cssText =
-          "padding: 0 !important; max-height: none !important; overflow: visible !important;";
-        console.log("Fixed modal body styles");
-      }
-
-      // Fix modal content wrapper
-      if (modalContent) {
-        modalContent.style.cssText =
-          "max-height: none !important; overflow: visible !important;";
-        console.log("Fixed modal content styles");
-      }
-
-      console.log("Modal DOM manipulation complete");
-    }
+  ERM.components.showThinkingModal({
+    input: input,
+    title: "AI is generating your control",
+    steps: [
+      { text: "AI analyzing your description", icon: "search", delay: 1200 },
+      { text: "AI detecting control type and category", icon: "category", delay: 1400 },
+      { text: "AI searching control database", icon: "tree", delay: 1600 },
+      { text: "AI identifying control owner", icon: "shield", delay: 1400 },
+      { text: "AI building control details", icon: "chart", delay: 1200 }
+    ],
+    namespace: ERM.controlsAI,
+    icons: ERM.controlsAI.icons,
+    onComplete: onComplete
   });
-
-  // Animate steps sequentially - OUTSIDE onOpen like risk register
-  function animateStep(stepIndex) {
-    // ALWAYS check flag first - if API already responded, stop animation completely
-    if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-      console.log("[Control AI] Animation step " + stepIndex + " skipped - API already responded");
-      return; // Stop animation entirely
-    }
-
-    if (stepIndex >= steps.length) {
-      // All steps complete - close modal and call onComplete
-      console.log("All thinking steps complete");
-
-      // Double-check flag before closing
-      if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-        console.log("[Control AI] Animation complete but API already responded - NOT closing modal");
-        if (onComplete) onComplete();
-        return;
-      }
-
-      console.log("Closing thinking modal (API hasn't responded yet)");
-      setTimeout(function() {
-        // Triple-check flag before actually closing (in case API responded during the 800ms wait)
-        if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-          console.log("[Control AI] NOT closing - API responded during final wait");
-          if (onComplete) onComplete();
-          return;
-        }
-        // Also check if the current modal is actually the thinking modal (has ai-thinking-modal class)
-        var modal = document.querySelector('.modal.ai-thinking-modal');
-        if (!modal) {
-          console.log("[Control AI] Thinking modal not found - preview must be showing, NOT closing");
-          if (onComplete) onComplete();
-          return;
-        }
-        console.log("[Control AI] Confirmed thinking modal still open - closing it now");
-        ERM.components.closeModal();
-        setTimeout(function() {
-          if (onComplete) onComplete();
-        }, 300);
-      }, 800);
-      return;
-    }
-
-    var stepEl = document.querySelector('.ai-step[data-step="' + stepIndex + '"]');
-    if (stepEl) {
-      console.log("Animating step:", stepIndex, steps[stepIndex].text);
-      stepEl.classList.add("active");
-
-      setTimeout(function() {
-        // Check flag again before continuing to next step
-        if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-          console.log("[Control AI] Animation stopped mid-step - API responded");
-          return;
-        }
-        stepEl.classList.remove("active");
-        stepEl.classList.add("complete");
-        animateStep(stepIndex + 1);
-      }, steps[stepIndex].delay);
-    } else {
-      // If step element not found, skip to next
-      console.warn("Step element not found for step:", stepIndex);
-      animateStep(stepIndex + 1);
-    }
-  }
-
-  // Start animation after modal opens - exactly like risk register
-  console.log("Starting thinking animation timer");
-  setTimeout(function() {
-    // Check if API already responded before even starting animation
-    if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-      console.log("[Control AI] API already responded - skipping animation start");
-      return;
-    }
-
-    console.log("Checking for step elements...");
-
-    // Debug: Check what elements exist
-    var modal = document.querySelector('.modal');
-    var modalBody = document.querySelector('.modal-body');
-    var thinkingContainer = document.querySelector('.ai-thinking-container');
-    var stepsContainer = document.querySelector('.ai-steps-container');
-    var firstStep = document.querySelector('.ai-step[data-step="0"]');
-    var allSteps = document.querySelectorAll('.ai-step');
-
-    console.log("Debug - Modal exists:", modal !== null);
-    console.log("Debug - Modal body exists:", modalBody !== null);
-    console.log("Debug - Thinking container exists:", thinkingContainer !== null);
-    console.log("Debug - Steps container exists:", stepsContainer !== null);
-    console.log("Debug - All steps count:", allSteps.length);
-    console.log("Debug - First step exists:", firstStep !== null);
-
-    if (modalBody) {
-      console.log("Debug - Modal body HTML length:", modalBody.innerHTML.length);
-      console.log("Debug - Modal body first 500 chars:", modalBody.innerHTML.substring(0, 500));
-    }
-
-    if (firstStep) {
-      console.log("First step element found - starting animation");
-      animateStep(0);
-    } else {
-      console.error("First step element NOT found after 300ms!");
-      console.log("Will retry with longer delay...");
-
-      // Retry with longer delay
-      setTimeout(function() {
-        // Check flag again before retry
-        if (ERM.controlsAI._apiRespondedBeforeAnimation) {
-          console.log("[Control AI] API responded during wait - skipping animation retry");
-          return;
-        }
-
-        console.log("Second attempt after 1000ms total...");
-        var retryFirstStep = document.querySelector('.ai-step[data-step="0"]');
-        if (retryFirstStep) {
-          console.log("Found on second attempt - starting animation");
-          animateStep(0);
-        } else {
-          console.error("Still not found on second attempt!");
-        }
-      }, 700);
-    }
-  }, 300);
 };
 
 /**
@@ -5457,6 +3867,7 @@ ERM.controlsAI.parseNaturalLanguageControl = function(input) {
               var controlData = {
                 name: parsed.name || input,
                 description: parsed.description || input,
+                describeRisk: "",
                 type: parsed.type || "preventive",
                 category: parsed.category || "manual",
                 owner: parsed.owner || "",
@@ -5516,6 +3927,7 @@ ERM.controlsAI.buildControlDataFromMatches = function(matches, input) {
   var controlData = {
     name: "",
     description: "",
+    describeRisk: "",
     type: "",
     category: "",
     owner: "",
@@ -5782,7 +4194,7 @@ ERM.controlsAI.showPreviewNameSuggestions = function() {
 
   // Show in secondary modal
   if (typeof ERM.components.showSecondaryModal === "function") {
-    ERM.components.showSecondaryModal({
+    ERM.components.modalManager.openSecondary({
       title: this.icons.sparkles + " Alternative Control Names",
       content: suggestionsHtml,
       size: "md",
@@ -5795,14 +4207,15 @@ ERM.controlsAI.showPreviewNameSuggestions = function() {
       for (var i = 0; i < titleItems.length; i++) {
         titleItems[i].addEventListener("click", function() {
           var selectedTitle = this.getAttribute("data-title");
-          if (currentName && selectedTitle) {
-            currentName.value = selectedTitle;
-            if (typeof ERM.components.closeSecondaryModal === "function") {
-              ERM.components.closeSecondaryModal();
-            }
-            if (typeof ERM.toast !== "undefined") {
-              ERM.toast.success("Control name updated");
-            }
+          if (selectedTitle) {
+            ERM.components.closeSecondaryModal(function() {
+              if (currentName) {
+                currentName.value = selectedTitle;
+              }
+              if (typeof ERM.toast !== "undefined") {
+                ERM.toast.success("Control name updated");
+              }
+            });
           }
         });
       }
@@ -5822,9 +4235,12 @@ ERM.controlsAI.showPreviewNameSuggestions = function() {
       for (var i = 0; i < titleItems.length; i++) {
         titleItems[i].addEventListener("click", function() {
           var selectedTitle = this.getAttribute("data-title");
-          if (currentName && selectedTitle) {
-            currentName.value = selectedTitle;
+          if (selectedTitle) {
             ERM.components.closeModal();
+            // For primary modal, field should still exist after close
+            if (currentName) {
+              currentName.value = selectedTitle;
+            }
             if (typeof ERM.toast !== "undefined") {
               ERM.toast.success("Control name updated");
             }
@@ -6115,17 +4531,9 @@ ERM.controlsAI.hideAIThinking = function() {
  * @returns {Array} Array of { control, score } objects sorted by score (highest first)
  */
 ERM.controlsAI.findControlsForRisk = function(riskContext) {
-  var results = [];
-
-  // Get all control templates for current industry
-  var industry = localStorage.getItem("ERM_industry") || "mining";
-
-  if (!window.ERM_TEMPLATES ||
-      !window.ERM_TEMPLATES[industry] ||
-      !window.ERM_TEMPLATES[industry].controls) {
-    console.log('[Controls AI] No control templates found for industry:', industry);
-    return results;
-  }
+  // Templates removed - return empty array
+  console.log('[Controls AI] Control templates removed - using DeepSeek AI instead');
+  return [];
 
   // Get all controls across all 9 categories
   var allControls = this.getAllControls(industry);
@@ -6199,33 +4607,10 @@ ERM.controlsAI.findControlsForRisk = function(riskContext) {
 };
 
 /**
- * Get all controls across all 9 categories for an industry
- * @param {string} industry - Industry ID (e.g., "mining")
- * @returns {Array} Array of all control objects
+ * Get all controls (templates removed - returns empty array)
  */
 ERM.controlsAI.getAllControls = function(industry) {
-  var all = [];
-  var controlTemplates = window.ERM_TEMPLATES[industry].controls;
-  var categories = [
-    'strategic',
-    'financial',
-    'operational',
-    'compliance',
-    'technology',
-    'hr',
-    'hse',
-    'reputational',
-    'project'
-  ];
-
-  for (var i = 0; i < categories.length; i++) {
-    var cat = categories[i];
-    if (controlTemplates[cat] && Array.isArray(controlTemplates[cat])) {
-      all = all.concat(controlTemplates[cat]);
-    }
-  }
-
-  return all;
+  return [];
 };
 
 /**
@@ -6256,3 +4641,4 @@ ERM.controlsAI.extractKeywords = function(text) {
 };
 
 console.log("Controls AI UI loaded");
+

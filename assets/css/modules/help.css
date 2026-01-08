@@ -297,10 +297,11 @@
 
 .faq-item.open .faq-answer {
   display: block;
-  animation: fadeIn 0.2s ease;
+  animation: fadeInSlideDown 0.2s ease;
 }
 
-@keyframes fadeIn {
+/* Local variant with slide-down effect (different from canonical fadeIn) */
+@keyframes fadeInSlideDown {
   from {
     opacity: 0;
     transform: translateY(-4px);

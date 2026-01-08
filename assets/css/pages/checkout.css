@@ -329,9 +329,7 @@
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin moved to core/components.css */
 
 /* ========================================
    PAYPAL FORM
@@ -687,10 +685,7 @@
   animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* @keyframes fadeIn REMOVED - canonical in core/components.css */
 
 .success-modal {
   background: white;
@@ -763,7 +758,7 @@
 }
 
 .unlocked-features li svg[fill="currentColor"] {
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .btn-dashboard {

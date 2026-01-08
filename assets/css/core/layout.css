@@ -782,12 +782,12 @@ body {
   right: 32px;
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  background: var(--ai-accent);
   border: none;
   border-radius: 9999px;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 20px var(--ai-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -797,7 +797,7 @@ body {
 
 .ai-float-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 28px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 6px 28px var(--ai-shadow-hover);
 }
 
 .ai-float-btn svg {
@@ -848,7 +848,7 @@ body {
 .ai-panel-title svg {
   width: 18px;
   height: 18px;
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 .ai-panel-close {
@@ -907,7 +907,7 @@ body {
 .ai-action-btn svg {
   width: 18px;
   height: 18px;
-  color: #8b5cf6;
+  color: var(--ai-accent);
 }
 
 /* ========================================
@@ -1169,8 +1169,8 @@ body {
 }
 
 .notification-icon-control {
-  background: #dbeafe;
-  color: #3b82f6;
+  background: var(--blue-100);
+  color: var(--ai-accent);
 }
 
 .notification-icon-user {

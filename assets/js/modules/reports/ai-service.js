@@ -15,8 +15,8 @@
   // ========================================
 
   var config = {
-    apiKey: 'sk-831509d82fa54fdeaa2e835e0a62f8b2',
-    baseUrl: 'https://api.deepseek.com',
+    apiKey: '',
+    baseUrl: '',
     proxyUrl: '/api/ai-proxy', // Node.js proxy endpoint
     useProxy: true, // Set to false if running server-side or CORS is resolved
     model: 'deepseek-chat',
